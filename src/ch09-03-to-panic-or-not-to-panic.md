@@ -1,153 +1,56 @@
-## To `panic!` or Not to `panic!`
+## 是否 `panic!`
 
-So, how do you decide when you should call `panic!` and when you should return
-`Result`? When code panics, there’s no way to recover. You could call `panic!`
-for any error situation, whether there’s a possible way to recover or not, but
-then you’re making the decision that a situation is unrecoverable on behalf of
-the calling code. When you choose to return a `Result` value, you give the
-calling code options. The calling code could choose to attempt to recover in a
-way that’s appropriate for its situation, or it could decide that an `Err`
-value in this case is unrecoverable, so it can call `panic!` and turn your
-recoverable error into an unrecoverable one. Therefore, returning `Result` is a
-good default choice when you’re defining a function that might fail.
+那么，你如何决定何时应该调用 `panic!` 以及何时应该返回 `Result`？当代码 panic 时，没有恢复的方法。你可以为任何错误情况调用 `panic!`，无论是否有可能的恢复方法，但这样你就是在代表调用代码做出情况不可恢复的决定。当你选择返回 `Result` 值时，你给调用代码选项。调用代码可以选择以适合其情况的方式尝试恢复，或者它可以决定在这种情况下 `Err` 值是不可恢复的，因此它可以调用 `panic!` 并将你的可恢复错误转换为不可恢复的错误。因此，当你定义可能失败的函数时，返回 `Result` 是一个很好的默认选择。
 
-In situations such as examples, prototype code, and tests, it’s more
-appropriate to write code that panics instead of returning a `Result`. Let’s
-explore why, then discuss situations in which the compiler can’t tell that
-failure is impossible, but you as a human can. The chapter will conclude with
-some general guidelines on how to decide whether to panic in library code.
+在示例、原型代码和测试等情况下，编写 panic 的代码而不是返回 `Result` 更合适。让我们探索原因，然后讨论编译器无法判断失败是不可能的但作为人类的你可以判断的情况。本章将以关于如何在库代码中决定是否 panic 的一些一般指导原则结束。
 
-### Examples, Prototype Code, and Tests
+### 示例、原型代码和测试
 
-When you’re writing an example to illustrate some concept, also including
-robust error-handling code can make the example less clear. In examples, it’s
-understood that a call to a method like `unwrap` that could panic is meant as a
-placeholder for the way you’d want your application to handle errors, which can
-differ based on what the rest of your code is doing.
+当你编写示例来说明某个概念时，同时包含健壮的错误处理代码可能会使示例不太清楚。在示例中，理解对可能 panic 的方法（如 `unwrap`）的调用意味着作为你希望应用程序处理错误的方式的占位符，这可能基于代码的其余部分在做什么而有所不同。
 
-Similarly, the `unwrap` and `expect` methods are very handy when you’re
-prototyping and you’re not yet ready to decide how to handle errors. They leave
-clear markers in your code for when you’re ready to make your program more
-robust.
+类似地，`unwrap` 和 `expect` 方法在你进行原型设计并且还没有准备好决定如何处理错误时非常方便。它们在你的代码中留下清晰的标记，以便当你准备好使程序更健壮时使用。
 
-If a method call fails in a test, you’d want the whole test to fail, even if
-that method isn’t the functionality under test. Because `panic!` is how a test
-is marked as a failure, calling `unwrap` or `expect` is exactly what should
-happen.
+如果测试中的方法调用失败，你希望整个测试失败，即使该方法不是正在测试的功能。因为 `panic!` 是测试被标记为失败的方式，调用 `unwrap` 或 `expect` 正是应该发生的事情。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="cases-in-which-you-have-more-information-than-the-compiler"></a>
 
-### When You Have More Information Than the Compiler
+### 当你拥有比编译器更多信息时
 
-It would also be appropriate to call `expect` when you have some other logic
-that ensures that the `Result` will have an `Ok` value, but the logic isn’t
-something the compiler understands. You’ll still have a `Result` value that you
-need to handle: Whatever operation you’re calling still has the possibility of
-failing in general, even though it’s logically impossible in your particular
-situation. If you can ensure by manually inspecting the code that you’ll never
-have an `Err` variant, it’s perfectly acceptable to call `expect` and document
-the reason you think you’ll never have an `Err` variant in the argument text.
-Here’s an example:
+当你有一些其他逻辑确保 `Result` 将具有 `Ok` 值，但编译器不理解该逻辑时，调用 `expect` 也是合适的。你仍然有一个需要处理的 `Result` 值：无论你正在调用的操作仍然有可能在一般情况下失败，即使在你的特定情况下这在逻辑上是不可能的。如果你可以通过手动检查代码来确保你永远不会有 `Err` 变体，那么调用 `expect` 并在参数文本中记录你认为你永远不会有 `Err` 变体的原因是完全可接受的。这是一个例子：
 
 ```rust
 {{#rustdoc_include ../listings/ch09-error-handling/no-listing-08-unwrap-that-cant-fail/src/main.rs:here}}
 ```
 
-We’re creating an `IpAddr` instance by parsing a hardcoded string. We can see
-that `127.0.0.1` is a valid IP address, so it’s acceptable to use `expect`
-here. However, having a hardcoded, valid string doesn’t change the return type
-of the `parse` method: We still get a `Result` value, and the compiler will
-still make us handle the `Result` as if the `Err` variant is a possibility
-because the compiler isn’t smart enough to see that this string is always a
-valid IP address. If the IP address string came from a user rather than being
-hardcoded into the program and therefore _did_ have a possibility of failure,
-we’d definitely want to handle the `Result` in a more robust way instead.
-Mentioning the assumption that this IP address is hardcoded will prompt us to
-change `expect` to better error-handling code if, in the future, we need to get
-the IP address from some other source instead.
+我们通过解析硬编码字符串来创建 `IpAddr` 实例。我们可以看到 `127.0.0.1` 是有效的 IP 地址，所以在这里使用 `expect` 是可以接受的。但是，拥有硬编码的有效字符串不会更改 `parse` 方法的返回类型：我们仍然得到 `Result` 值，编译器仍然会让我们处理 `Result`，就像 `Err` 变体是一种可能性一样，因为编译器不够聪明，无法看到这个字符串始终是有效的 IP 地址。如果 IP 地址字符串来自用户而不是硬编码到程序中，因此 _确实_ 有失败的可能性，我们肯定希望以更健壮的方式处理 `Result`。提及此 IP 地址是硬编码的假设将提示我们在将来需要从其他来源获取 IP 地址时，将 `expect` 更改为更好的错误处理代码。
 
-### Guidelines for Error Handling
+### 错误处理指南
 
-It’s advisable to have your code panic when it’s possible that your code could
-end up in a bad state. In this context, a _bad state_ is when some assumption,
-guarantee, contract, or invariant has been broken, such as when invalid values,
-contradictory values, or missing values are passed to your code—plus one or
-more of the following:
+当你的代码可能最终处于不良状态时，建议让你的代码 panic。在这种情况下，_不良状态_ 是当某些假设、保证、契约或不变量被破坏时，例如当无效值、矛盾值或缺失值传递给你的代码时——加上以下一项或多项：
 
-- The bad state is something that is unexpected, as opposed to something that
-  will likely happen occasionally, like a user entering data in the wrong
-  format.
-- Your code after this point needs to rely on not being in this bad state,
-  rather than checking for the problem at every step.
-- There’s not a good way to encode this information in the types you use. We’ll
-  work through an example of what we mean in [“Encoding States and Behavior as
-  Types”][encoding]<!-- ignore --> in Chapter 18.
+- 不良状态是意外的，而不是可能偶尔发生的事情，比如用户以错误的格式输入数据。
+- 此点之后的代码需要依赖于不处于此不良状态，而不是在每一步都检查问题。
+- 在你使用的类型中没有好的方法来编码此信息。我们将在第 18 章的["将状态和行为编码为类型"][encoding]<!-- ignore -->中通过一个示例来说明我们的意思。
 
-If someone calls your code and passes in values that don’t make sense, it’s
-best to return an error if you can so that the user of the library can decide
-what they want to do in that case. However, in cases where continuing could be
-insecure or harmful, the best choice might be to call `panic!` and alert the
-person using your library to the bug in their code so that they can fix it
-during development. Similarly, `panic!` is often appropriate if you’re calling
-external code that is out of your control and returns an invalid state that you
-have no way of fixing.
+如果有人调用你的代码并传入没有意义的值，如果你可以的话，最好返回错误，以便库的用户可以决定他们想在这种情况下做什么。但是，在继续可能不安全或有害的情况下，最好的选择可能是调用 `panic!` 并提醒使用你的库的人他们的代码中存在 bug，以便他们可以在开发过程中修复它。类似地，如果你正在调用你无法控制的外部代码并且返回你无法修复的无效状态，`panic!` 通常是合适的。
 
-However, when failure is expected, it’s more appropriate to return a `Result`
-than to make a `panic!` call. Examples include a parser being given malformed
-data or an HTTP request returning a status that indicates you have hit a rate
-limit. In these cases, returning a `Result` indicates that failure is an
-expected possibility that the calling code must decide how to handle.
+但是，当失败是预期的时，返回 `Result` 比进行 `panic!` 调用更合适。示例包括解析器被给予格式错误的数据或 HTTP 请求返回指示你已达到速率限制的状态。在这些情况下，返回 `Result` 表示失败是调用代码必须决定如何处理的预期可能性。
 
-When your code performs an operation that could put a user at risk if it’s
-called using invalid values, your code should verify the values are valid first
-and panic if the values aren’t valid. This is mostly for safety reasons:
-Attempting to operate on invalid data can expose your code to vulnerabilities.
-This is the main reason the standard library will call `panic!` if you attempt
-an out-of-bounds memory access: Trying to access memory that doesn’t belong to
-the current data structure is a common security problem. Functions often have
-_contracts_: Their behavior is only guaranteed if the inputs meet particular
-requirements. Panicking when the contract is violated makes sense because a
-contract violation always indicates a caller-side bug, and it’s not a kind of
-error you want the calling code to have to explicitly handle. In fact, there’s
-no reasonable way for calling code to recover; the calling _programmers_ need
-to fix the code. Contracts for a function, especially when a violation will
-cause a panic, should be explained in the API documentation for the function.
+当你的代码执行的操作如果使用无效值调用可能会使用户处于危险之中时，你的代码应该首先验证值是有效的，如果值无效则 panic。这主要是出于安全原因：尝试对无效数据进行操作可能会使你的代码暴露于漏洞。这是标准库会在你尝试越界内存访问时调用 `panic!` 的主要原因：尝试访问不属于当前数据结构的内存是一个常见的安全问题。函数通常有 _契约_：只有当输入满足特定要求时，才保证它们的行为。违反契约时 panic 是有意义的，因为契约违反总是表示调用方 bug，这不是你希望调用代码必须显式处理的一种错误。实际上，调用代码没有合理的恢复方法；调用 _程序员_ 需要修复代码。函数的契约，特别是当违反会导致 panic 时，应该在函数的 API 文档中解释。
 
-However, having lots of error checks in all of your functions would be verbose
-and annoying. Fortunately, you can use Rust’s type system (and thus the type
-checking done by the compiler) to do many of the checks for you. If your
-function has a particular type as a parameter, you can proceed with your code’s
-logic knowing that the compiler has already ensured that you have a valid
-value. For example, if you have a type rather than an `Option`, your program
-expects to have _something_ rather than _nothing_. Your code then doesn’t have
-to handle two cases for the `Some` and `None` variants: It will only have one
-case for definitely having a value. Code trying to pass nothing to your
-function won’t even compile, so your function doesn’t have to check for that
-case at runtime. Another example is using an unsigned integer type such as
-`u32`, which ensures that the parameter is never negative.
+但是，在所有函数中进行大量错误检查会很冗长和烦人。幸运的是，你可以使用 Rust 的类型系统（以及编译器完成的类型检查）为你执行许多检查。如果你的函数具有特定类型作为参数，你可以继续你的代码逻辑，知道编译器已经确保你有一个有效值。例如，如果你有一个类型而不是 `Option`，你的程序期望有 _某些东西_ 而不是 _什么都没有_。然后你的代码不必处理 `Some` 和 `None` 变体的两种情况：它只会有一个肯定有值的情况。试图将 nothing 传递给函数的代码甚至不会编译，所以你的函数不必在运行时检查该情况。另一个例子是使用无符号整数类型，如 `u32`，它确保参数永远不会是负数。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="creating-custom-types-for-validation"></a>
 
-### Custom Types for Validation
+### 用于验证的自定义类型
 
-Let’s take the idea of using Rust’s type system to ensure that we have a valid
-value one step further and look at creating a custom type for validation.
-Recall the guessing game in Chapter 2 in which our code asked the user to guess
-a number between 1 and 100. We never validated that the user’s guess was
-between those numbers before checking it against our secret number; we only
-validated that the guess was positive. In this case, the consequences were not
-very dire: Our output of “Too high” or “Too low” would still be correct. But it
-would be a useful enhancement to guide the user toward valid guesses and have
-different behavior when the user guesses a number that’s out of range versus
-when the user types, for example, letters instead.
+让我们进一步探讨使用 Rust 的类型系统来确保我们有一个有效值的想法，并看看为验证创建自定义类型。回想第 2 章中的猜数字游戏，我们的代码要求用户猜测 1 到 100 之间的数字。我们在检查它与我们秘密数字之前从未验证用户的猜测是在这些数字之间；我们只验证猜测是正数。在这种情况下，后果不是非常严重：我们的"Too high"或"Too low"输出仍然正确。但是，引导用户进行有效猜测并在用户猜测超出范围的数字时（例如，当用户输入字母时）具有不同的行为将是一个有用的增强。
 
-One way to do this would be to parse the guess as an `i32` instead of only a
-`u32` to allow potentially negative numbers, and then add a check for the
-number being in range, like so:
+一种方法是解析猜测为 `i32` 而不是仅 `u32` 以允许潜在的负数，然后添加对数字在范围内的检查，如下所示：
 
 <Listing file-name="src/main.rs">
 
@@ -157,25 +60,13 @@ number being in range, like so:
 
 </Listing>
 
-The `if` expression checks whether our value is out of range, tells the user
-about the problem, and calls `continue` to start the next iteration of the loop
-and ask for another guess. After the `if` expression, we can proceed with the
-comparisons between `guess` and the secret number knowing that `guess` is
-between 1 and 100.
+`if` 表达式检查我们的值是否超出范围，告诉用户问题，并调用 `continue` 以开始循环的下一次迭代并请求另一个猜测。在 `if` 表达式之后，我们可以继续 `guess` 和秘密数字之间的比较，知道 `guess` 在 1 和 100 之间。
 
-However, this is not an ideal solution: If it were absolutely critical that the
-program only operated on values between 1 and 100, and it had many functions
-with this requirement, having a check like this in every function would be
-tedious (and might impact performance).
+但是，这不是理想的解决方案：如果绝对关键的是程序只在 1 到 100 之间的值上操作，并且它有许多具有此要求的函数，在每个函数中进行这样的检查会很繁琐（并且可能影响性能）。
 
-Instead, we can make a new type in a dedicated module and put the validations
-in a function to create an instance of the type rather than repeating the
-validations everywhere. That way, it’s safe for functions to use the new type
-in their signatures and confidently use the values they receive. Listing 9-13
-shows one way to define a `Guess` type that will only create an instance of
-`Guess` if the `new` function receives a value between 1 and 100.
+相反，我们可以在专用模块中创建新类型，并将验证放在创建类型实例的函数中，而不是到处重复验证。这样，函数在其签名中使用新类型是安全的，并且可以自信地使用它们接收的值。代码清单 9-13 显示了一种定义 `Guess` 类型的方法，只有当 `new` 函数接收到 1 到 100 之间的值时，才会创建 `Guess` 实例。
 
-<Listing number="9-13" caption="A `Guess` type that will only continue with values between 1 and 100" file-name="src/guessing_game.rs">
+<Listing number="9-13" caption="一个 `Guess` 类型，只会在值在 1 到 100 之间时继续" file-name="src/guessing_game.rs">
 
 ```rust
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-13/src/guessing_game.rs}}
@@ -183,54 +74,18 @@ shows one way to define a `Guess` type that will only create an instance of
 
 </Listing>
 
-Note that this code in *src/guessing_game.rs* depends on adding a module
-declaration `mod guessing_game;` in *src/lib.rs* that we haven’t shown here.
-Within this new module’s file, we define a struct named `Guess` that has a
-field named `value` that holds an `i32`. This is where the number will be
-stored.
+注意，*src/guessing_game.rs* 中的这段代码依赖于在 *src/lib.rs* 中添加模块声明 `mod guessing_game;`，我们在这里没有显示。在这个新模块的文件中，我们定义一个名为 `Guess` 的结构体，它有一个名为 `value` 的字段，保存一个 `i32`。这是数字将存储的地方。
 
-Then, we implement an associated function named `new` on `Guess` that creates
-instances of `Guess` values. The `new` function is defined to have one
-parameter named `value` of type `i32` and to return a `Guess`. The code in the
-body of the `new` function tests `value` to make sure it’s between 1 and 100.
-If `value` doesn’t pass this test, we make a `panic!` call, which will alert
-the programmer who is writing the calling code that they have a bug they need
-to fix, because creating a `Guess` with a `value` outside this range would
-violate the contract that `Guess::new` is relying on. The conditions in which
-`Guess::new` might panic should be discussed in its public-facing API
-documentation; we’ll cover documentation conventions indicating the possibility
-of a `panic!` in the API documentation that you create in Chapter 14. If
-`value` does pass the test, we create a new `Guess` with its `value` field set
-to the `value` parameter and return the `Guess`.
+然后，我们在 `Guess` 上实现一个名为 `new` 的关联函数，创建 `Guess` 值的实例。`new` 函数被定义为一个名为 `value` 的参数，类型为 `i32`，并返回 `Guess`。`new` 函数主体中的代码测试 `value` 以确保它在 1 到 100 之间。如果 `value` 没有通过此测试，我们进行 `panic!` 调用，这将提醒正在编写调用代码的程序员他们有一个需要修复的 bug，因为使用超出此范围的 `value` 创建 `Guess` 将违反 `Guess::new` 所依赖的契约。`Guess::new` 可能 panic 的条件应该在其面向公众的 API 文档中讨论；我们将在第 14 章中介绍你创建的 API 文档中指示 `panic!` 可能性的文档约定。如果 `value` 确实通过了测试，我们创建一个新的 `Guess`，其 `value` 字段设置为 `value` 参数并返回 `Guess`。
 
-Next, we implement a method named `value` that borrows `self`, doesn’t have any
-other parameters, and returns an `i32`. This kind of method is sometimes called
-a _getter_ because its purpose is to get some data from its fields and return
-it. This public method is necessary because the `value` field of the `Guess`
-struct is private. It’s important that the `value` field be private so that
-code using the `Guess` struct is not allowed to set `value` directly: Code
-outside the `guessing_game` module _must_ use the `Guess::new` function to
-create an instance of `Guess`, thereby ensuring that there’s no way for a
-`Guess` to have a `value` that hasn’t been checked by the conditions in the
-`Guess::new` function.
+接下来，我们实现一个名为 `value` 的方法，它借用 `self`，没有任何其他参数，并返回 `i32`。这种类型的方法有时称为 _getter_，因为它的目的是从其字段中获取一些数据并返回它。这个公共方法是必要的，因为 `Guess` 结构体的 `value` 字段是私有的。`value` 字段是私有的很重要，这样使用 `Guess` 结构体的代码不允许直接设置 `value`：`guessing_game` 模块外部的代码 _必须_ 使用 `Guess::new` 函数创建 `Guess` 实例，从而确保没有方式让 `Guess` 具有未被 `Guess::new` 函数中的条件检查的 `value`。
 
-A function that has a parameter or returns only numbers between 1 and 100 could
-then declare in its signature that it takes or returns a `Guess` rather than an
-`i32` and wouldn’t need to do any additional checks in its body.
+具有参数或只返回 1 到 100 之间数字的函数然后可以在其签名中声明它接受或返回 `Guess` 而不是 `i32`，并且不需要在其主体中进行任何额外的检查。
 
-## Summary
+## 总结
 
-Rust’s error-handling features are designed to help you write more robust code.
-The `panic!` macro signals that your program is in a state it can’t handle and
-lets you tell the process to stop instead of trying to proceed with invalid or
-incorrect values. The `Result` enum uses Rust’s type system to indicate that
-operations might fail in a way that your code could recover from. You can use
-`Result` to tell code that calls your code that it needs to handle potential
-success or failure as well. Using `panic!` and `Result` in the appropriate
-situations will make your code more reliable in the face of inevitable problems.
+Rust 的错误处理功能旨在帮助你编写更健壮的代码。`panic!` 宏表示你的程序处于无法处理的状态，并让你告诉进程停止，而不是尝试使用无效或不正确的值继续。`Result` 枚举使用 Rust 的类型系统来指示操作可能以你的代码可以恢复的方式失败。你可以使用 `Result` 告诉调用你的代码的代码，它需要处理潜在的成功或失败。在适当的情况下使用 `panic!` 和 `Result` 将使你的代码在面对不可避免的问题时更加可靠。
 
-Now that you’ve seen useful ways that the standard library uses generics with
-the `Option` and `Result` enums, we’ll talk about how generics work and how you
-can use them in your code.
+现在你已经看到了标准库如何使用泛型与 `Option` 和 `Result` 枚举的有用方法，我们将讨论泛型如何工作以及如何在自己的代码中使用它们。
 
 [encoding]: ch18-03-oo-design-patterns.html#encoding-states-and-behavior-as-types
