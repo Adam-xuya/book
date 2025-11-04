@@ -1,11 +1,3 @@
-# Enums and Pattern Matching
+# 枚举和模式匹配
 
-In this chapter, we’ll look at enumerations, also referred to as _enums_.
-Enums allow you to define a type by enumerating its possible variants. First
-we’ll define and use an enum to show how an enum can encode meaning along with
-data. Next, we’ll explore a particularly useful enum, called `Option`, which
-expresses that a value can be either something or nothing. Then, we’ll look at
-how pattern matching in the `match` expression makes it easy to run different
-code for different values of an enum. Finally, we’ll cover how the `if let`
-construct is another convenient and concise idiom available to handle enums in
-your code.
+在本章中，我们将了解枚举（enumerations），也称作 _enums_。枚举允许你通过列举可能的变体来定义一个类型。首先，我们会定义并使用一个枚举来展示枚举如何将数据和意义一起编码。接下来，我们会探索一个特别有用的枚举，叫做 `Option`，它表示一个值可以是某个值或者什么都没有。然后，我们会看看 `match` 表达式中的模式匹配是如何让对不同枚举值运行不同代码变得容易的。最后，我们会介绍 `if let` 构造是如何成为处理枚举的另一个方便且简洁的习语的。
