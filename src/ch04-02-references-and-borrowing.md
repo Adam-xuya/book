@@ -1,16 +1,8 @@
-## References and Borrowing
+## 引用与借用
 
-The issue with the tuple code in Listing 4-5 is that we have to return the
-`String` to the calling function so that we can still use the `String` after
-the call to `calculate_length`, because the `String` was moved into
-`calculate_length`. Instead, we can provide a reference to the `String` value.
-A reference is like a pointer in that it’s an address we can follow to access
-the data stored at that address; that data is owned by some other variable.
-Unlike a pointer, a reference is guaranteed to point to a valid value of a
-particular type for the life of that reference.
+清单 4-5 中元组代码的问题是我们必须将 `String` 返回到调用函数，以便我们仍然可以在调用 `calculate_length` 后使用 `String`，因为 `String` 被移动到 `calculate_length`。相反，我们可以提供对 `String` 值的引用。引用就像指针，它是一个地址，我们可以跟随该地址访问存储在该地址的数据；该数据由某个其他变量拥有。与指针不同，引用保证在该引用的生命周期内指向特定类型的有效值。
 
-Here is how you would define and use a `calculate_length` function that has a
-reference to an object as a parameter instead of taking ownership of the value:
+以下是您如何定义和使用 `calculate_length` 函数，该函数具有对对象的引用作为参数，而不是获取值的所有权：
 
 <Listing file-name="src/main.rs">
 
@@ -20,56 +12,35 @@ reference to an object as a parameter instead of taking ownership of the value:
 
 </Listing>
 
-First, notice that all the tuple code in the variable declaration and the
-function return value is gone. Second, note that we pass `&s1` into
-`calculate_length` and, in its definition, we take `&String` rather than
-`String`. These ampersands represent references, and they allow you to refer to
-some value without taking ownership of it. Figure 4-6 depicts this concept.
+首先，注意变量声明和函数返回值中的所有元组代码都消失了。其次，注意我们将 `&s1` 传递给 `calculate_length`，在其定义中，我们接受 `&String` 而不是 `String`。这些与号表示引用，它们允许您引用某个值而不获取其所有权。图 4-6 描绘了这个概念。
 
-<img alt="Three tables: the table for s contains only a pointer to the table
-for s1. The table for s1 contains the stack data for s1 and points to the
-string data on the heap." src="img/trpl04-06.svg" class="center" />
+<img alt="三个表：s 的表只包含指向 s1 表的指针。s1 的表包含 s1 的栈数据并指向堆上的字符串数据。" src="img/trpl04-06.svg" class="center" />
 
-<span class="caption">Figure 4-6: A diagram of `&String` `s` pointing at
-`String` `s1`</span>
+<span class="caption">图 4-6：指向 `String` `s1` 的 `&String` `s` 的图表</span>
 
-> Note: The opposite of referencing by using `&` is _dereferencing_, which is
-> accomplished with the dereference operator, `*`. We’ll see some uses of the
-> dereference operator in Chapter 8 and discuss details of dereferencing in
-> Chapter 15.
+> 注意：通过使用 `&` 进行引用的相反操作是_解引用_，这通过解引用运算符 `*` 完成。我们将在第 8 章看到解引用运算符的一些用途，并在第 15 章讨论解引用的详细信息。
 
-Let’s take a closer look at the function call here:
+让我们仔细看看这里的函数调用：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-07-reference/src/main.rs:here}}
 ```
 
-The `&s1` syntax lets us create a reference that _refers_ to the value of `s1`
-but does not own it. Because the reference does not own it, the value it points
-to will not be dropped when the reference stops being used.
+`&s1` 语法让我们创建一个_引用_ `s1` 的值但不拥有它。因为引用不拥有它，当引用停止使用时，它指向的值不会被丢弃。
 
-Likewise, the signature of the function uses `&` to indicate that the type of
-the parameter `s` is a reference. Let’s add some explanatory annotations:
+同样，函数的签名使用 `&` 表示参数 `s` 的类型是引用。让我们添加一些解释性注释：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-08-reference-with-annotations/src/main.rs:here}}
 ```
 
-The scope in which the variable `s` is valid is the same as any function
-parameter’s scope, but the value pointed to by the reference is not dropped
-when `s` stops being used, because `s` doesn’t have ownership. When functions
-have references as parameters instead of the actual values, we won’t need to
-return the values in order to give back ownership, because we never had
-ownership.
+变量 `s` 有效的作用域与任何函数参数的作用域相同，但当 `s` 停止使用时，引用指向的值不会被丢弃，因为 `s` 没有所有权。当函数有引用作为参数而不是实际值时，我们不需要返回值以归还所有权，因为我们从未拥有所有权。
 
-We call the action of creating a reference _borrowing_. As in real life, if a
-person owns something, you can borrow it from them. When you’re done, you have
-to give it back. You don’t own it.
+我们称创建引用的行为为_借用_。就像在现实生活中一样，如果一个人拥有某物，您可以从他们那里借用它。当您完成时，您必须归还它。您不拥有它。
 
-So, what happens if we try to modify something we’re borrowing? Try the code in
-Listing 4-6. Spoiler alert: It doesn’t work!
+那么，如果我们尝试修改我们正在借用的东西会发生什么？尝试清单 4-6 中的代码。剧透警告：它不起作用！
 
-<Listing number="4-6" file-name="src/main.rs" caption="Attempting to modify a borrowed value">
+<Listing number="4-6" file-name="src/main.rs" caption="尝试修改借用的值">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-06/src/main.rs}}
@@ -77,19 +48,17 @@ Listing 4-6. Spoiler alert: It doesn’t work!
 
 </Listing>
 
-Here’s the error:
+这是错误：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/listing-04-06/output.txt}}
 ```
 
-Just as variables are immutable by default, so are references. We’re not
-allowed to modify something we have a reference to.
+就像变量默认是不可变的一样，引用也是不可变的。我们不允许修改我们有引用的东西。
 
-### Mutable References
+### 可变引用
 
-We can fix the code from Listing 4-6 to allow us to modify a borrowed value
-with just a few small tweaks that use, instead, a _mutable reference_:
+我们可以修复清单 4-6 中的代码，通过一些小的调整来允许我们修改借用的值，使用_可变引用_：
 
 <Listing file-name="src/main.rs">
 
@@ -99,14 +68,9 @@ with just a few small tweaks that use, instead, a _mutable reference_:
 
 </Listing>
 
-First, we change `s` to be `mut`. Then, we create a mutable reference with
-`&mut s` where we call the `change` function and update the function signature
-to accept a mutable reference with `some_string: &mut String`. This makes it
-very clear that the `change` function will mutate the value it borrows.
+首先，我们将 `s` 更改为 `mut`。然后，我们在调用 `change` 函数的地方使用 `&mut s` 创建可变引用，并将函数签名更新为接受 `some_string: &mut String` 的可变引用。这非常清楚地表明 `change` 函数将改变它借用的值。
 
-Mutable references have one big restriction: If you have a mutable reference to
-a value, you can have no other references to that value. This code that
-attempts to create two mutable references to `s` will fail:
+可变引用有一个很大的限制：如果您对值有可变引用，您就不能有对该值的任何其他引用。这段尝试创建两个对 `s` 的可变引用的代码将失败：
 
 <Listing file-name="src/main.rs">
 
@@ -116,93 +80,59 @@ attempts to create two mutable references to `s` will fail:
 
 </Listing>
 
-Here’s the error:
+这是错误：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/no-listing-10-multiple-mut-not-allowed/output.txt}}
 ```
 
-This error says that this code is invalid because we cannot borrow `s` as
-mutable more than once at a time. The first mutable borrow is in `r1` and must
-last until it’s used in the `println!`, but between the creation of that
-mutable reference and its usage, we tried to create another mutable reference
-in `r2` that borrows the same data as `r1`.
+此错误说此代码无效，因为我们不能一次多次将 `s` 借用为可变。第一个可变借用位于 `r1` 中，必须持续到它在 `println!` 中使用为止，但在创建该可变引用和其使用之间，我们尝试在 `r2` 中创建另一个可变引用，它借用与 `r1` 相同的数据。
 
-The restriction preventing multiple mutable references to the same data at the
-same time allows for mutation but in a very controlled fashion. It’s something
-that new Rustaceans struggle with because most languages let you mutate
-whenever you’d like. The benefit of having this restriction is that Rust can
-prevent data races at compile time. A _data race_ is similar to a race
-condition and happens when these three behaviors occur:
+阻止同时有多个对同一数据的可变引用的限制允许改变，但以非常受控的方式进行。这是新的 Rustaceans 难以解决的问题，因为大多数语言允许您随时进行改变。拥有此限制的好处是 Rust 可以在编译时防止数据竞争。_数据竞争_类似于竞争条件，在发生以下三种行为时发生：
 
-- Two or more pointers access the same data at the same time.
-- At least one of the pointers is being used to write to the data.
-- There’s no mechanism being used to synchronize access to the data.
+- 两个或多个指针同时访问相同的数据。
+- 至少有一个指针用于写入数据。
+- 没有用于同步数据访问的机制。
 
-Data races cause undefined behavior and can be difficult to diagnose and fix
-when you’re trying to track them down at runtime; Rust prevents this problem by
-refusing to compile code with data races!
+数据竞争会导致未定义行为，并且在运行时尝试追踪它们时可能难以诊断和修复；Rust 通过拒绝编译带有数据竞争的代码来防止此问题！
 
-As always, we can use curly brackets to create a new scope, allowing for
-multiple mutable references, just not _simultaneous_ ones:
+一如既往，我们可以使用花括号创建新作用域，允许多个可变引用，只是不能_同时_存在：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-11-muts-in-separate-scopes/src/main.rs:here}}
 ```
 
-Rust enforces a similar rule for combining mutable and immutable references.
-This code results in an error:
+Rust 对组合可变和不可变引用强制执行类似的规则。此代码导致错误：
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-12-immutable-and-mutable-not-allowed/src/main.rs:here}}
 ```
 
-Here’s the error:
+这是错误：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/no-listing-12-immutable-and-mutable-not-allowed/output.txt}}
 ```
 
-Whew! We _also_ cannot have a mutable reference while we have an immutable one
-to the same value.
+哇！我们_也不能_在对同一值有不可变引用的同时拥有可变引用。
 
-Users of an immutable reference don’t expect the value to suddenly change out
-from under them! However, multiple immutable references are allowed because no
-one who is just reading the data has the ability to affect anyone else’s
-reading of the data.
+不可变引用的用户不期望值突然从他们下面改变！但是，允许多个不可变引用，因为只是读取数据的人没有能力影响其他人对数据的读取。
 
-Note that a reference’s scope starts from where it is introduced and continues
-through the last time that reference is used. For instance, this code will
-compile because the last usage of the immutable references is in the `println!`,
-before the mutable reference is introduced:
+请注意，引用的作用域从它被引入的地方开始，并持续到该引用最后一次使用。例如，此代码将编译，因为不可变引用的最后一次使用是在 `println!` 中，在引入可变引用之前：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-13-reference-scope-ends/src/main.rs:here}}
 ```
 
-The scopes of the immutable references `r1` and `r2` end after the `println!`
-where they are last used, which is before the mutable reference `r3` is
-created. These scopes don’t overlap, so this code is allowed: The compiler can
-tell that the reference is no longer being used at a point before the end of
-the scope.
+不可变引用 `r1` 和 `r2` 的作用域在它们最后一次使用的 `println!` 之后结束，这是在创建可变引用 `r3` 之前。这些作用域不重叠，所以允许此代码：编译器可以判断引用在作用域结束之前的某个点不再被使用。
 
-Even though borrowing errors may be frustrating at times, remember that it’s
-the Rust compiler pointing out a potential bug early (at compile time rather
-than at runtime) and showing you exactly where the problem is. Then, you don’t
-have to track down why your data isn’t what you thought it was.
+尽管借用错误有时可能令人沮丧，但请记住，这是 Rust 编译器在早期（编译时而不是运行时）指出潜在错误并向您显示问题确切位置。然后，您不必追踪为什么您的数据不是您认为的那样。
 
-### Dangling References
+### 悬垂引用
 
-In languages with pointers, it’s easy to erroneously create a _dangling
-pointer_—a pointer that references a location in memory that may have been
-given to someone else—by freeing some memory while preserving a pointer to that
-memory. In Rust, by contrast, the compiler guarantees that references will
-never be dangling references: If you have a reference to some data, the
-compiler will ensure that the data will not go out of scope before the
-reference to the data does.
+在具有指针的语言中，很容易错误地创建_悬垂指针_——引用可能已给予其他人的内存位置的指针——通过释放一些内存而保留指向该内存的指针。相比之下，在 Rust 中，编译器保证引用永远不会是悬垂引用：如果您有对某些数据的引用，编译器将确保数据不会在该数据的引用之前超出作用域。
 
-Let’s try to create a dangling reference to see how Rust prevents them with a
-compile-time error:
+让我们尝试创建一个悬垂引用来看看 Rust 如何通过编译时错误防止它们：
 
 <Listing file-name="src/main.rs">
 
@@ -212,23 +142,19 @@ compile-time error:
 
 </Listing>
 
-Here’s the error:
+这是错误：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/no-listing-14-dangling-reference/output.txt}}
 ```
 
-This error message refers to a feature we haven’t covered yet: lifetimes. We’ll
-discuss lifetimes in detail in Chapter 10. But, if you disregard the parts
-about lifetimes, the message does contain the key to why this code is a problem:
+此错误消息指的是我们尚未涵盖的功能：生命周期。我们将在第 10 章详细讨论生命周期。但是，如果您忽略有关生命周期的部分，消息确实包含为什么此代码是问题的关键：
 
 ```text
-this function's return type contains a borrowed value, but there is no value
-for it to be borrowed from
+此函数的返回类型包含借用的值，但没有值可以从中借用
 ```
 
-Let’s take a closer look at exactly what’s happening at each stage of our
-`dangle` code:
+让我们仔细看看我们的 `dangle` 代码的每个阶段究竟发生了什么：
 
 <Listing file-name="src/main.rs">
 
@@ -238,26 +164,21 @@ Let’s take a closer look at exactly what’s happening at each stage of our
 
 </Listing>
 
-Because `s` is created inside `dangle`, when the code of `dangle` is finished,
-`s` will be deallocated. But we tried to return a reference to it. That means
-this reference would be pointing to an invalid `String`. That’s no good! Rust
-won’t let us do this.
+因为 `s` 是在 `dangle` 内部创建的，当 `dangle` 的代码完成时，`s` 将被释放。但我们尝试返回对它的引用。这意味着此引用将指向无效的 `String`。那不好！Rust 不会让我们这样做。
 
-The solution here is to return the `String` directly:
+这里的解决方案是直接返回 `String`：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-16-no-dangle/src/main.rs:here}}
 ```
 
-This works without any problems. Ownership is moved out, and nothing is
-deallocated.
+这工作起来没有任何问题。所有权被移出，没有任何东西被释放。
 
-### The Rules of References
+### 引用规则
 
-Let’s recap what we’ve discussed about references:
+让我们总结一下我们讨论的关于引用的内容：
 
-- At any given time, you can have _either_ one mutable reference _or_ any
-  number of immutable references.
-- References must always be valid.
+- 在任何给定时间，您可以有_要么_一个可变引用_要么_任意数量的不可变引用。
+- 引用必须始终有效。
 
-Next, we’ll look at a different kind of reference: slices.
+接下来，我们将查看另一种引用：切片。

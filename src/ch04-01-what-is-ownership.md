@@ -1,120 +1,48 @@
-## What Is Ownership?
+## 什么是所有权？
 
-_Ownership_ is a set of rules that govern how a Rust program manages memory.
-All programs have to manage the way they use a computer’s memory while running.
-Some languages have garbage collection that regularly looks for no-longer-used
-memory as the program runs; in other languages, the programmer must explicitly
-allocate and free the memory. Rust uses a third approach: Memory is managed
-through a system of ownership with a set of rules that the compiler checks. If
-any of the rules are violated, the program won’t compile. None of the features
-of ownership will slow down your program while it’s running.
+_所有权_是一组管理 Rust 程序如何管理内存的规则。所有程序在运行时都必须管理它们使用计算机内存的方式。一些语言有垃圾收集器，在程序运行时定期查找不再使用的内存；在其他语言中，程序员必须显式分配和释放内存。Rust 使用第三种方法：内存通过所有权系统进行管理，该系统有一组编译器检查的规则。如果违反了任何规则，程序将无法编译。所有权的功能都不会在程序运行时减慢程序速度。
 
-Because ownership is a new concept for many programmers, it does take some time
-to get used to. The good news is that the more experienced you become with Rust
-and the rules of the ownership system, the easier you’ll find it to naturally
-develop code that is safe and efficient. Keep at it!
+因为所有权对许多程序员来说是一个新概念，确实需要一些时间来适应。好消息是，您对 Rust 和所有权系统规则的经验越多，您就越容易自然地开发安全高效的代码。坚持下去！
 
-When you understand ownership, you’ll have a solid foundation for understanding
-the features that make Rust unique. In this chapter, you’ll learn ownership by
-working through some examples that focus on a very common data structure:
-strings.
+当您理解所有权时，您将有一个坚实的基础来理解使 Rust 独特的功能。在本章中，您将通过一些专注于非常常见的数据结构的示例来学习所有权：字符串。
 
-> ### The Stack and the Heap
+> ### 栈和堆
 >
-> Many programming languages don’t require you to think about the stack and the
-> heap very often. But in a systems programming language like Rust, whether a
-> value is on the stack or the heap affects how the language behaves and why
-> you have to make certain decisions. Parts of ownership will be described in
-> relation to the stack and the heap later in this chapter, so here is a brief
-> explanation in preparation.
+> 许多编程语言不需要您经常考虑栈和堆。但在像 Rust 这样的系统编程语言中，值是位于栈上还是堆上会影响语言的行为以及您必须做出某些决定的原因。所有权的部分将在本章后面根据栈和堆进行描述，所以这里是一个简短的准备说明。
 >
-> Both the stack and the heap are parts of memory available to your code to use
-> at runtime, but they are structured in different ways. The stack stores
-> values in the order it gets them and removes the values in the opposite
-> order. This is referred to as _last in, first out (LIFO)_. Think of a stack of
-> plates: When you add more plates, you put them on top of the pile, and when
-> you need a plate, you take one off the top. Adding or removing plates from
-> the middle or bottom wouldn’t work as well! Adding data is called _pushing
-> onto the stack_, and removing data is called _popping off the stack_. All
-> data stored on the stack must have a known, fixed size. Data with an unknown
-> size at compile time or a size that might change must be stored on the heap
-> instead.
+> 栈和堆都是代码在运行时可用于使用的内存部分，但它们以不同的方式构造。栈按接收值的顺序存储值，并按相反的顺序删除值。这被称为_后进先出（LIFO）_。想象一堆盘子：当您添加更多盘子时，您将它们放在堆的顶部，当您需要一个盘子时，您从顶部取一个。从中间或底部添加或删除盘子不会很好地工作！添加数据称为_推入栈_，删除数据称为_弹出栈_。存储在栈上的所有数据都必须具有已知的固定大小。在编译时大小未知或大小可能发生变化的数据必须存储在堆上。
 >
-> The heap is less organized: When you put data on the heap, you request a
-> certain amount of space. The memory allocator finds an empty spot in the heap
-> that is big enough, marks it as being in use, and returns a _pointer_, which
-> is the address of that location. This process is called _allocating on the
-> heap_ and is sometimes abbreviated as just _allocating_ (pushing values onto
-> the stack is not considered allocating). Because the pointer to the heap is a
-> known, fixed size, you can store the pointer on the stack, but when you want
-> the actual data, you must follow the pointer. Think of being seated at a
-> restaurant. When you enter, you state the number of people in your group, and
-> the host finds an empty table that fits everyone and leads you there. If
-> someone in your group comes late, they can ask where you’ve been seated to
-> find you.
+> 堆的组织性较差：当您将数据放在堆上时，您请求一定数量的空间。内存分配器在堆中找到一个足够大的空位，将其标记为正在使用，并返回一个_指针_，即该位置的地址。此过程称为_在堆上分配_，有时简称为_分配_（将值推入栈不被视为分配）。因为指向堆的指针是已知的固定大小，您可以将指针存储在栈上，但当您想要实际数据时，必须跟随指针。想象坐在餐厅里。当您进入时，您说明您组中的人数，主人找到一张适合所有人的空桌并带您到那里。如果您组中的某人来晚了，他们可以询问您坐在哪里来找到您。
 >
-> Pushing to the stack is faster than allocating on the heap because the
-> allocator never has to search for a place to store new data; that location is
-> always at the top of the stack. Comparatively, allocating space on the heap
-> requires more work because the allocator must first find a big enough space
-> to hold the data and then perform bookkeeping to prepare for the next
-> allocation.
+> 推入栈比在堆上分配快，因为分配器永远不必搜索存储新数据的位置；该位置总是在栈的顶部。相比之下，在堆上分配空间需要更多工作，因为分配器必须首先找到足够大的空间来保存数据，然后执行簿记以为下一次分配做准备。
 >
-> Accessing data in the heap is generally slower than accessing data on the
-> stack because you have to follow a pointer to get there. Contemporary
-> processors are faster if they jump around less in memory. Continuing the
-> analogy, consider a server at a restaurant taking orders from many tables.
-> It’s most efficient to get all the orders at one table before moving on to
-> the next table. Taking an order from table A, then an order from table B,
-> then one from A again, and then one from B again would be a much slower
-> process. By the same token, a processor can usually do its job better if it
-> works on data that’s close to other data (as it is on the stack) rather than
-> farther away (as it can be on the heap).
+> 访问堆中的数据通常比访问栈中的数据慢，因为您必须跟随指针才能到达那里。如果处理器在内存中跳转较少，当代处理器会更快。继续这个类比，考虑餐厅中的服务员从许多桌子接收订单。在移动到下一张桌子之前在一张桌子上获取所有订单是最有效的。从桌子 A 取一个订单，然后从桌子 B 取一个订单，然后再次从 A 取一个，然后再次从 B 取一个，这将是一个慢得多的过程。同样，如果处理器处理与其他数据接近的数据（就像在栈上一样）而不是更远的数据（就像在堆上可能的情况），处理器通常可以更好地完成其工作。
 >
-> When your code calls a function, the values passed into the function
-> (including, potentially, pointers to data on the heap) and the function’s
-> local variables get pushed onto the stack. When the function is over, those
-> values get popped off the stack.
+> 当您的代码调用函数时，传递给函数的值（包括可能指向堆上数据的指针）和函数的局部变量被推入栈。当函数结束时，这些值被弹出栈。
 >
-> Keeping track of what parts of code are using what data on the heap,
-> minimizing the amount of duplicate data on the heap, and cleaning up unused
-> data on the heap so that you don’t run out of space are all problems that
-> ownership addresses. Once you understand ownership, you won’t need to think
-> about the stack and the heap very often. But knowing that the main purpose of
-> ownership is to manage heap data can help explain why it works the way it
-> does.
+> 跟踪代码的哪些部分正在使用堆上的哪些数据，最小化堆上重复数据的数量，以及清理堆上未使用的数据，以便您不会耗尽空间，这些都是所有权解决的问题。一旦您理解了所有权，您就不需要经常考虑栈和堆。但知道所有权的主要目的是管理堆数据可以帮助解释它为什么以这种方式工作。
 
-### Ownership Rules
+### 所有权规则
 
-First, let’s take a look at the ownership rules. Keep these rules in mind as we
-work through the examples that illustrate them:
+首先，让我们看一下所有权规则。在我们通过说明它们的示例时，请记住这些规则：
 
-- Each value in Rust has an _owner_.
-- There can only be one owner at a time.
-- When the owner goes out of scope, the value will be dropped.
+- Rust 中的每个值都有一个_所有者_。
+- 一次只能有一个所有者。
+- 当所有者超出作用域时，该值将被丢弃。
 
-### Variable Scope
+### 变量作用域
 
-Now that we’re past basic Rust syntax, we won’t include all the `fn main() {`
-code in the examples, so if you’re following along, make sure to put the
-following examples inside a `main` function manually. As a result, our examples
-will be a bit more concise, letting us focus on the actual details rather than
-boilerplate code.
+既然我们已经完成了基本的 Rust 语法，我们不会在示例中包含所有 `fn main() {` 代码，所以如果您正在跟随，请确保手动将以下示例放在 `main` 函数内部。因此，我们的示例会更加简洁，让我们专注于实际细节而不是样板代码。
 
-As a first example of ownership, we’ll look at the scope of some variables. A
-_scope_ is the range within a program for which an item is valid. Take the
-following variable:
+作为所有权的第一个示例，我们将查看某些变量的作用域。_作用域_是程序中项目有效的范围。以以下变量为例：
 
 ```rust
 let s = "hello";
 ```
 
-The variable `s` refers to a string literal, where the value of the string is
-hardcoded into the text of our program. The variable is valid from the point at
-which it’s declared until the end of the current scope. Listing 4-1 shows a
-program with comments annotating where the variable `s` would be valid.
+变量 `s` 引用字符串字面量，其中字符串的值硬编码到我们程序的文本中。变量从声明它的点开始有效，直到当前作用域结束。清单 4-1 显示了一个程序，带有注释注释变量 `s` 将有效的位置。
 
-<Listing number="4-1" caption="A variable and the scope in which it is valid">
+<Listing number="4-1" caption="变量及其有效的作用域">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-01/src/main.rs:here}}
@@ -122,127 +50,70 @@ program with comments annotating where the variable `s` would be valid.
 
 </Listing>
 
-In other words, there are two important points in time here:
+换句话说，这里有两个重要的时间点：
 
-- When `s` comes _into_ scope, it is valid.
-- It remains valid until it goes _out of_ scope.
+- 当 `s` 进入作用域时，它是有效的。
+- 它保持有效直到它超出作用域。
 
-At this point, the relationship between scopes and when variables are valid is
-similar to that in other programming languages. Now we’ll build on top of this
-understanding by introducing the `String` type.
+此时，作用域和变量何时有效之间的关系与其他编程语言中的类似。现在，我们将通过引入 `String` 类型在此理解的基础上构建。
 
-### The `String` Type
+### `String` 类型
 
-To illustrate the rules of ownership, we need a data type that is more complex
-than those we covered in the [“Data Types”][data-types]<!-- ignore --> section
-of Chapter 3. The types covered previously are of a known size, can be stored
-on the stack and popped off the stack when their scope is over, and can be
-quickly and trivially copied to make a new, independent instance if another
-part of code needs to use the same value in a different scope. But we want to
-look at data that is stored on the heap and explore how Rust knows when to
-clean up that data, and the `String` type is a great example.
+为了说明所有权规则，我们需要一个比我们在第 3 章的["数据类型"][data-types]<!-- ignore -->部分中涵盖的类型更复杂的数据类型。之前涵盖的类型是已知大小的，可以存储在栈上，并在其作用域结束时从栈中弹出，并且可以快速且简单地复制以创建新的独立实例，如果代码的另一部分需要在不同作用域中使用相同的值。但我们想查看存储在堆上的数据，并探索 Rust 如何知道何时清理该数据，而 `String` 类型是一个很好的示例。
 
-We’ll concentrate on the parts of `String` that relate to ownership. These
-aspects also apply to other complex data types, whether they are provided by
-the standard library or created by you. We’ll discuss non-ownership aspects of
-`String` in [Chapter 8][ch8]<!-- ignore -->.
+我们将专注于 `String` 与所有权相关的部分。这些方面也适用于其他复杂数据类型，无论它们是由标准库提供还是由您创建的。我们将在[第 8 章][ch8]<!-- ignore -->中讨论 `String` 的非所有权方面。
 
-We’ve already seen string literals, where a string value is hardcoded into our
-program. String literals are convenient, but they aren’t suitable for every
-situation in which we may want to use text. One reason is that they’re
-immutable. Another is that not every string value can be known when we write
-our code: For example, what if we want to take user input and store it? It is
-for these situations that Rust has the `String` type. This type manages
-data allocated on the heap and as such is able to store an amount of text that
-is unknown to us at compile time. You can create a `String` from a string
-literal using the `from` function, like so:
+我们已经看到字符串字面量，其中字符串值硬编码到我们的程序中。字符串字面量很方便，但它们不适合我们可能想要使用文本的每种情况。一个原因是它们是不可变的。另一个原因是，并非每个字符串值都可以在我们编写代码时知道：例如，如果我们想要获取用户输入并存储它怎么办？正是针对这些情况，Rust 有 `String` 类型。此类型管理分配在堆上的数据，因此能够存储我们在编译时不知道的文本量。您可以使用 `from` 函数从字符串字面量创建 `String`，如下所示：
 
 ```rust
 let s = String::from("hello");
 ```
 
-The double colon `::` operator allows us to namespace this particular `from`
-function under the `String` type rather than using some sort of name like
-`string_from`. We’ll discuss this syntax more in the [“Methods”][methods]<!--
-ignore --> section of Chapter 5, and when we talk about namespacing with
-modules in [“Paths for Referring to an Item in the Module
-Tree”][paths-module-tree]<!-- ignore --> in Chapter 7.
+双冒号 `::` 运算符允许我们在 `String` 类型下命名空间化这个特定的 `from` 函数，而不是使用某种名称，如 `string_from`。我们将在第 5 章的["方法"][methods]<!--
+ignore -->部分以及在第 7 章的["用于引用模块树中项目的路径"][paths-module-tree]<!-- ignore -->中讨论模块命名空间时更详细地讨论此语法。
 
-This kind of string _can_ be mutated:
+这种字符串_可以_被改变：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-01-can-mutate-string/src/main.rs:here}}
 ```
 
-So, what’s the difference here? Why can `String` be mutated but literals
-cannot? The difference is in how these two types deal with memory.
+那么，这里有什么区别？为什么 `String` 可以被改变，但字面量不能？区别在于这两种类型如何处理内存。
 
-### Memory and Allocation
+### 内存和分配
 
-In the case of a string literal, we know the contents at compile time, so the
-text is hardcoded directly into the final executable. This is why string
-literals are fast and efficient. But these properties only come from the string
-literal’s immutability. Unfortunately, we can’t put a blob of memory into the
-binary for each piece of text whose size is unknown at compile time and whose
-size might change while running the program.
+对于字符串字面量，我们在编译时知道内容，因此文本直接硬编码到最终可执行文件中。这就是为什么字符串字面量快速高效。但这些属性仅来自字符串字面量的不可变性。不幸的是，我们不能为每个在编译时大小未知且大小可能在程序运行时发生变化的文本片段将内存块放入二进制文件中。
 
-With the `String` type, in order to support a mutable, growable piece of text,
-we need to allocate an amount of memory on the heap, unknown at compile time,
-to hold the contents. This means:
+对于 `String` 类型，为了支持可变、可增长的文本片段，我们需要在堆上分配一定数量的内存，在编译时未知，以保存内容。这意味着：
 
-- The memory must be requested from the memory allocator at runtime.
-- We need a way of returning this memory to the allocator when we’re done with
-  our `String`.
+- 必须在运行时从内存分配器请求内存。
+- 当我们完成使用 `String` 时，我们需要一种方法将此内存返回给分配器。
 
-That first part is done by us: When we call `String::from`, its implementation
-requests the memory it needs. This is pretty much universal in programming
-languages.
+第一部分由我们完成：当我们调用 `String::from` 时，其实现请求它需要的内存。这在编程语言中几乎是通用的。
 
-However, the second part is different. In languages with a _garbage collector
-(GC)_, the GC keeps track of and cleans up memory that isn’t being used
-anymore, and we don’t need to think about it. In most languages without a GC,
-it’s our responsibility to identify when memory is no longer being used and to
-call code to explicitly free it, just as we did to request it. Doing this
-correctly has historically been a difficult programming problem. If we forget,
-we’ll waste memory. If we do it too early, we’ll have an invalid variable. If
-we do it twice, that’s a bug too. We need to pair exactly one `allocate` with
-exactly one `free`.
+但是，第二部分是不同的。在具有_垃圾收集器（GC）_的语言中，GC 跟踪并清理不再使用的内存，我们不需要考虑它。在大多数没有 GC 的语言中，我们有责任识别何时不再使用内存并调用代码显式释放它，就像我们请求它一样。正确地做到这一点历来是一个困难的编程问题。如果我们忘记了，我们会浪费内存。如果我们做得太早，我们将有一个无效的变量。如果我们做两次，这也是一个错误。我们需要恰好将一个 `allocate` 与恰好一个 `free` 配对。
 
-Rust takes a different path: The memory is automatically returned once the
-variable that owns it goes out of scope. Here’s a version of our scope example
-from Listing 4-1 using a `String` instead of a string literal:
+Rust 采用不同的路径：一旦拥有它的变量超出作用域，内存就会自动返回。这是我们在清单 4-1 中使用 `String` 而不是字符串字面量的作用域示例版本：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-02-string-scope/src/main.rs:here}}
 ```
 
-There is a natural point at which we can return the memory our `String` needs
-to the allocator: when `s` goes out of scope. When a variable goes out of
-scope, Rust calls a special function for us. This function is called
-[`drop`][drop]<!-- ignore -->, and it’s where the author of `String` can put
-the code to return the memory. Rust calls `drop` automatically at the closing
-curly bracket.
+有一个自然的点，我们可以将 `String` 需要的内存返回给分配器：当 `s` 超出作用域时。当变量超出作用域时，Rust 为我们调用一个特殊函数。此函数称为 [`drop`][drop]<!-- ignore -->，这是 `String` 的作者可以放置返回内存的代码的地方。Rust 在右花括号处自动调用 `drop`。
 
-> Note: In C++, this pattern of deallocating resources at the end of an item’s
-> lifetime is sometimes called _Resource Acquisition Is Initialization (RAII)_.
-> The `drop` function in Rust will be familiar to you if you’ve used RAII
-> patterns.
+> 注意：在 C++ 中，在项目生命周期结束时释放资源的这种模式有时称为_资源获取即初始化（RAII）_。如果您使用过 RAII 模式，Rust 中的 `drop` 函数对您来说会很熟悉。
 
-This pattern has a profound impact on the way Rust code is written. It may seem
-simple right now, but the behavior of code can be unexpected in more
-complicated situations when we want to have multiple variables use the data
-we’ve allocated on the heap. Let’s explore some of those situations now.
+这种模式对 Rust 代码的编写方式有深远的影响。现在看起来可能很简单，但在我们想要让多个变量使用我们在堆上分配的数据的更复杂情况下，代码的行为可能会出乎意料。现在让我们探索其中一些情况。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="ways-variables-and-data-interact-move"></a>
 
-#### Variables and Data Interacting with Move
+#### 变量和数据交互：移动
 
-Multiple variables can interact with the same data in different ways in Rust.
-Listing 4-2 shows an example using an integer.
+多个变量可以在 Rust 中以不同方式与相同数据交互。清单 4-2 显示了一个使用整数的示例。
 
-<Listing number="4-2" caption="Assigning the integer value of variable `x` to `y`">
+<Listing number="4-2" caption="将变量 `x` 的整数值赋值给 `y`">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-02/src/main.rs:here}}
@@ -250,219 +121,125 @@ Listing 4-2 shows an example using an integer.
 
 </Listing>
 
-We can probably guess what this is doing: “Bind the value `5` to `x`; then, make
-a copy of the value in `x` and bind it to `y`.” We now have two variables, `x`
-and `y`, and both equal `5`. This is indeed what is happening, because integers
-are simple values with a known, fixed size, and these two `5` values are pushed
-onto the stack.
+我们可能可以猜到这是做什么的："将值 `5` 绑定到 `x`；然后，复制 `x` 中的值并将其绑定到 `y`。"我们现在有两个变量 `x` 和 `y`，都等于 `5`。这确实是正在发生的事情，因为整数是具有已知固定大小的简单值，这两个 `5` 值被推入栈。
 
-Now let’s look at the `String` version:
+现在让我们看一下 `String` 版本：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-03-string-move/src/main.rs:here}}
 ```
 
-This looks very similar, so we might assume that the way it works would be the
-same: That is, the second line would make a copy of the value in `s1` and bind
-it to `s2`. But this isn’t quite what happens.
+这看起来非常相似，所以我们可能假设它的工作方式会相同：也就是说，第二行会复制 `s1` 中的值并将其绑定到 `s2`。但这并不是完全发生的事情。
 
-Take a look at Figure 4-1 to see what is happening to `String` under the
-covers. A `String` is made up of three parts, shown on the left: a pointer to
-the memory that holds the contents of the string, a length, and a capacity.
-This group of data is stored on the stack. On the right is the memory on the
-heap that holds the contents.
+查看图 4-1 以了解 `String` 在幕后发生了什么。`String` 由三部分组成，如左侧所示：指向保存字符串内容的内存的指针、长度和容量。这组数据存储在栈上。右侧是保存内容的堆内存。
 
-<img alt="Two tables: the first table contains the representation of s1 on the
-stack, consisting of its length (5), capacity (5), and a pointer to the first
-value in the second table. The second table contains the representation of the
-string data on the heap, byte by byte." src="img/trpl04-01.svg" class="center"
+<img alt="两个表：第一个表包含栈上 s1 的表示，由长度（5）、容量（5）和指向第二个表中第一个值的指针组成。第二个表包含堆上字符串数据的表示，逐字节。" src="img/trpl04-01.svg" class="center"
 style="width: 50%;" />
 
-<span class="caption">Figure 4-1: The representation in memory of a `String`
-holding the value `"hello"` bound to `s1`</span>
+<span class="caption">图 4-1：绑定到 `s1` 的 `String` 在内存中保存值 `"hello"` 的表示</span>
 
-The length is how much memory, in bytes, the contents of the `String` are
-currently using. The capacity is the total amount of memory, in bytes, that the
-`String` has received from the allocator. The difference between length and
-capacity matters, but not in this context, so for now, it’s fine to ignore the
-capacity.
+长度是 `String` 的内容当前使用的内存量（以字节为单位）。容量是 `String` 从分配器接收的总内存量（以字节为单位）。长度和容量之间的差异很重要，但在此上下文中不重要，所以现在忽略容量是可以的。
 
-When we assign `s1` to `s2`, the `String` data is copied, meaning we copy the
-pointer, the length, and the capacity that are on the stack. We do not copy the
-data on the heap that the pointer refers to. In other words, the data
-representation in memory looks like Figure 4-2.
+当我们将 `s1` 赋值给 `s2` 时，会复制 `String` 数据，这意味着我们复制指针、长度和栈上的容量。我们不复制指针指向的堆上的数据。换句话说，内存中的数据表示看起来像图 4-2。
 
-<img alt="Three tables: tables s1 and s2 representing those strings on the
-stack, respectively, and both pointing to the same string data on the heap."
-src="img/trpl04-02.svg" class="center" style="width: 50%;" />
+<img alt="三个表：表 s1 和 s2 分别表示栈上的那些字符串，都指向堆上的相同字符串数据。" src="img/trpl04-02.svg" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 4-2: The representation in memory of the variable
-`s2` that has a copy of the pointer, length, and capacity of `s1`</span>
+<span class="caption">图 4-2：变量 `s2` 在内存中的表示，它复制了 `s1` 的指针、长度和容量</span>
 
-The representation does _not_ look like Figure 4-3, which is what memory would
-look like if Rust instead copied the heap data as well. If Rust did this, the
-operation `s2 = s1` could be very expensive in terms of runtime performance if
-the data on the heap were large.
+表示_不_看起来像图 4-3，如果 Rust 也复制堆数据，这将是内存的样子。如果 Rust 这样做，如果堆上的数据很大，操作 `s2 = s1` 在运行时性能方面可能非常昂贵。
 
-<img alt="Four tables: two tables representing the stack data for s1 and s2,
-and each points to its own copy of string data on the heap."
-src="img/trpl04-03.svg" class="center" style="width: 50%;" />
+<img alt="四个表：两个表表示 s1 和 s2 的栈数据，每个都指向堆上字符串数据的自己的副本。" src="img/trpl04-03.svg" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 4-3: Another possibility for what `s2 = s1` might
-do if Rust copied the heap data as well</span>
+<span class="caption">图 4-3：如果 Rust 也复制堆数据，`s2 = s1` 可能做的另一种可能性</span>
 
-Earlier, we said that when a variable goes out of scope, Rust automatically
-calls the `drop` function and cleans up the heap memory for that variable. But
-Figure 4-2 shows both data pointers pointing to the same location. This is a
-problem: When `s2` and `s1` go out of scope, they will both try to free the
-same memory. This is known as a _double free_ error and is one of the memory
-safety bugs we mentioned previously. Freeing memory twice can lead to memory
-corruption, which can potentially lead to security vulnerabilities.
+早些时候，我们说过当变量超出作用域时，Rust 会自动调用 `drop` 函数并清理该变量的堆内存。但是图 4-2 显示两个数据指针都指向同一位置。这是一个问题：当 `s2` 和 `s1` 超出作用域时，它们都会尝试释放相同的内存。这被称为_双重释放_错误，是我们之前提到的内存安全错误之一。释放内存两次可能导致内存损坏，这可能潜在地导致安全漏洞。
 
-To ensure memory safety, after the line `let s2 = s1;`, Rust considers `s1` as
-no longer valid. Therefore, Rust doesn’t need to free anything when `s1` goes
-out of scope. Check out what happens when you try to use `s1` after `s2` is
-created; it won’t work:
+为了确保内存安全，在 `let s2 = s1;` 行之后，Rust 认为 `s1` 不再有效。因此，当 `s1` 超出作用域时，Rust 不需要释放任何东西。看看在创建 `s2` 后尝试使用 `s1` 时会发生什么；它不会工作：
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-04-cant-use-after-move/src/main.rs:here}}
 ```
 
-You’ll get an error like this because Rust prevents you from using the
-invalidated reference:
+您会得到这样的错误，因为 Rust 阻止您使用无效的引用：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/no-listing-04-cant-use-after-move/output.txt}}
 ```
 
-If you’ve heard the terms _shallow copy_ and _deep copy_ while working with
-other languages, the concept of copying the pointer, length, and capacity
-without copying the data probably sounds like making a shallow copy. But
-because Rust also invalidates the first variable, instead of being called a
-shallow copy, it’s known as a _move_. In this example, we would say that `s1`
-was _moved_ into `s2`. So, what actually happens is shown in Figure 4-4.
+如果您在使用其他语言时听说过_浅拷贝_和_深拷贝_这两个术语，复制指针、长度和容量而不复制数据的概念可能听起来像是进行浅拷贝。但由于 Rust 也使第一个变量无效，而不是被称为浅拷贝，它被称为_移动_。在此示例中，我们会说 `s1` 被_移动_到 `s2`。所以，实际发生的事情如图 4-4 所示。
 
-<img alt="Three tables: tables s1 and s2 representing those strings on the
-stack, respectively, and both pointing to the same string data on the heap.
-Table s1 is grayed out because s1 is no longer valid; only s2 can be used to
-access the heap data." src="img/trpl04-04.svg" class="center" style="width:
+<img alt="三个表：表 s1 和 s2 分别表示栈上的那些字符串，都指向堆上的相同字符串数据。表 s1 被灰掉，因为 s1 不再有效；只有 s2 可以用来访问堆数据。" src="img/trpl04-04.svg" class="center" style="width:
 50%;" />
 
-<span class="caption">Figure 4-4: The representation in memory after `s1` has
-been invalidated</span>
+<span class="caption">图 4-4：`s1` 失效后内存中的表示</span>
 
-That solves our problem! With only `s2` valid, when it goes out of scope it
-alone will free the memory, and we’re done.
+这解决了我们的问题！只有 `s2` 有效，当它超出作用域时，它单独将释放内存，我们就完成了。
 
-In addition, there’s a design choice that’s implied by this: Rust will never
-automatically create “deep” copies of your data. Therefore, any _automatic_
-copying can be assumed to be inexpensive in terms of runtime performance.
+此外，这里有一个隐含的设计选择：Rust 永远不会自动创建数据的"深"副本。因此，任何_自动_复制都可以假设在运行时性能方面是廉价的。
 
-#### Scope and Assignment
+#### 作用域和赋值
 
-The inverse of this is true for the relationship between scoping, ownership, and
-memory being freed via the `drop` function as well. When you assign a completely
-new value to an existing variable, Rust will call `drop` and free the original
-value’s memory immediately. Consider this code, for example:
+这对作用域、所有权和通过 `drop` 函数释放内存之间的关系也是相反的。当您将全新值赋值给现有变量时，Rust 将立即调用 `drop` 并释放原始值的内存。例如，考虑此代码：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-04b-replacement-drop/src/main.rs:here}}
 ```
 
-We initially declare a variable `s` and bind it to a `String` with the value
-`"hello"`. Then, we immediately create a new `String` with the value `"ahoy"`
-and assign it to `s`. At this point, nothing is referring to the original value
-on the heap at all. Figure 4-5 illustrates the stack and heap data now:
+我们最初声明一个变量 `s` 并将其绑定到值为 `"hello"` 的 `String`。然后，我们立即创建一个值为 `"ahoy"` 的新 `String` 并将其赋值给 `s`。此时，没有任何东西引用堆上的原始值。图 4-5 说明了现在的栈和堆数据：
 
-<img alt="One table representing the string value on the stack, pointing to
-the second piece of string data (ahoy) on the heap, with the original string
-data (hello) grayed out because it cannot be accessed anymore."
-src="img/trpl04-05.svg" class="center" style="width: 50%;" />
+<img alt="一个表表示栈上的字符串值，指向堆上的第二段字符串数据（ahoy），原始字符串数据（hello）被灰掉，因为它无法再访问。" src="img/trpl04-05.svg" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 4-5: The representation in memory after the initial
-value has been replaced in its entirety</span>
+<span class="caption">图 4-5：初始值完全替换后内存中的表示</span>
 
-The original string thus immediately goes out of scope. Rust will run the `drop`
-function on it and its memory will be freed right away. When we print the value
-at the end, it will be `"ahoy, world!"`.
+因此，原始字符串立即超出作用域。Rust 将在其上运行 `drop` 函数，其内存将立即释放。当我们在最后打印值时，它将是 `"ahoy, world!"`。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="ways-variables-and-data-interact-clone"></a>
 
-#### Variables and Data Interacting with Clone
+#### 变量和数据交互：克隆
 
-If we _do_ want to deeply copy the heap data of the `String`, not just the
-stack data, we can use a common method called `clone`. We’ll discuss method
-syntax in Chapter 5, but because methods are a common feature in many
-programming languages, you’ve probably seen them before.
+如果我们_确实_想要深度复制 `String` 的堆数据，而不仅仅是栈数据，我们可以使用一个称为 `clone` 的常见方法。我们将在第 5 章讨论方法语法，但因为方法是许多编程语言中的常见功能，您可能以前见过它们。
 
-Here’s an example of the `clone` method in action:
+以下是 `clone` 方法在实际中的示例：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-05-clone/src/main.rs:here}}
 ```
 
-This works just fine and explicitly produces the behavior shown in Figure 4-3,
-where the heap data _does_ get copied.
+这工作得很好，并显式产生图 4-3 中显示的行为，其中堆数据_确实_被复制。
 
-When you see a call to `clone`, you know that some arbitrary code is being
-executed and that code may be expensive. It’s a visual indicator that something
-different is going on.
+当您看到对 `clone` 的调用时，您知道正在执行一些任意代码，并且该代码可能很昂贵。这是正在发生不同事情的视觉指示器。
 
-#### Stack-Only Data: Copy
+#### 仅栈数据：复制
 
-There’s another wrinkle we haven’t talked about yet. This code using
-integers—part of which was shown in Listing 4-2—works and is valid:
+还有另一个我们尚未讨论的细节。这段使用整数的代码——其中一部分在清单 4-2 中显示——工作正常且有效：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-06-copy/src/main.rs:here}}
 ```
 
-But this code seems to contradict what we just learned: We don’t have a call to
-`clone`, but `x` is still valid and wasn’t moved into `y`.
+但这段代码似乎与我们刚刚学到的相矛盾：我们没有调用 `clone`，但 `x` 仍然有效，没有被移动到 `y`。
 
-The reason is that types such as integers that have a known size at compile
-time are stored entirely on the stack, so copies of the actual values are quick
-to make. That means there’s no reason we would want to prevent `x` from being
-valid after we create the variable `y`. In other words, there’s no difference
-between deep and shallow copying here, so calling `clone` wouldn’t do anything
-different from the usual shallow copying, and we can leave it out.
+原因是像整数这样在编译时具有已知大小的类型完全存储在栈上，因此实际值的副本可以快速制作。这意味着我们没有理由在创建变量 `y` 后阻止 `x` 有效。换句话说，这里深拷贝和浅拷贝之间没有区别，所以调用 `clone` 不会做任何与通常的浅拷贝不同的事情，我们可以省略它。
 
-Rust has a special annotation called the `Copy` trait that we can place on
-types that are stored on the stack, as integers are (we’ll talk more about
-traits in [Chapter 10][traits]<!-- ignore -->). If a type implements the `Copy`
-trait, variables that use it do not move, but rather are trivially copied,
-making them still valid after assignment to another variable.
+Rust 有一个称为 `Copy` trait 的特殊注释，我们可以将其放在存储在栈上的类型上，就像整数一样（我们将在[第 10 章][traits]<!-- ignore -->中更多地讨论 trait）。如果类型实现了 `Copy` trait，使用它的变量不会移动，而是被简单地复制，使它们在赋值给另一个变量后仍然有效。
 
-Rust won’t let us annotate a type with `Copy` if the type, or any of its parts,
-has implemented the `Drop` trait. If the type needs something special to happen
-when the value goes out of scope and we add the `Copy` annotation to that type,
-we’ll get a compile-time error. To learn about how to add the `Copy` annotation
-to your type to implement the trait, see [“Derivable
-Traits”][derivable-traits]<!-- ignore --> in Appendix C.
+如果类型或其任何部分实现了 `Drop` trait，Rust 不会让我们用 `Copy` 注释类型。如果类型需要在值超出作用域时发生某些特殊的事情，并且我们将 `Copy` 注释添加到该类型，我们将得到编译时错误。要了解如何将 `Copy` 注释添加到您的类型以实现 trait，请参见附录 C 中的["可派生 Trait"][derivable-traits]<!-- ignore -->。
 
-So, what types implement the `Copy` trait? You can check the documentation for
-the given type to be sure, but as a general rule, any group of simple scalar
-values can implement `Copy`, and nothing that requires allocation or is some
-form of resource can implement `Copy`. Here are some of the types that
-implement `Copy`:
+那么，哪些类型实现了 `Copy` trait？您可以查看给定类型的文档以确定，但作为一般规则，任何简单标量值组都可以实现 `Copy`，而任何需要分配或某种形式的资源都不能实现 `Copy`。以下是一些实现 `Copy` 的类型：
 
-- All the integer types, such as `u32`.
-- The Boolean type, `bool`, with values `true` and `false`.
-- All the floating-point types, such as `f64`.
-- The character type, `char`.
-- Tuples, if they only contain types that also implement `Copy`. For example,
-  `(i32, i32)` implements `Copy`, but `(i32, String)` does not.
+- 所有整数类型，例如 `u32`。
+- 布尔类型 `bool`，值为 `true` 和 `false`。
+- 所有浮点类型，例如 `f64`。
+- 字符类型 `char`。
+- 元组，如果它们只包含也实现 `Copy` 的类型。例如，`(i32, i32)` 实现 `Copy`，但 `(i32, String)` 不实现。
 
-### Ownership and Functions
+### 所有权和函数
 
-The mechanics of passing a value to a function are similar to those when
-assigning a value to a variable. Passing a variable to a function will move or
-copy, just as assignment does. Listing 4-3 has an example with some annotations
-showing where variables go into and out of scope.
+将值传递给函数的机制与将值赋值给变量时类似。将变量传递给函数会移动或复制，就像赋值一样。清单 4-3 有一个示例，带有一些注释显示变量进入和超出作用域的位置。
 
-<Listing number="4-3" file-name="src/main.rs" caption="Functions with ownership and scope annotated">
+<Listing number="4-3" file-name="src/main.rs" caption="带有所有权和作用域注释的函数">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-03/src/main.rs}}
@@ -470,18 +247,13 @@ showing where variables go into and out of scope.
 
 </Listing>
 
-If we tried to use `s` after the call to `takes_ownership`, Rust would throw a
-compile-time error. These static checks protect us from mistakes. Try adding
-code to `main` that uses `s` and `x` to see where you can use them and where
-the ownership rules prevent you from doing so.
+如果我们在调用 `takes_ownership` 后尝试使用 `s`，Rust 会抛出编译时错误。这些静态检查保护我们免受错误。尝试添加代码到 `main`，使用 `s` 和 `x` 来查看您可以在哪里使用它们，以及所有权规则在哪里阻止您这样做。
 
-### Return Values and Scope
+### 返回值和作用域
 
-Returning values can also transfer ownership. Listing 4-4 shows an example of a
-function that returns some value, with similar annotations as those in Listing
-4-3.
+返回值也可以转移所有权。清单 4-4 显示了一个返回某个值的函数示例，带有与清单 4-3 中类似的注释。
 
-<Listing number="4-4" file-name="src/main.rs" caption="Transferring ownership of return values">
+<Listing number="4-4" file-name="src/main.rs" caption="转移返回值的所有权">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-04/src/main.rs}}
@@ -489,20 +261,13 @@ function that returns some value, with similar annotations as those in Listing
 
 </Listing>
 
-The ownership of a variable follows the same pattern every time: Assigning a
-value to another variable moves it. When a variable that includes data on the
-heap goes out of scope, the value will be cleaned up by `drop` unless ownership
-of the data has been moved to another variable.
+变量的所有权每次都遵循相同的模式：将值赋值给另一个变量会移动它。当包含堆上数据的变量超出作用域时，该值将被 `drop` 清理，除非数据的所有权已移动到另一个变量。
 
-While this works, taking ownership and then returning ownership with every
-function is a bit tedious. What if we want to let a function use a value but
-not take ownership? It’s quite annoying that anything we pass in also needs to
-be passed back if we want to use it again, in addition to any data resulting
-from the body of the function that we might want to return as well.
+虽然这有效，但每次函数都获取所有权然后返回所有权有点繁琐。如果我们想让函数使用值但不获取所有权怎么办？如果我们想再次使用它，我们传入的任何东西也需要传回，这很烦人，另外还有函数体可能产生的任何数据，我们可能也想返回。
 
-Rust does let us return multiple values using a tuple, as shown in Listing 4-5.
+Rust 确实允许我们使用元组返回多个值，如清单 4-5 所示。
 
-<Listing number="4-5" file-name="src/main.rs" caption="Returning ownership of parameters">
+<Listing number="4-5" file-name="src/main.rs" caption="返回参数的所有权">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-05/src/main.rs}}
@@ -510,9 +275,7 @@ Rust does let us return multiple values using a tuple, as shown in Listing 4-5.
 
 </Listing>
 
-But this is too much ceremony and a lot of work for a concept that should be
-common. Luckily for us, Rust has a feature for using a value without
-transferring ownership: references.
+但对于一个应该是常见的概念来说，这太繁琐了，工作量很大。幸运的是，Rust 有一个功能可以使用值而不转移所有权：引用。
 
 [data-types]: ch03-02-data-types.html#data-types
 [ch8]: ch08-02-strings.html

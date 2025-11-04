@@ -1,7 +1,3 @@
-# Understanding Ownership
+# 理解所有权
 
-Ownership is Rust’s most unique feature and has deep implications for the rest
-of the language. It enables Rust to make memory safety guarantees without
-needing a garbage collector, so it’s important to understand how ownership
-works. In this chapter, we’ll talk about ownership as well as several related
-features: borrowing, slices, and how Rust lays data out in memory.
+所有权是 Rust 最独特的功能，对语言的其余部分有深远的影响。它使 Rust 能够在不需要垃圾收集器的情况下保证内存安全，因此了解所有权的工作原理很重要。在本章中，我们将讨论所有权以及几个相关功能：借用、切片，以及 Rust 如何在内存中布局数据。

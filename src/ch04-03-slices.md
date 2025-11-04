@@ -1,34 +1,20 @@
-## The Slice Type
+## 切片类型
 
-_Slices_ let you reference a contiguous sequence of elements in a
-[collection](ch08-00-common-collections.md)<!-- ignore -->. A slice is a kind
-of reference, so it does not have ownership.
+_切片_让您引用[集合](ch08-00-common-collections.md)<!-- ignore -->中连续的元素序列。切片是一种引用，所以它没有所有权。
 
-Here’s a small programming problem: Write a function that takes a string of
-words separated by spaces and returns the first word it finds in that string.
-If the function doesn’t find a space in the string, the whole string must be
-one word, so the entire string should be returned.
+这里有一个小编程问题：编写一个函数，该函数接受一个由空格分隔的单词字符串，并返回它在该字符串中找到的第一个单词。如果函数在字符串中找不到空格，整个字符串必须是一个单词，因此应该返回整个字符串。
 
-> Note: For the purposes of introducing slices, we are assuming ASCII only in
-> this section; a more thorough discussion of UTF-8 handling is in the
-> [“Storing UTF-8 Encoded Text with Strings”][strings]<!-- ignore --> section
-> of Chapter 8.
+> 注意：为了介绍切片的目的，我们在本节中假设仅使用 ASCII；关于 UTF-8 处理的更详细讨论在第 8 章的["使用字符串存储 UTF-8 编码的文本"][strings]<!-- ignore -->部分中。
 
-Let’s work through how we’d write the signature of this function without using
-slices, to understand the problem that slices will solve:
+让我们不使用切片来编写此函数的签名，以了解切片将解决的问题：
 
 ```rust,ignore
 fn first_word(s: &String) -> ?
 ```
 
-The `first_word` function has a parameter of type `&String`. We don’t need
-ownership, so this is fine. (In idiomatic Rust, functions do not take ownership
-of their arguments unless they need to, and the reasons for that will become
-clear as we keep going.) But what should we return? We don’t really have a way
-to talk about *part* of a string. However, we could return the index of the end
-of the word, indicated by a space. Let’s try that, as shown in Listing 4-7.
+`first_word` 函数的参数类型为 `&String`。我们不需要所有权，所以这很好。（在惯用的 Rust 中，函数不会获取其参数的所有权，除非它们需要，当我们继续前进时，这样做的原因会变得清楚。）但我们应该返回什么？我们真的没有方法来谈论字符串的*部分*。但是，我们可以返回单词结束的索引，由空格指示。让我们尝试一下，如清单 4-7 所示。
 
-<Listing number="4-7" file-name="src/main.rs" caption="The `first_word` function that returns a byte index value into the `String` parameter">
+<Listing number="4-7" file-name="src/main.rs" caption="返回 `String` 参数的字节索引值的 `first_word` 函数">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-07/src/main.rs:here}}
@@ -36,50 +22,31 @@ of the word, indicated by a space. Let’s try that, as shown in Listing 4-7.
 
 </Listing>
 
-Because we need to go through the `String` element by element and check whether
-a value is a space, we’ll convert our `String` to an array of bytes using the
-`as_bytes` method.
+因为我们需要逐个元素地遍历 `String` 并检查值是否为空格，我们将使用 `as_bytes` 方法将 `String` 转换为字节数组。
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-07/src/main.rs:as_bytes}}
 ```
 
-Next, we create an iterator over the array of bytes using the `iter` method:
+接下来，我们使用 `iter` 方法在字节数组上创建一个迭代器：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-07/src/main.rs:iter}}
 ```
 
-We’ll discuss iterators in more detail in [Chapter 13][ch13]<!-- ignore -->.
-For now, know that `iter` is a method that returns each element in a collection
-and that `enumerate` wraps the result of `iter` and returns each element as
-part of a tuple instead. The first element of the tuple returned from
-`enumerate` is the index, and the second element is a reference to the element.
-This is a bit more convenient than calculating the index ourselves.
+我们将在[第 13 章][ch13]<!-- ignore -->中更详细地讨论迭代器。现在，知道 `iter` 是一个返回集合中每个元素的方法，`enumerate` 包装 `iter` 的结果并将每个元素作为元组的一部分返回。从 `enumerate` 返回的元组的第一个元素是索引，第二个元素是对元素的引用。这比我们自己计算索引更方便一点。
 
-Because the `enumerate` method returns a tuple, we can use patterns to
-destructure that tuple. We’ll be discussing patterns more in [Chapter
-6][ch6]<!-- ignore -->. In the `for` loop, we specify a pattern that has `i`
-for the index in the tuple and `&item` for the single byte in the tuple.
-Because we get a reference to the element from `.iter().enumerate()`, we use
-`&` in the pattern.
+因为 `enumerate` 方法返回元组，我们可以使用模式来解构该元组。我们将在[第 6 章][ch6]<!-- ignore -->中更详细地讨论模式。在 `for` 循环中，我们指定一个模式，在元组中 `i` 用于索引，`&item` 用于元组中的单个字节。因为我们从 `.iter().enumerate()` 获取对元素的引用，所以我们在模式中使用 `&`。
 
-Inside the `for` loop, we search for the byte that represents the space by
-using the byte literal syntax. If we find a space, we return the position.
-Otherwise, we return the length of the string by using `s.len()`.
+在 `for` 循环内部，我们通过使用字节字面量语法搜索表示空格的字节。如果我们找到空格，我们返回位置。否则，我们使用 `s.len()` 返回字符串的长度。
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-07/src/main.rs:inside_for}}
 ```
 
-We now have a way to find out the index of the end of the first word in the
-string, but there’s a problem. We’re returning a `usize` on its own, but it’s
-only a meaningful number in the context of the `&String`. In other words,
-because it’s a separate value from the `String`, there’s no guarantee that it
-will still be valid in the future. Consider the program in Listing 4-8 that
-uses the `first_word` function from Listing 4-7.
+我们现在有一种方法来找出字符串中第一个单词结束的索引，但有一个问题。我们单独返回 `usize`，但它只在 `&String` 的上下文中是有意义的数字。换句话说，因为它是一个与 `String` 分离的值，不能保证它将来仍然有效。考虑清单 4-8 中使用清单 4-7 中的 `first_word` 函数的程序。
 
-<Listing number="4-8" file-name="src/main.rs" caption="Storing the result from calling the `first_word` function and then changing the `String` contents">
+<Listing number="4-8" file-name="src/main.rs" caption="存储调用 `first_word` 函数的结果，然后更改 `String` 内容">
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-08/src/main.rs:here}}
@@ -87,60 +54,35 @@ uses the `first_word` function from Listing 4-7.
 
 </Listing>
 
-This program compiles without any errors and would also do so if we used `word`
-after calling `s.clear()`. Because `word` isn’t connected to the state of `s`
-at all, `word` still contains the value `5`. We could use that value `5` with
-the variable `s` to try to extract the first word out, but this would be a bug
-because the contents of `s` have changed since we saved `5` in `word`.
+此程序编译时没有任何错误，如果我们 after calling `s.clear()` 使用 `word`，它也会这样做。因为 `word` 根本没有连接到 `s` 的状态，`word` 仍然包含值 `5`。我们可以使用该值 `5` 和变量 `s` 来尝试提取第一个单词，但这将是一个错误，因为 `s` 的内容自我们将 `5` 保存在 `word` 中以来已经改变。
 
-Having to worry about the index in `word` getting out of sync with the data in
-`s` is tedious and error-prone! Managing these indices is even more brittle if
-we write a `second_word` function. Its signature would have to look like this:
+不得不担心 `word` 中的索引与 `s` 中的数据不同步是繁琐且容易出错的！如果我们编写 `second_word` 函数，管理这些索引会更加脆弱。它的签名必须看起来像这样：
 
 ```rust,ignore
 fn second_word(s: &String) -> (usize, usize) {
 ```
 
-Now we’re tracking a starting _and_ an ending index, and we have even more
-values that were calculated from data in a particular state but aren’t tied to
-that state at all. We have three unrelated variables floating around that need
-to be kept in sync.
+现在我们正在跟踪开始_和_结束索引，我们还有更多从特定状态的数据计算的值，但根本没有绑定到该状态。我们有三个不相关的变量在浮动，需要保持同步。
 
-Luckily, Rust has a solution to this problem: string slices.
+幸运的是，Rust 有一个解决此问题的方案：字符串切片。
 
-### String Slices
+### 字符串切片
 
-A _string slice_ is a reference to a contiguous sequence of the elements of a
-`String`, and it looks like this:
+_字符串切片_是对 `String` 的连续元素序列的引用，它看起来像这样：
 
 ```rust
 {{#rustdoc_include ../listings/ch04-understanding-ownership/no-listing-17-slice/src/main.rs:here}}
 ```
 
-Rather than a reference to the entire `String`, `hello` is a reference to a
-portion of the `String`, specified in the extra `[0..5]` bit. We create slices
-using a range within square brackets by specifying
-`[starting_index..ending_index]`, where _`starting_index`_ is the first
-position in the slice and _`ending_index`_ is one more than the last position
-in the slice. Internally, the slice data structure stores the starting position
-and the length of the slice, which corresponds to _`ending_index`_ minus
-_`starting_index`_. So, in the case of `let world = &s[6..11];`, `world` would
-be a slice that contains a pointer to the byte at index 6 of `s` with a length
-value of `5`.
+而不是对整个 `String` 的引用，`hello` 是对 `String` 的一部分的引用，在额外的 `[0..5]` 位中指定。我们通过在方括号内指定范围来创建切片，通过指定 `[starting_index..ending_index]`，其中 _`starting_index`_ 是切片中的第一个位置，_`ending_index`_ 是切片中最后一个位置多一个。在内部，切片数据结构存储起始位置和切片的长度，对应于 _`ending_index`_ 减去 _`starting_index`_。所以，在 `let world = &s[6..11];` 的情况下，`world` 将是一个切片，包含指向 `s` 索引 6 处的字节的指针，长度为 `5`。
 
-Figure 4-7 shows this in a diagram.
+图 4-7 在图表中显示了这一点。
 
-<img alt="Three tables: a table representing the stack data of s, which points
-to the byte at index 0 in a table of the string data &quot;hello world&quot; on
-the heap. The third table represents the stack data of the slice world, which
-has a length value of 5 and points to byte 6 of the heap data table."
-src="img/trpl04-07.svg" class="center" style="width: 50%;" />
+<img alt="三个表：一个表表示 s 的栈数据，它指向堆上字符串数据表中索引 0 处的字节。第三个表表示切片 world 的栈数据，长度为 5，指向堆数据表的字节 6。" src="img/trpl04-07.svg" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 4-7: A string slice referring to part of a
-`String`</span>
+<span class="caption">图 4-7：引用 `String` 一部分的字符串切片</span>
 
-With Rust’s `..` range syntax, if you want to start at index 0, you can drop
-the value before the two periods. In other words, these are equal:
+使用 Rust 的 `..` 范围语法，如果您想从索引 0 开始，可以删除两个点之前的值。换句话说，这些是相等的：
 
 ```rust
 let s = String::from("hello");
@@ -149,8 +91,7 @@ let slice = &s[0..2];
 let slice = &s[..2];
 ```
 
-By the same token, if your slice includes the last byte of the `String`, you
-can drop the trailing number. That means these are equal:
+同样，如果您的切片包括 `String` 的最后一个字节，您可以删除尾随数字。这意味着这些是相等的：
 
 ```rust
 let s = String::from("hello");
@@ -161,8 +102,7 @@ let slice = &s[3..len];
 let slice = &s[3..];
 ```
 
-You can also drop both values to take a slice of the entire string. So, these
-are equal:
+您也可以删除两个值以获取整个字符串的切片。所以，这些是相等的：
 
 ```rust
 let s = String::from("hello");
@@ -173,12 +113,9 @@ let slice = &s[0..len];
 let slice = &s[..];
 ```
 
-> Note: String slice range indices must occur at valid UTF-8 character
-> boundaries. If you attempt to create a string slice in the middle of a
-> multibyte character, your program will exit with an error.
+> 注意：字符串切片范围索引必须发生在有效的 UTF-8 字符边界处。如果您尝试在多字节字符的中间创建字符串切片，您的程序将因错误而退出。
 
-With all this information in mind, let’s rewrite `first_word` to return a
-slice. The type that signifies “string slice” is written as `&str`:
+考虑到所有这些信息，让我们重写 `first_word` 以返回切片。表示"字符串切片"的类型写为 `&str`：
 
 <Listing file-name="src/main.rs">
 
@@ -188,30 +125,17 @@ slice. The type that signifies “string slice” is written as `&str`:
 
 </Listing>
 
-We get the index for the end of the word the same way we did in Listing 4-7, by
-looking for the first occurrence of a space. When we find a space, we return a
-string slice using the start of the string and the index of the space as the
-starting and ending indices.
+我们以与清单 4-7 中相同的方式获取单词结束的索引，通过查找空格的第一次出现。当我们找到空格时，我们使用字符串的开始和空格的索引作为起始和结束索引来返回字符串切片。
 
-Now when we call `first_word`, we get back a single value that is tied to the
-underlying data. The value is made up of a reference to the starting point of
-the slice and the number of elements in the slice.
+现在当我们调用 `first_word` 时，我们得到一个与底层数据相关的单个值。该值由对切片起点的引用和切片中的元素数量组成。
 
-Returning a slice would also work for a `second_word` function:
+返回切片也适用于 `second_word` 函数：
 
 ```rust,ignore
 fn second_word(s: &String) -> &str {
 ```
 
-We now have a straightforward API that’s much harder to mess up because the
-compiler will ensure that the references into the `String` remain valid.
-Remember the bug in the program in Listing 4-8, when we got the index to the
-end of the first word but then cleared the string so our index was invalid?
-That code was logically incorrect but didn’t show any immediate errors. The
-problems would show up later if we kept trying to use the first word index with
-an emptied string. Slices make this bug impossible and let us know much sooner
-that we have a problem with our code. Using the slice version of `first_word`
-will throw a compile-time error:
+我们现在有一个更直接的 API，很难出错，因为编译器将确保对 `String` 的引用保持有效。还记得清单 4-8 中程序中的错误吗，当我们获得第一个单词结束的索引，但然后清除了字符串，所以我们的索引无效？该代码在逻辑上不正确，但没有显示任何立即错误。如果我们继续尝试将第一个单词索引与清空的字符串一起使用，问题会在稍后出现。切片使此错误不可能发生，并让我们更早地知道代码有问题。使用 `first_word` 的切片版本将抛出编译时错误：
 
 <Listing file-name="src/main.rs">
 
@@ -221,52 +145,39 @@ will throw a compile-time error:
 
 </Listing>
 
-Here’s the compiler error:
+这是编译器错误：
 
 ```console
 {{#include ../listings/ch04-understanding-ownership/no-listing-19-slice-error/output.txt}}
 ```
 
-Recall from the borrowing rules that if we have an immutable reference to
-something, we cannot also take a mutable reference. Because `clear` needs to
-truncate the `String`, it needs to get a mutable reference. The `println!`
-after the call to `clear` uses the reference in `word`, so the immutable
-reference must still be active at that point. Rust disallows the mutable
-reference in `clear` and the immutable reference in `word` from existing at the
-same time, and compilation fails. Not only has Rust made our API easier to use,
-but it has also eliminated an entire class of errors at compile time!
+从借用规则回想，如果我们对某物有不可变引用，我们不能同时获取可变引用。因为 `clear` 需要截断 `String`，它需要获取可变引用。在调用 `clear` 之后的 `println!` 使用 `word` 中的引用，所以不可变引用必须在该点仍然有效。Rust 不允许 `clear` 中的可变引用和 `word` 中的不可变引用同时存在，编译失败。Rust 不仅使我们的 API 更易于使用，而且在编译时消除了整个类别的错误！
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="string-literals-are-slices"></a>
 
-#### String Literals as Slices
+#### 字符串字面量作为切片
 
-Recall that we talked about string literals being stored inside the binary. Now
-that we know about slices, we can properly understand string literals:
+回想一下，我们谈论过字符串字面量存储在二进制文件中。现在我们知道切片了，我们可以正确理解字符串字面量：
 
 ```rust
 let s = "Hello, world!";
 ```
 
-The type of `s` here is `&str`: It’s a slice pointing to that specific point of
-the binary. This is also why string literals are immutable; `&str` is an
-immutable reference.
+这里 `s` 的类型是 `&str`：它是一个指向二进制文件中特定点的切片。这也是为什么字符串字面量是不可变的；`&str` 是不可变引用。
 
-#### String Slices as Parameters
+#### 字符串切片作为参数
 
-Knowing that you can take slices of literals and `String` values leads us to
-one more improvement on `first_word`, and that’s its signature:
+知道您可以获取字面量和 `String` 值的切片，这使我们能够对 `first_word` 进行另一个改进，那就是它的签名：
 
 ```rust,ignore
 fn first_word(s: &String) -> &str {
 ```
 
-A more experienced Rustacean would write the signature shown in Listing 4-9
-instead because it allows us to use the same function on both `&String` values
-and `&str` values.
+更有经验的 Rustacean 会编写清单 4-9 中显示的签名，因为它允许我们在 `&String` 值和 `&str` 值上使用相同的函数。
 
-<Listing number="4-9" caption="Improving the `first_word` function by using a string slice for the type of the `s` parameter">
+<Listing number="4-9" caption="通过使用字符串切片作为 `s` 参数的类型来改进 `first_word` 函数">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch04-understanding-ownership/listing-04-09/src/main.rs:here}}
@@ -274,14 +185,10 @@ and `&str` values.
 
 </Listing>
 
-If we have a string slice, we can pass that directly. If we have a `String`, we
-can pass a slice of the `String` or a reference to the `String`. This
-flexibility takes advantage of deref coercions, a feature we will cover in
-the [“Using Deref Coercions in Functions and Methods”][deref-coercions]<!--
-ignore --> section of Chapter 15.
+如果我们有字符串切片，我们可以直接传递它。如果我们有 `String`，我们可以传递 `String` 的切片或对 `String` 的引用。这种灵活性利用了解引用强制转换，我们将在第 15 章的["在函数和方法中使用解引用强制转换"][deref-coercions]<!--
+ignore -->部分中介绍。
 
-Defining a function to take a string slice instead of a reference to a `String`
-makes our API more general and useful without losing any functionality:
+定义函数接受字符串切片而不是对 `String` 的引用，使我们的 API 更通用和有用，而不会丢失任何功能：
 
 <Listing file-name="src/main.rs">
 
@@ -291,17 +198,15 @@ makes our API more general and useful without losing any functionality:
 
 </Listing>
 
-### Other Slices
+### 其他切片
 
-String slices, as you might imagine, are specific to strings. But there’s a
-more general slice type too. Consider this array:
+字符串切片，正如您可能想象的那样，特定于字符串。但也有更通用的切片类型。考虑这个数组：
 
 ```rust
 let a = [1, 2, 3, 4, 5];
 ```
 
-Just as we might want to refer to part of a string, we might want to refer to
-part of an array. We’d do so like this:
+就像我们可能想要引用字符串的一部分一样，我们可能想要引用数组的一部分。我们会这样做：
 
 ```rust
 let a = [1, 2, 3, 4, 5];
@@ -311,22 +216,13 @@ let slice = &a[1..3];
 assert_eq!(slice, &[2, 3]);
 ```
 
-This slice has the type `&[i32]`. It works the same way as string slices do, by
-storing a reference to the first element and a length. You’ll use this kind of
-slice for all sorts of other collections. We’ll discuss these collections in
-detail when we talk about vectors in Chapter 8.
+此切片的类型为 `&[i32]`。它的工作方式与字符串切片相同，通过存储对第一个元素的引用和长度。您将使用这种切片来处理所有其他类型的集合。我们将在第 8 章讨论向量时详细讨论这些集合。
 
-## Summary
+## 总结
 
-The concepts of ownership, borrowing, and slices ensure memory safety in Rust
-programs at compile time. The Rust language gives you control over your memory
-usage in the same way as other systems programming languages. But having the
-owner of data automatically clean up that data when the owner goes out of scope
-means you don’t have to write and debug extra code to get this control.
+所有权、借用和切片的概念在编译时确保 Rust 程序中的内存安全。Rust 语言让您以与其他系统编程语言相同的方式控制内存使用。但拥有数据的拥有者在拥有者超出作用域时自动清理该数据，这意味着您不必编写和调试额外的代码来获得这种控制。
 
-Ownership affects how lots of other parts of Rust work, so we’ll talk about
-these concepts further throughout the rest of the book. Let’s move on to
-Chapter 5 and look at grouping pieces of data together in a `struct`.
+所有权影响 Rust 的许多其他部分的工作方式，所以我们将在本书的其余部分进一步讨论这些概念。让我们继续第 5 章，看看如何在 `struct` 中将数据片段组合在一起。
 
 [ch13]: ch13-02-iterators.html
 [ch6]: ch06-02-match.html#patterns-that-bind-to-values
