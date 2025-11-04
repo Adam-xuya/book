@@ -1,15 +1,10 @@
-## An Example Program Using Structs
+## 使用结构体的示例程序
 
-To understand when we might want to use structs, let’s write a program that
-calculates the area of a rectangle. We’ll start by using single variables and
-then refactor the program until we’re using structs instead.
+要了解我们何时可能想要使用结构体，让我们编写一个计算矩形面积的程序。我们将从使用单个变量开始，然后重构程序，直到我们使用结构体。
 
-Let’s make a new binary project with Cargo called _rectangles_ that will take
-the width and height of a rectangle specified in pixels and calculate the area
-of the rectangle. Listing 5-8 shows a short program with one way of doing
-exactly that in our project’s _src/main.rs_.
+让我们创建一个名为 _rectangles_ 的新 Cargo 二进制项目，该项目将接受以像素指定的矩形的宽度和高度，并计算矩形的面积。清单 5-8 显示了一个短程序，其中一种方法在我们项目的 _src/main.rs_ 中完全做到这一点。
 
-<Listing number="5-8" file-name="src/main.rs" caption="Calculating the area of a rectangle specified by separate width and height variables">
+<Listing number="5-8" file-name="src/main.rs" caption="通过单独的宽度和高度变量计算指定矩形的面积">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-08/src/main.rs:all}}
@@ -17,34 +12,27 @@ exactly that in our project’s _src/main.rs_.
 
 </Listing>
 
-Now, run this program using `cargo run`:
+现在，使用 `cargo run` 运行此程序：
 
 ```console
 {{#include ../listings/ch05-using-structs-to-structure-related-data/listing-05-08/output.txt}}
 ```
 
-This code succeeds in figuring out the area of the rectangle by calling the
-`area` function with each dimension, but we can do more to make this code clear
-and readable.
+此代码通过使用每个维度调用 `area` 函数成功地计算出矩形的面积，但我们可以做更多来使代码清晰和可读。
 
-The issue with this code is evident in the signature of `area`:
+此代码的问题在 `area` 的签名中很明显：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-08/src/main.rs:here}}
 ```
 
-The `area` function is supposed to calculate the area of one rectangle, but the
-function we wrote has two parameters, and it’s not clear anywhere in our
-program that the parameters are related. It would be more readable and more
-manageable to group width and height together. We’ve already discussed one way
-we might do that in [“The Tuple Type”][the-tuple-type]<!-- ignore --> section
-of Chapter 3: by using tuples.
+`area` 函数应该计算一个矩形的面积，但我们编写的函数有两个参数，并且在程序的任何地方都不清楚参数是相关的。将宽度和高度分组在一起会更易读和更易于管理。我们已经在第 3 章的["元组类型"][the-tuple-type]<!-- ignore -->部分讨论了一种可能的方法：使用元组。
 
-### Refactoring with Tuples
+### 使用元组重构
 
-Listing 5-9 shows another version of our program that uses tuples.
+清单 5-9 显示了使用元组的我们程序的另一个版本。
 
-<Listing number="5-9" file-name="src/main.rs" caption="Specifying the width and height of the rectangle with a tuple">
+<Listing number="5-9" file-name="src/main.rs" caption="使用元组指定矩形的宽度和高度">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-09/src/main.rs}}
@@ -52,29 +40,19 @@ Listing 5-9 shows another version of our program that uses tuples.
 
 </Listing>
 
-In one way, this program is better. Tuples let us add a bit of structure, and
-we’re now passing just one argument. But in another way, this version is less
-clear: Tuples don’t name their elements, so we have to index into the parts of
-the tuple, making our calculation less obvious.
+在一种方式上，此程序更好。元组让我们添加一点结构，我们现在只传递一个参数。但在另一种方式上，此版本不太清楚：元组不命名其元素，所以我们必须索引到元组的各个部分，使我们的计算不太明显。
 
-Mixing up the width and height wouldn’t matter for the area calculation, but if
-we want to draw the rectangle on the screen, it would matter! We would have to
-keep in mind that `width` is the tuple index `0` and `height` is the tuple
-index `1`. This would be even harder for someone else to figure out and keep in
-mind if they were to use our code. Because we haven’t conveyed the meaning of
-our data in our code, it’s now easier to introduce errors.
+混淆宽度和高度对面积计算无关紧要，但如果我们想在屏幕上绘制矩形，那就很重要了！我们必须记住 `width` 是元组索引 `0`，`height` 是元组索引 `1`。如果其他人要使用我们的代码，这将更加困难，以便他们理解和记住。因为我们在代码中没有传达数据的含义，现在更容易引入错误。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="refactoring-with-structs-adding-more-meaning"></a>
 
-### Refactoring with Structs
+### 使用结构体重构
 
-We use structs to add meaning by labeling the data. We can transform the tuple
-we’re using into a struct with a name for the whole as well as names for the
-parts, as shown in Listing 5-10.
+我们使用结构体通过标记数据来添加含义。我们可以将正在使用的元组转换为具有整体名称以及各部分名称的结构体，如清单 5-10 所示。
 
-<Listing number="5-10" file-name="src/main.rs" caption="Defining a `Rectangle` struct">
+<Listing number="5-10" file-name="src/main.rs" caption="定义 `Rectangle` 结构体">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-10/src/main.rs}}
@@ -82,39 +60,21 @@ parts, as shown in Listing 5-10.
 
 </Listing>
 
-Here, we’ve defined a struct and named it `Rectangle`. Inside the curly
-brackets, we defined the fields as `width` and `height`, both of which have
-type `u32`. Then, in `main`, we created a particular instance of `Rectangle`
-that has a width of `30` and a height of `50`.
+这里，我们定义了一个结构体并将其命名为 `Rectangle`。在花括号内，我们将字段定义为 `width` 和 `height`，两者都具有类型 `u32`。然后，在 `main` 中，我们创建了一个特定的 `Rectangle` 实例，宽度为 `30`，高度为 `50`。
 
-Our `area` function is now defined with one parameter, which we’ve named
-`rectangle`, whose type is an immutable borrow of a struct `Rectangle`
-instance. As mentioned in Chapter 4, we want to borrow the struct rather than
-take ownership of it. This way, `main` retains its ownership and can continue
-using `rect1`, which is the reason we use the `&` in the function signature and
-where we call the function.
+我们的 `area` 函数现在使用一个参数定义，我们将其命名为 `rectangle`，其类型是结构体 `Rectangle` 实例的不可变借用。如第 4 章中提到的，我们想要借用结构体而不是获取其所有权。这样，`main` 保留其所有权并可以继续使用 `rect1`，这是我们在函数签名和使用该函数的地方使用 `&` 的原因。
 
-The `area` function accesses the `width` and `height` fields of the `Rectangle`
-instance (note that accessing fields of a borrowed struct instance does not
-move the field values, which is why you often see borrows of structs). Our
-function signature for `area` now says exactly what we mean: Calculate the area
-of `Rectangle`, using its `width` and `height` fields. This conveys that the
-width and height are related to each other, and it gives descriptive names to
-the values rather than using the tuple index values of `0` and `1`. This is a
-win for clarity.
+`area` 函数访问 `Rectangle` 实例的 `width` 和 `height` 字段（请注意，访问借用结构体实例的字段不会移动字段值，这就是为什么您经常看到结构体的借用）。我们的 `area` 函数签名现在准确说明了我们的意思：使用 `Rectangle` 的 `width` 和 `height` 字段计算 `Rectangle` 的面积。这表明宽度和高度彼此相关，并为值提供描述性名称，而不是使用元组索引值 `0` 和 `1`。这对清晰度来说是一个胜利。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="adding-useful-functionality-with-derived-traits"></a>
 
-### Adding Functionality with Derived Traits
+### 使用派生 Trait 添加功能
 
-It’d be useful to be able to print an instance of `Rectangle` while we’re
-debugging our program and see the values for all its fields. Listing 5-11 tries
-using the [`println!` macro][println]<!-- ignore --> as we have used in
-previous chapters. This won’t work, however.
+能够在调试程序时打印 `Rectangle` 的实例并查看其所有字段的值会很有用。清单 5-11 尝试使用 [`println!` 宏][println]<!-- ignore -->，就像我们在前面章节中使用的那样。但是，这不会起作用。
 
-<Listing number="5-11" file-name="src/main.rs" caption="Attempting to print a `Rectangle` instance">
+<Listing number="5-11" file-name="src/main.rs" caption="尝试打印 `Rectangle` 实例">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-11/src/main.rs}}
@@ -122,53 +82,38 @@ previous chapters. This won’t work, however.
 
 </Listing>
 
-When we compile this code, we get an error with this core message:
+当我们编译此代码时，我们得到一条核心消息的错误：
 
 ```text
 {{#include ../listings/ch05-using-structs-to-structure-related-data/listing-05-11/output.txt:3}}
 ```
 
-The `println!` macro can do many kinds of formatting, and by default, the curly
-brackets tell `println!` to use formatting known as `Display`: output intended
-for direct end user consumption. The primitive types we’ve seen so far
-implement `Display` by default because there’s only one way you’d want to show
-a `1` or any other primitive type to a user. But with structs, the way
-`println!` should format the output is less clear because there are more
-display possibilities: Do you want commas or not? Do you want to print the
-curly brackets? Should all the fields be shown? Due to this ambiguity, Rust
-doesn’t try to guess what we want, and structs don’t have a provided
-implementation of `Display` to use with `println!` and the `{}` placeholder.
+`println!` 宏可以执行多种格式化，默认情况下，花括号告诉 `println!` 使用称为 `Display` 的格式化：用于直接最终用户消费的输出。我们到目前为止看到的原始类型默认实现 `Display`，因为只有一种方式您想要向用户显示 `1` 或任何其他原始类型。但对于结构体，`println!` 应该如何格式化输出不太清楚，因为有更多的显示可能性：您是否想要逗号？您是否想要打印花括号？应该显示所有字段吗？由于这种歧义，Rust 不会尝试猜测我们想要什么，结构体没有提供 `Display` 的实现以与 `println!` 和 `{}` 占位符一起使用。
 
-If we continue reading the errors, we’ll find this helpful note:
+如果我们继续阅读错误，我们会找到这个有用的注释：
 
 ```text
 {{#include ../listings/ch05-using-structs-to-structure-related-data/listing-05-11/output.txt:9:10}}
 ```
 
-Let’s try it! The `println!` macro call will now look like `println!("rect1 is
-{rect1:?}");`. Putting the specifier `:?` inside the curly brackets tells
-`println!` we want to use an output format called `Debug`. The `Debug` trait
-enables us to print our struct in a way that is useful for developers so that
-we can see its value while we’re debugging our code.
+让我们试试！`println!` 宏调用现在看起来像 `println!("rect1 is
+{rect1:?}");`。将说明符 `:?` 放在花括号内告诉 `println!` 我们想要使用称为 `Debug` 的输出格式。`Debug` trait 使我们能够以对开发人员有用的方式打印结构体，以便我们可以在调试代码时看到其值。
 
-Compile the code with this change. Drat! We still get an error:
+使用此更改编译代码。哎呀！我们仍然得到错误：
 
 ```text
 {{#include ../listings/ch05-using-structs-to-structure-related-data/output-only-01-debug/output.txt:3}}
 ```
 
-But again, the compiler gives us a helpful note:
+但是再次，编译器给我们一个有用的注释：
 
 ```text
 {{#include ../listings/ch05-using-structs-to-structure-related-data/output-only-01-debug/output.txt:9:10}}
 ```
 
-Rust _does_ include functionality to print out debugging information, but we
-have to explicitly opt in to make that functionality available for our struct.
-To do that, we add the outer attribute `#[derive(Debug)]` just before the
-struct definition, as shown in Listing 5-12.
+Rust _确实_包括打印调试信息的功能，但我们必须显式选择加入以使该功能可用于我们的结构体。为此，我们在结构体定义之前添加外部属性 `#[derive(Debug)]`，如清单 5-12 所示。
 
-<Listing number="5-12" file-name="src/main.rs" caption="Adding the attribute to derive the `Debug` trait and printing the `Rectangle` instance using debug formatting">
+<Listing number="5-12" file-name="src/main.rs" caption="添加属性以派生 `Debug` trait 并使用调试格式化打印 `Rectangle` 实例">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-12/src/main.rs}}
@@ -176,73 +121,41 @@ struct definition, as shown in Listing 5-12.
 
 </Listing>
 
-Now when we run the program, we won’t get any errors, and we’ll see the
-following output:
+现在当我们运行程序时，我们不会得到任何错误，我们将看到以下输出：
 
 ```console
 {{#include ../listings/ch05-using-structs-to-structure-related-data/listing-05-12/output.txt}}
 ```
 
-Nice! It’s not the prettiest output, but it shows the values of all the fields
-for this instance, which would definitely help during debugging. When we have
-larger structs, it’s useful to have output that’s a bit easier to read; in
-those cases, we can use `{:#?}` instead of `{:?}` in the `println!` string. In
-this example, using the `{:#?}` style will output the following:
+很好！这不是最漂亮的输出，但它显示了此实例的所有字段的值，这肯定会在调试期间有所帮助。当我们有更大的结构体时，拥有稍微更容易阅读的输出很有用；在这些情况下，我们可以在 `println!` 字符串中使用 `{:#?}` 而不是 `{:?}`。在此示例中，使用 `{:#?}` 样式将输出以下内容：
 
 ```console
 {{#include ../listings/ch05-using-structs-to-structure-related-data/output-only-02-pretty-debug/output.txt}}
 ```
 
-Another way to print out a value using the `Debug` format is to use the [`dbg!`
-macro][dbg]<!-- ignore -->, which takes ownership of an expression (as opposed
-to `println!`, which takes a reference), prints the file and line number of
-where that `dbg!` macro call occurs in your code along with the resultant value
-of that expression, and returns ownership of the value.
+使用 `Debug` 格式打印值的另一种方法是使用 [`dbg!`
+宏][dbg]<!-- ignore -->，它获取表达式的所有权（与 `println!` 相反，它接受引用），打印该 `dbg!` 宏调用在代码中发生的文件和行号以及该表达式的结果值，并返回值的所有权。
 
-> Note: Calling the `dbg!` macro prints to the standard error console stream
-> (`stderr`), as opposed to `println!`, which prints to the standard output
-> console stream (`stdout`). We’ll talk more about `stderr` and `stdout` in the
-> [“Redirecting Errors to Standard Error” section in Chapter
-> 12][err]<!-- ignore -->.
+> 注意：调用 `dbg!` 宏打印到标准错误控制台流（`stderr`），与 `println!` 相反，它打印到标准输出控制台流（`stdout`）。我们将在第 12 章的["将错误重定向到标准错误"部分][err]<!-- ignore -->中更多地讨论 `stderr` 和 `stdout`。
 
-Here’s an example where we’re interested in the value that gets assigned to the
-`width` field, as well as the value of the whole struct in `rect1`:
+这是一个示例，我们感兴趣的是赋值给 `width` 字段的值，以及 `rect1` 中整个结构体的值：
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/no-listing-05-dbg-macro/src/main.rs}}
 ```
 
-We can put `dbg!` around the expression `30 * scale` and, because `dbg!`
-returns ownership of the expression’s value, the `width` field will get the
-same value as if we didn’t have the `dbg!` call there. We don’t want `dbg!` to
-take ownership of `rect1`, so we use a reference to `rect1` in the next call.
-Here’s what the output of this example looks like:
+我们可以将 `dbg!` 放在表达式 `30 * scale` 周围，因为 `dbg!` 返回表达式值的所有权，`width` 字段将获得与我们在那里没有 `dbg!` 调用相同的值。我们不希望 `dbg!` 获取 `rect1` 的所有权，所以我们在下一个调用中使用对 `rect1` 的引用。以下是此示例的输出：
 
 ```console
 {{#include ../listings/ch05-using-structs-to-structure-related-data/no-listing-05-dbg-macro/output.txt}}
 ```
 
-We can see the first bit of output came from _src/main.rs_ line 10 where we’re
-debugging the expression `30 * scale`, and its resultant value is `60` (the
-`Debug` formatting implemented for integers is to print only their value). The
-`dbg!` call on line 14 of _src/main.rs_ outputs the value of `&rect1`, which is
-the `Rectangle` struct. This output uses the pretty `Debug` formatting of the
-`Rectangle` type. The `dbg!` macro can be really helpful when you’re trying to
-figure out what your code is doing!
+我们可以看到输出的第一部分来自 _src/main.rs_ 第 10 行，我们在那里调试表达式 `30 * scale`，其结果值是 `60`（为整数实现的 `Debug` 格式化是只打印它们的值）。_src/main.rs_ 第 14 行的 `dbg!` 调用输出 `&rect1` 的值，这是 `Rectangle` 结构体。此输出使用 `Rectangle` 类型的漂亮 `Debug` 格式化。`dbg!` 宏在您试图弄清楚代码在做什么时可能真的很有帮助！
 
-In addition to the `Debug` trait, Rust has provided a number of traits for us
-to use with the `derive` attribute that can add useful behavior to our custom
-types. Those traits and their behaviors are listed in [Appendix C][app-c]<!--
-ignore -->. We’ll cover how to implement these traits with custom behavior as
-well as how to create your own traits in Chapter 10. There are also many
-attributes other than `derive`; for more information, see [the “Attributes”
-section of the Rust Reference][attributes].
+除了 `Debug` trait，Rust 还为我们提供了许多 trait 与 `derive` 属性一起使用，这些属性可以为我们的自定义类型添加有用的行为。这些 trait 及其行为在[附录 C][app-c]<!--
+ignore -->中列出。我们将在第 10 章中介绍如何使用自定义行为实现这些 trait，以及如何创建您自己的 trait。除了 `derive` 之外，还有许多其他属性；有关更多信息，请参见 [Rust 参考的"属性"部分][attributes]。
 
-Our `area` function is very specific: It only computes the area of rectangles.
-It would be helpful to tie this behavior more closely to our `Rectangle` struct
-because it won’t work with any other type. Let’s look at how we can continue to
-refactor this code by turning the `area` function into an `area` method
-defined on our `Rectangle` type.
+我们的 `area` 函数非常具体：它只计算矩形的面积。将此行为更紧密地绑定到我们的 `Rectangle` 结构体会很有帮助，因为它不会与任何其他类型一起工作。让我们看看如何通过将 `area` 函数转换为在我们的 `Rectangle` 类型上定义的 `area` 方法来继续重构此代码。
 
 [the-tuple-type]: ch03-02-data-types.html#the-tuple-type
 [app-c]: appendix-03-derivable-traits.md

@@ -1,25 +1,16 @@
-## Methods
+## 方法
 
-Methods are similar to functions: We declare them with the `fn` keyword and a
-name, they can have parameters and a return value, and they contain some code
-that’s run when the method is called from somewhere else. Unlike functions,
-methods are defined within the context of a struct (or an enum or a trait
-object, which we cover in [Chapter 6][enums]<!-- ignore --> and [Chapter
-18][trait-objects]<!-- ignore -->, respectively), and their first parameter is
-always `self`, which represents the instance of the struct the method is being
-called on.
+方法类似于函数：我们使用 `fn` 关键字和名称声明它们，它们可以有参数和返回值，并且它们包含在从其他地方调用该方法时运行的一些代码。与函数不同，方法在结构体（或枚举或 trait 对象，我们分别在第 6 章和[第 18 章][trait-objects]<!-- ignore -->中讨论）的上下文中定义，它们的第一个参数总是 `self`，它表示正在调用该方法的结构体实例。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="defining-methods"></a>
 
-### Method Syntax
+### 方法语法
 
-Let’s change the `area` function that has a `Rectangle` instance as a parameter
-and instead make an `area` method defined on the `Rectangle` struct, as shown
-in Listing 5-13.
+让我们更改将 `Rectangle` 实例作为参数的 `area` 函数，而是在 `Rectangle` 结构体上定义 `area` 方法，如清单 5-13 所示。
 
-<Listing number="5-13" file-name="src/main.rs" caption="Defining an `area` method on the `Rectangle` struct">
+<Listing number="5-13" file-name="src/main.rs" caption="在 `Rectangle` 结构体上定义 `area` 方法">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-13/src/main.rs}}
@@ -27,46 +18,15 @@ in Listing 5-13.
 
 </Listing>
 
-To define the function within the context of `Rectangle`, we start an `impl`
-(implementation) block for `Rectangle`. Everything within this `impl` block
-will be associated with the `Rectangle` type. Then, we move the `area` function
-within the `impl` curly brackets and change the first (and in this case, only)
-parameter to be `self` in the signature and everywhere within the body. In
-`main`, where we called the `area` function and passed `rect1` as an argument,
-we can instead use _method syntax_ to call the `area` method on our `Rectangle`
-instance. The method syntax goes after an instance: We add a dot followed by
-the method name, parentheses, and any arguments.
+为了在 `Rectangle` 的上下文中定义函数，我们为 `Rectangle` 启动一个 `impl`（实现）块。此 `impl` 块内的所有内容都将与 `Rectangle` 类型关联。然后，我们将 `area` 函数移动到 `impl` 花括号内，并将第一个（在这种情况下，也是唯一的）参数更改为签名和主体内各处的 `self`。在 `main` 中，我们调用 `area` 函数并将 `rect1` 作为参数传递的地方，我们可以改为使用_方法语法_在我们的 `Rectangle` 实例上调用 `area` 方法。方法语法位于实例之后：我们添加一个点，后跟方法名、括号和任何参数。
 
-In the signature for `area`, we use `&self` instead of `rectangle: &Rectangle`.
-The `&self` is actually short for `self: &Self`. Within an `impl` block, the
-type `Self` is an alias for the type that the `impl` block is for. Methods must
-have a parameter named `self` of type `Self` for their first parameter, so Rust
-lets you abbreviate this with only the name `self` in the first parameter spot.
-Note that we still need to use the `&` in front of the `self` shorthand to
-indicate that this method borrows the `Self` instance, just as we did in
-`rectangle: &Rectangle`. Methods can take ownership of `self`, borrow `self`
-immutably, as we’ve done here, or borrow `self` mutably, just as they can any
-other parameter.
+在 `area` 的签名中，我们使用 `&self` 而不是 `rectangle: &Rectangle`。`&self` 实际上是 `self: &Self` 的简写。在 `impl` 块内，类型 `Self` 是 `impl` 块所针对的类型的别名。方法必须在其第一个参数中有一个名为 `self` 的 `Self` 类型参数，所以 Rust 允许您仅在第一个参数位置使用名称 `self` 来缩写。请注意，我们仍然需要在 `self` 简写前面使用 `&` 来指示此方法借用 `Self` 实例，就像我们在 `rectangle: &Rectangle` 中所做的那样。方法可以获取 `self` 的所有权，不可变地借用 `self`（就像我们在这里所做的那样），或可变地借用 `self`，就像它们可以任何其他参数一样。
 
-We chose `&self` here for the same reason we used `&Rectangle` in the function
-version: We don’t want to take ownership, and we just want to read the data in
-the struct, not write to it. If we wanted to change the instance that we’ve
-called the method on as part of what the method does, we’d use `&mut self` as
-the first parameter. Having a method that takes ownership of the instance by
-using just `self` as the first parameter is rare; this technique is usually
-used when the method transforms `self` into something else and you want to
-prevent the caller from using the original instance after the transformation.
+我们在这里选择 `&self` 的原因与我们在函数版本中使用 `&Rectangle` 的原因相同：我们不想获取所有权，我们只想读取结构体中的数据，而不是写入它。如果我们想要更改作为方法操作的一部分调用方法的实例，我们将使用 `&mut self` 作为第一个参数。拥有一个通过仅使用 `self` 作为第一个参数来获取实例所有权的方法是罕见的；当方法将 `self` 转换为其他东西并且您想要防止调用者在转换后使用原始实例时，通常使用此技术。
 
-The main reason for using methods instead of functions, in addition to
-providing method syntax and not having to repeat the type of `self` in every
-method’s signature, is for organization. We’ve put all the things we can do
-with an instance of a type in one `impl` block rather than making future users
-of our code search for capabilities of `Rectangle` in various places in the
-library we provide.
+使用方法而不是函数的主要原因，除了提供方法语法和不必在每个方法的签名中重复 `self` 的类型之外，是为了组织。我们已经将所有可以对类型的实例执行的操作放在一个 `impl` 块中，而不是让我们代码的未来用户在我们提供的库中的各个地方搜索 `Rectangle` 的功能。
 
-Note that we can choose to give a method the same name as one of the struct’s
-fields. For example, we can define a method on `Rectangle` that is also named
-`width`:
+请注意，我们可以选择给方法与结构体的字段之一相同的名称。例如，我们可以在 `Rectangle` 上定义一个方法，该方法也命名为 `width`：
 
 <Listing file-name="src/main.rs">
 
@@ -76,37 +36,17 @@ fields. For example, we can define a method on `Rectangle` that is also named
 
 </Listing>
 
-Here, we’re choosing to make the `width` method return `true` if the value in
-the instance’s `width` field is greater than `0` and `false` if the value is
-`0`: We can use a field within a method of the same name for any purpose. In
-`main`, when we follow `rect1.width` with parentheses, Rust knows we mean the
-method `width`. When we don’t use parentheses, Rust knows we mean the field
-`width`.
+这里，我们选择使 `width` 方法如果实例的 `width` 字段中的值大于 `0` 则返回 `true`，如果值为 `0` 则返回 `false`：我们可以将同名方法中的字段用于任何目的。在 `main` 中，当我们在 `rect1.width` 后跟括号时，Rust 知道我们指的是方法 `width`。当我们不使用括号时，Rust 知道我们指的是字段 `width`。
 
-Often, but not always, when we give a method the same name as a field we want
-it to only return the value in the field and do nothing else. Methods like this
-are called _getters_, and Rust does not implement them automatically for struct
-fields as some other languages do. Getters are useful because you can make the
-field private but the method public and thus enable read-only access to that
-field as part of the type’s public API. We will discuss what public and private
-are and how to designate a field or method as public or private in [Chapter
-7][public]<!-- ignore -->.
+通常，但不总是，当我们给方法与字段相同的名称时，我们希望它只返回字段中的值而不做其他任何事情。这样的方法称为_访问器_，Rust 不会像其他语言那样自动为结构体字段实现它们。访问器很有用，因为您可以使字段私有但方法公开，从而作为类型的公共 API 的一部分启用对该字段的只读访问。我们将在[第 7 章][public]<!-- ignore -->中讨论什么是公共和私有，以及如何将字段或方法指定为公共或私有。
 
-> ### Where’s the `->` Operator?
+> ### `->` 运算符在哪里？
 >
-> In C and C++, two different operators are used for calling methods: You use
-> `.` if you’re calling a method on the object directly and `->` if you’re
-> calling the method on a pointer to the object and need to dereference the
-> pointer first. In other words, if `object` is a pointer,
-> `object->something()` is similar to `(*object).something()`.
+> 在 C 和 C++ 中，使用两个不同的运算符来调用方法：如果您直接在对象上调用方法，则使用 `.`；如果您在指向对象的指针上调用方法并需要首先解引用指针，则使用 `->`。换句话说，如果 `object` 是指针，`object->something()` 类似于 `(*object).something()`。
 >
-> Rust doesn’t have an equivalent to the `->` operator; instead, Rust has a
-> feature called _automatic referencing and dereferencing_. Calling methods is
-> one of the few places in Rust with this behavior.
+> Rust 没有等同于 `->` 运算符；相反，Rust 有一个称为_自动引用和解引用_的功能。调用方法是 Rust 中具有此行为的少数地方之一。
 >
-> Here’s how it works: When you call a method with `object.something()`, Rust
-> automatically adds in `&`, `&mut`, or `*` so that `object` matches the
-> signature of the method. In other words, the following are the same:
+> 这是它的工作原理：当您使用 `object.something()` 调用方法时，Rust 自动添加 `&`、`&mut` 或 `*`，以便 `object` 匹配方法的签名。换句话说，以下是相同的：
 >
 > <!-- CAN'T EXTRACT SEE BUG https://github.com/rust-lang/mdBook/issues/1127 -->
 >
@@ -131,23 +71,13 @@ are and how to designate a field or method as public or private in [Chapter
 > (&p1).distance(&p2);
 > ```
 >
-> The first one looks much cleaner. This automatic referencing behavior works
-> because methods have a clear receiver—the type of `self`. Given the receiver
-> and name of a method, Rust can figure out definitively whether the method is
-> reading (`&self`), mutating (`&mut self`), or consuming (`self`). The fact
-> that Rust makes borrowing implicit for method receivers is a big part of
-> making ownership ergonomic in practice.
+> 第一个看起来更清晰。这种自动引用行为有效，因为方法有一个明确的接收者——`self` 的类型。给定方法的接收者和名称，Rust 可以明确地确定方法是读取（`&self`）、改变（`&mut self`）还是消耗（`self`）。Rust 使方法接收者的借用隐式这一事实是使所有权在实践中符合人体工程学的重要组成部分。
 
-### Methods with More Parameters
+### 具有更多参数的方法
 
-Let’s practice using methods by implementing a second method on the `Rectangle`
-struct. This time we want an instance of `Rectangle` to take another instance
-of `Rectangle` and return `true` if the second `Rectangle` can fit completely
-within `self` (the first `Rectangle`); otherwise, it should return `false`.
-That is, once we’ve defined the `can_hold` method, we want to be able to write
-the program shown in Listing 5-14.
+让我们通过在 `Rectangle` 结构体上实现第二个方法来练习使用方法。这次我们希望 `Rectangle` 的实例接受另一个 `Rectangle` 实例，如果第二个 `Rectangle` 可以完全适合 `self`（第一个 `Rectangle`），则返回 `true`；否则，它应该返回 `false`。也就是说，一旦我们定义了 `can_hold` 方法，我们希望能够编写清单 5-14 中显示的程序。
 
-<Listing number="5-14" file-name="src/main.rs" caption="Using the as-yet-unwritten `can_hold` method">
+<Listing number="5-14" file-name="src/main.rs" caption="使用尚未编写的 `can_hold` 方法">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-14/src/main.rs}}
@@ -155,30 +85,17 @@ the program shown in Listing 5-14.
 
 </Listing>
 
-The expected output would look like the following because both dimensions of
-`rect2` are smaller than the dimensions of `rect1`, but `rect3` is wider than
-`rect1`:
+预期输出将如下所示，因为 `rect2` 的两个维度都小于 `rect1` 的维度，但 `rect3` 比 `rect1` 宽：
 
 ```text
 Can rect1 hold rect2? true
 Can rect1 hold rect3? false
 ```
 
-We know we want to define a method, so it will be within the `impl Rectangle`
-block. The method name will be `can_hold`, and it will take an immutable borrow
-of another `Rectangle` as a parameter. We can tell what the type of the
-parameter will be by looking at the code that calls the method:
-`rect1.can_hold(&rect2)` passes in `&rect2`, which is an immutable borrow to
-`rect2`, an instance of `Rectangle`. This makes sense because we only need to
-read `rect2` (rather than write, which would mean we’d need a mutable borrow),
-and we want `main` to retain ownership of `rect2` so that we can use it again
-after calling the `can_hold` method. The return value of `can_hold` will be a
-Boolean, and the implementation will check whether the width and height of
-`self` are greater than the width and height of the other `Rectangle`,
-respectively. Let’s add the new `can_hold` method to the `impl` block from
-Listing 5-13, shown in Listing 5-15.
+我们知道我们想要定义一个方法，所以它将在 `impl Rectangle` 块内。方法名称将是 `can_hold`，它将接受另一个 `Rectangle` 的不可变借用作为参数。我们可以通过查看调用该方法的代码来告诉参数的类型：
+`rect1.can_hold(&rect2)` 传入 `&rect2`，这是对 `rect2`（`Rectangle` 的实例）的不可变借用。这是有道理的，因为我们只需要读取 `rect2`（而不是写入，这意味着我们需要可变借用），我们希望 `main` 保留 `rect2` 的所有权，以便我们可以在调用 `can_hold` 方法后再次使用它。`can_hold` 的返回值将是布尔值，实现将检查 `self` 的宽度和高度是否分别大于另一个 `Rectangle` 的宽度和高度。让我们从清单 5-13 中的 `impl` 块添加新的 `can_hold` 方法，如清单 5-15 所示。
 
-<Listing number="5-15" file-name="src/main.rs" caption="Implementing the `can_hold` method on `Rectangle` that takes another `Rectangle` instance as a parameter">
+<Listing number="5-15" file-name="src/main.rs" caption="在 `Rectangle` 上实现 `can_hold` 方法，该方法接受另一个 `Rectangle` 实例作为参数">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-15/src/main.rs:here}}
@@ -186,51 +103,29 @@ Listing 5-13, shown in Listing 5-15.
 
 </Listing>
 
-When we run this code with the `main` function in Listing 5-14, we’ll get our
-desired output. Methods can take multiple parameters that we add to the
-signature after the `self` parameter, and those parameters work just like
-parameters in functions.
+当我们使用清单 5-14 中的 `main` 函数运行此代码时，我们将得到所需的输出。方法可以采用多个参数，我们在 `self` 参数之后将它们添加到签名中，这些参数的工作方式就像函数中的参数一样。
 
-### Associated Functions
+### 关联函数
 
-All functions defined within an `impl` block are called _associated functions_
-because they’re associated with the type named after the `impl`. We can define
-associated functions that don’t have `self` as their first parameter (and thus
-are not methods) because they don’t need an instance of the type to work with.
-We’ve already used one function like this: the `String::from` function that’s
-defined on the `String` type.
+在 `impl` 块内定义的所有函数都称为_关联函数_，因为它们与 `impl` 后命名的类型关联。我们可以定义没有 `self` 作为第一个参数的关联函数（因此不是方法），因为它们不需要类型的实例来工作。我们已经使用过这样的函数：在 `String` 类型上定义的 `String::from` 函数。
 
-Associated functions that aren’t methods are often used for constructors that
-will return a new instance of the struct. These are often called `new`, but
-`new` isn’t a special name and isn’t built into the language. For example, we
-could choose to provide an associated function named `square` that would have
-one dimension parameter and use that as both width and height, thus making it
-easier to create a square `Rectangle` rather than having to specify the same
-value twice:
+不是方法的关联函数通常用于将返回结构体新实例的构造函数。这些通常称为 `new`，但 `new` 不是特殊名称，也不是内置在语言中的。例如，我们可以选择提供一个名为 `square` 的关联函数，该函数将具有一个维度参数并使用该参数作为宽度和高度，从而使创建正方形 `Rectangle` 更容易，而不必指定相同的值两次：
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">文件名：src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/no-listing-03-associated-functions/src/main.rs:here}}
 ```
 
-The `Self` keywords in the return type and in the body of the function are
-aliases for the type that appears after the `impl` keyword, which in this case
-is `Rectangle`.
+函数的返回类型和函数体中的 `Self` 关键字是出现在 `impl` 关键字后的类型的别名，在这种情况下是 `Rectangle`。
 
-To call this associated function, we use the `::` syntax with the struct name;
-`let sq = Rectangle::square(3);` is an example. This function is namespaced by
-the struct: The `::` syntax is used for both associated functions and
-namespaces created by modules. We’ll discuss modules in [Chapter
-7][modules]<!-- ignore -->.
+要调用此关联函数，我们使用带有结构体名称的 `::` 语法；`let sq = Rectangle::square(3);` 是一个示例。此函数由结构体命名空间化：`::` 语法用于关联函数和由模块创建的命名空间。我们将在[第 7 章][modules]<!-- ignore -->中讨论模块。
 
-### Multiple `impl` Blocks
+### 多个 `impl` 块
 
-Each struct is allowed to have multiple `impl` blocks. For example, Listing
-5-15 is equivalent to the code shown in Listing 5-16, which has each method in
-its own `impl` block.
+每个结构体允许有多个 `impl` 块。例如，清单 5-15 等同于清单 5-16 中显示的代码，该代码在每个方法都有自己的 `impl` 块中。
 
-<Listing number="5-16" caption="Rewriting Listing 5-15 using multiple `impl` blocks">
+<Listing number="5-16" caption="使用多个 `impl` 块重写清单 5-15">
 
 ```rust
 {{#rustdoc_include ../listings/ch05-using-structs-to-structure-related-data/listing-05-16/src/main.rs:here}}
@@ -238,21 +133,13 @@ its own `impl` block.
 
 </Listing>
 
-There’s no reason to separate these methods into multiple `impl` blocks here,
-but this is valid syntax. We’ll see a case in which multiple `impl` blocks are
-useful in Chapter 10, where we discuss generic types and traits.
+没有理由将这些方法分离到多个 `impl` 块中，但这是有效的语法。我们将在第 10 章看到一个多个 `impl` 块有用的案例，我们将在那里讨论泛型类型和 trait。
 
-## Summary
+## 总结
 
-Structs let you create custom types that are meaningful for your domain. By
-using structs, you can keep associated pieces of data connected to each other
-and name each piece to make your code clear. In `impl` blocks, you can define
-functions that are associated with your type, and methods are a kind of
-associated function that let you specify the behavior that instances of your
-structs have.
+结构体让您创建对您的域有意义的自定义类型。通过使用结构体，您可以将相关的数据片段保持连接在一起，并为每个片段命名以使您的代码清晰。在 `impl` 块中，您可以定义与您的类型关联的函数，方法是让您指定结构体实例具有的行为的一种关联函数。
 
-But structs aren’t the only way you can create custom types: Let’s turn to
-Rust’s enum feature to add another tool to your toolbox.
+但结构体不是您可以创建自定义类型的唯一方式：让我们转向 Rust 的枚举功能，为您的工具箱添加另一个工具。
 
 [enums]: ch06-00-enums.html
 [trait-objects]: ch18-02-trait-objects.md
