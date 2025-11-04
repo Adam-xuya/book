@@ -1,16 +1,10 @@
-## Customizing Builds with Release Profiles
+## 使用发布配置文件自定义构建
 
-In Rust, _release profiles_ are predefined, customizable profiles with
-different configurations that allow a programmer to have more control over
-various options for compiling code. Each profile is configured independently of
-the others.
+在 Rust 中，_发布配置文件_ 是具有不同配置的预定义、可自定义配置文件，允许程序员更好地控制编译代码的各种选项。每个配置文件都是独立配置的。
 
-Cargo has two main profiles: the `dev` profile Cargo uses when you run `cargo
-build`, and the `release` profile Cargo uses when you run `cargo build
---release`. The `dev` profile is defined with good defaults for development,
-and the `release` profile has good defaults for release builds.
+Cargo 有两个主要配置文件：`dev` 配置文件，Cargo 在你运行 `cargo build` 时使用，以及 `release` 配置文件，Cargo 在你运行 `cargo build --release` 时使用。`dev` 配置文件使用适合开发的良好默认值定义，`release` 配置文件具有适合发布构建的良好默认值。
 
-These profile names might be familiar from the output of your builds:
+这些配置文件名称可能从你的构建输出中熟悉：
 
 <!-- manual-regeneration
 anywhere, run:
@@ -26,13 +20,9 @@ $ cargo build --release
     Finished `release` profile [optimized] target(s) in 0.32s
 ```
 
-The `dev` and `release` are these different profiles used by the compiler.
+`dev` 和 `release` 是编译器使用的这些不同配置文件。
 
-Cargo has default settings for each of the profiles that apply when you haven't
-explicitly added any `[profile.*]` sections in the project’s _Cargo.toml_ file.
-By adding `[profile.*]` sections for any profile you want to customize, you
-override any subset of the default settings. For example, here are the default
-values for the `opt-level` setting for the `dev` and `release` profiles:
+Cargo 为每个配置文件设置了默认设置，当你在项目的 _Cargo.toml_ 文件中没有显式添加任何 `[profile.*]` 部分时应用这些设置。通过为你想要自定义的任何配置文件添加 `[profile.*]` 部分，你可以覆盖默认设置的任何子集。例如，以下是 `dev` 和 `release` 配置文件的 `opt-level` 设置的默认值：
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -44,20 +34,9 @@ opt-level = 0
 opt-level = 3
 ```
 
-The `opt-level` setting controls the number of optimizations Rust will apply to
-your code, with a range of 0 to 3. Applying more optimizations extends
-compiling time, so if you’re in development and compiling your code often,
-you’ll want fewer optimizations to compile faster even if the resultant code
-runs slower. The default `opt-level` for `dev` is therefore `0`. When you’re
-ready to release your code, it’s best to spend more time compiling. You’ll only
-compile in release mode once, but you’ll run the compiled program many times,
-so release mode trades longer compile time for code that runs faster. That is
-why the default `opt-level` for the `release` profile is `3`.
+`opt-level` 设置控制 Rust 将应用于代码的优化数量，范围为 0 到 3。应用更多优化会延长编译时间，所以如果你在开发中并且经常编译代码，你会希望更少的优化以便更快地编译，即使生成的代码运行更慢。因此，`dev` 的默认 `opt-level` 是 `0`。当你准备发布代码时，最好花费更多时间编译。你只会以发布模式编译一次，但会多次运行编译的程序，所以发布模式以更长的编译时间换取运行更快的代码。这就是为什么 `release` 配置文件的默认 `opt-level` 是 `3`。
 
-You can override a default setting by adding a different value for it in
-_Cargo.toml_. For example, if we want to use optimization level 1 in the
-development profile, we can add these two lines to our project’s _Cargo.toml_
-file:
+你可以通过在 _Cargo.toml_ 中为其添加不同的值来覆盖默认设置。例如，如果我们想在开发配置文件中使用优化级别 1，我们可以将这两行添加到项目的 _Cargo.toml_ 文件中：
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -66,10 +45,6 @@ file:
 opt-level = 1
 ```
 
-This code overrides the default setting of `0`. Now when we run `cargo build`,
-Cargo will use the defaults for the `dev` profile plus our customization to
-`opt-level`. Because we set `opt-level` to `1`, Cargo will apply more
-optimizations than the default, but not as many as in a release build.
+此代码覆盖了 `0` 的默认设置。现在当我们运行 `cargo build` 时，Cargo 将使用 `dev` 配置文件的默认值加上我们对 `opt-level` 的自定义。因为我们设置 `opt-level` 为 `1`，Cargo 将应用比默认值更多的优化，但不如发布构建中的那么多。
 
-For the full list of configuration options and defaults for each profile, see
-[Cargo’s documentation](https://doc.rust-lang.org/cargo/reference/profiles.html).
+有关每个配置文件的配置选项和默认值的完整列表，请参阅 [Cargo 的文档](https://doc.rust-lang.org/cargo/reference/profiles.html)。

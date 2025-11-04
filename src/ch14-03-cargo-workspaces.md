@@ -1,34 +1,17 @@
-## Cargo Workspaces
+## Cargo 工作空间
 
-In Chapter 12, we built a package that included a binary crate and a library
-crate. As your project develops, you might find that the library crate
-continues to get bigger and you want to split your package further into
-multiple library crates. Cargo offers a feature called _workspaces_ that can
-help manage multiple related packages that are developed in tandem.
+在第 12 章中，我们构建了一个包含二进制 crate 和库 crate 的包。随着项目的发展，你可能会发现库 crate 继续变大，并且你想进一步将包拆分为多个库 crate。Cargo 提供了一个称为 _工作空间_ 的功能，可以帮助管理多个相关包，这些包是同时开发的。
 
-### Creating a Workspace
+### 创建工作空间
 
-A _workspace_ is a set of packages that share the same _Cargo.lock_ and output
-directory. Let’s make a project using a workspace—we’ll use trivial code so
-that we can concentrate on the structure of the workspace. There are multiple
-ways to structure a workspace, so we'll just show one common way. We’ll have a
-workspace containing a binary and two libraries. The binary, which will provide
-the main functionality, will depend on the two libraries. One library will
-provide an `add_one` function and the other library an `add_two` function.
-These three crates will be part of the same workspace. We’ll start by creating
-a new directory for the workspace:
+_工作空间_ 是一组共享相同 _Cargo.lock_ 和输出目录的包。让我们使用工作空间创建一个项目——我们将使用简单的代码，以便我们可以专注于工作空间的结构。有多种方法来构建工作空间，所以我们只展示一种常见的方法。我们将有一个包含二进制文件和两个库的工作空间。二进制文件将提供主要功能，将依赖于两个库。一个库将提供 `add_one` 函数，另一个库将提供 `add_two` 函数。这三个 crate 将成为同一工作空间的一部分。我们将首先为工作空间创建一个新目录：
 
 ```console
 $ mkdir add
 $ cd add
 ```
 
-Next, in the _add_ directory, we create the _Cargo.toml_ file that will
-configure the entire workspace. This file won’t have a `[package]` section.
-Instead, it will start with a `[workspace]` section that will allow us to add
-members to the workspace. We also make a point to use the latest and greatest
-version of Cargo’s resolver algorithm in our workspace by setting the
-`resolver` value to `"3"`:
+接下来，在 _add_ 目录中，我们创建将配置整个工作空间的 _Cargo.toml_ 文件。此文件不会有 `[package]` 部分。相反，它将以 `[workspace]` 部分开始，这将允许我们将成员添加到工作空间。我们还通过将 `resolver` 值设置为 `"3"` 来确保在工作空间中使用 Cargo 解析器算法的最新和最佳版本：
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -36,8 +19,7 @@ version of Cargo’s resolver algorithm in our workspace by setting the
 {{#include ../listings/ch14-more-about-cargo/no-listing-01-workspace/add/Cargo.toml}}
 ```
 
-Next, we’ll create the `adder` binary crate by running `cargo new` within the
-_add_ directory:
+接下来，我们通过在 _add_ 目录内运行 `cargo new` 来创建 `adder` 二进制 crate：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-01-adder-crate/add
@@ -53,16 +35,13 @@ $ cargo new adder
       Adding `adder` as member of workspace at `file:///projects/add`
 ```
 
-Running `cargo new` inside a workspace also automatically adds the newly created
-package to the `members` key in the `[workspace]` definition in the workspace
-_Cargo.toml_, like this:
+在工作空间内运行 `cargo new` 也会自动将新创建的包添加到工作空间 _Cargo.toml_ 中 `[workspace]` 定义的 `members` 键中，如下所示：
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/output-only-01-adder-crate/add/Cargo.toml}}
 ```
 
-At this point, we can build the workspace by running `cargo build`. The files
-in your _add_ directory should look like this:
+此时，我们可以通过运行 `cargo build` 来构建工作空间。你的 _add_ 目录中的文件应该看起来像这样：
 
 ```text
 ├── Cargo.lock
@@ -74,21 +53,11 @@ in your _add_ directory should look like this:
 └── target
 ```
 
-The workspace has one _target_ directory at the top level that the compiled
-artifacts will be placed into; the `adder` package doesn’t have its own
-_target_ directory. Even if we were to run `cargo build` from inside the
-_adder_ directory, the compiled artifacts would still end up in _add/target_
-rather than _add/adder/target_. Cargo structures the _target_ directory in a
-workspace like this because the crates in a workspace are meant to depend on
-each other. If each crate had its own _target_ directory, each crate would have
-to recompile each of the other crates in the workspace to place the artifacts
-in its own _target_ directory. By sharing one _target_ directory, the crates
-can avoid unnecessary rebuilding.
+工作空间在顶层有一个 _target_ 目录，编译工件将放置在其中；`adder` 包没有自己的 _target_ 目录。即使我们从 _adder_ 目录内运行 `cargo build`，编译工件仍将最终出现在 _add/target_ 中，而不是 _add/adder/target_。Cargo 以这种方式构建工作空间中的 _target_ 目录，因为工作空间中的 crate 旨在相互依赖。如果每个 crate 都有自己的 _target_ 目录，每个 crate 都必须重新编译工作空间中的其他 crate，以便将工件放在自己的 _target_ 目录中。通过共享一个 _target_ 目录，crate 可以避免不必要的重建。
 
-### Creating the Second Package in the Workspace
+### 在工作空间中创建第二个包
 
-Next, let’s create another member package in the workspace and call it
-`add_one`. Generate a new library crate named `add_one`:
+接下来，让我们在工作空间中创建另一个成员包，并将其称为 `add_one`。生成一个名为 `add_one` 的新库 crate：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-02-add-one/add
@@ -104,8 +73,7 @@ $ cargo new add_one --lib
       Adding `add_one` as member of workspace at `file:///projects/add`
 ```
 
-The top-level _Cargo.toml_ will now include the _add_one_ path in the `members`
-list:
+顶层 _Cargo.toml_ 现在将在 `members` 列表中包含 _add_one_ 路径：
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -113,7 +81,7 @@ list:
 {{#include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/Cargo.toml}}
 ```
 
-Your _add_ directory should now have these directories and files:
+你的 _add_ 目录现在应该有这些目录和文件：
 
 ```text
 ├── Cargo.lock
@@ -129,7 +97,7 @@ Your _add_ directory should now have these directories and files:
 └── target
 ```
 
-In the _add_one/src/lib.rs_ file, let’s add an `add_one` function:
+在 _add_one/src/lib.rs_ 文件中，让我们添加一个 `add_one` 函数：
 
 <span class="filename">Filename: add_one/src/lib.rs</span>
 
@@ -137,9 +105,7 @@ In the _add_one/src/lib.rs_ file, let’s add an `add_one` function:
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/add_one/src/lib.rs}}
 ```
 
-Now we can have the `adder` package with our binary depend on the `add_one`
-package that has our library. First, we’ll need to add a path dependency on
-`add_one` to _adder/Cargo.toml_.
+现在我们可以让带有二进制文件的 `adder` 包依赖于具有库的 `add_one` 包。首先，我们需要在 _adder/Cargo.toml_ 中添加对 `add_one` 的路径依赖。
 
 <span class="filename">Filename: adder/Cargo.toml</span>
 
@@ -147,14 +113,11 @@ package that has our library. First, we’ll need to add a path dependency on
 {{#include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/adder/Cargo.toml:6:7}}
 ```
 
-Cargo doesn’t assume that crates in a workspace will depend on each other, so
-we need to be explicit about the dependency relationships.
+Cargo 不假设工作空间中的 crate 会相互依赖，所以我们需要明确指定依赖关系。
 
-Next, let’s use the `add_one` function (from the `add_one` crate) in the
-`adder` crate. Open the _adder/src/main.rs_ file and change the `main`
-function to call the `add_one` function, as in Listing 14-7.
+接下来，让我们在 `adder` crate 中使用 `add_one` 函数（来自 `add_one` crate）。打开 _adder/src/main.rs_ 文件，并将 `main` 函数更改为调用 `add_one` 函数，如代码清单 14-7 所示。
 
-<Listing number="14-7" file-name="adder/src/main.rs" caption="Using the `add_one` library crate from the `adder` crate">
+<Listing number="14-7" file-name="adder/src/main.rs" caption="从 `adder` crate 使用 `add_one` 库 crate">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-07/add/adder/src/main.rs}}
@@ -162,8 +125,7 @@ function to call the `add_one` function, as in Listing 14-7.
 
 </Listing>
 
-Let’s build the workspace by running `cargo build` in the top-level _add_
-directory!
+让我们通过在顶层 _add_ 目录中运行 `cargo build` 来构建工作空间！
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -178,9 +140,7 @@ $ cargo build
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
 ```
 
-To run the binary crate from the _add_ directory, we can specify which package
-in the workspace we want to run by using the `-p` argument and the package name
-with `cargo run`:
+要从 _add_ 目录运行二进制 crate，我们可以通过使用 `-p` 参数和包名称与 `cargo run` 来指定我们想要运行的工作空间中的哪个包：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -195,23 +155,15 @@ $ cargo run -p adder
 Hello, world! 10 plus one is 11!
 ```
 
-This runs the code in _adder/src/main.rs_, which depends on the `add_one` crate.
+这运行 _adder/src/main.rs_ 中的代码，它依赖于 `add_one` crate。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="depending-on-an-external-package-in-a-workspace"></a>
 
-### Depending on an External Package
+### 依赖外部包
 
-Notice that the workspace has only one _Cargo.lock_ file at the top level,
-rather than having a _Cargo.lock_ in each crate’s directory. This ensures that
-all crates are using the same version of all dependencies. If we add the `rand`
-package to the _adder/Cargo.toml_ and _add_one/Cargo.toml_ files, Cargo will
-resolve both of those to one version of `rand` and record that in the one
-_Cargo.lock_. Making all crates in the workspace use the same dependencies
-means the crates will always be compatible with each other. Let’s add the
-`rand` crate to the `[dependencies]` section in the _add_one/Cargo.toml_ file
-so that we can use the `rand` crate in the `add_one` crate:
+注意，工作空间在顶层只有一个 _Cargo.lock_ 文件，而不是在每个 crate 的目录中都有一个 _Cargo.lock_。这确保所有 crate 使用所有依赖项的相同版本。如果我们将 `rand` 包添加到 _adder/Cargo.toml_ 和 _add_one/Cargo.toml_ 文件中，Cargo 将把这两个解析为 `rand` 的一个版本，并在一个 _Cargo.lock_ 中记录它。使工作空间中的所有 crate 使用相同的依赖项意味着 crate 将始终彼此兼容。让我们将 `rand` crate 添加到 _add_one/Cargo.toml_ 文件中的 `[dependencies]` 部分，以便我们可以在 `add_one` crate 中使用 `rand` crate：
 
 <!-- When updating the version of `rand` used, also update the version of
 `rand` used in these files so they all match:
@@ -225,10 +177,7 @@ so that we can use the `rand` crate in the `add_one` crate:
 {{#include ../listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add/add_one/Cargo.toml:6:7}}
 ```
 
-We can now add `use rand;` to the _add_one/src/lib.rs_ file, and building the
-whole workspace by running `cargo build` in the _add_ directory will bring in
-and compile the `rand` crate. We will get one warning because we aren’t
-referring to the `rand` we brought into scope:
+我们现在可以将 `use rand;` 添加到 _add_one/src/lib.rs_ 文件中，通过在 _add_ 目录中运行 `cargo build` 来构建整个工作空间将引入并编译 `rand` crate。我们会收到一个警告，因为我们没有引用我们引入作用域的 `rand`：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add
@@ -256,11 +205,7 @@ warning: `add_one` (lib) generated 1 warning (run `cargo fix --lib -p add_one` t
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
 ```
 
-The top-level _Cargo.lock_ now contains information about the dependency of
-`add_one` on `rand`. However, even though `rand` is used somewhere in the
-workspace, we can’t use it in other crates in the workspace unless we add
-`rand` to their _Cargo.toml_ files as well. For example, if we add `use rand;`
-to the _adder/src/main.rs_ file for the `adder` package, we’ll get an error:
+顶层 _Cargo.lock_ 现在包含 `add_one` 对 `rand` 的依赖信息。但是，即使 `rand` 在工作空间的某个地方使用，我们也无法在工作空间中的其他 crate 中使用它，除非我们也将其添加到它们的 _Cargo.toml_ 文件中。例如，如果我们将 `use rand;` 添加到 `adder` 包的 _adder/src/main.rs_ 文件中，我们将收到错误：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-03-use-rand/add
@@ -279,23 +224,13 @@ error[E0432]: unresolved import `rand`
   |     ^^^^ no external crate `rand`
 ```
 
-To fix this, edit the _Cargo.toml_ file for the `adder` package and indicate
-that `rand` is a dependency for it as well. Building the `adder` package will
-add `rand` to the list of dependencies for `adder` in _Cargo.lock_, but no
-additional copies of `rand` will be downloaded. Cargo will ensure that every
-crate in every package in the workspace using the `rand` package will use the
-same version as long as they specify compatible versions of `rand`, saving us
-space and ensuring that the crates in the workspace will be compatible with
-each other.
+要修复此问题，请编辑 `adder` 包的 _Cargo.toml_ 文件，并指示 `rand` 也是它的依赖项。构建 `adder` 包将把 `rand` 添加到 _Cargo.lock_ 中 `adder` 的依赖项列表中，但不会下载 `rand` 的额外副本。只要它们指定 `rand` 的兼容版本，Cargo 将确保工作空间中每个包中使用 `rand` 包的每个 crate 都使用相同版本，为我们节省空间并确保工作空间中的 crate 彼此兼容。
 
-If crates in the workspace specify incompatible versions of the same
-dependency, Cargo will resolve each of them but will still try to resolve as
-few versions as possible.
+如果工作空间中的 crate 指定同一依赖项的不兼容版本，Cargo 将解析它们中的每一个，但仍将尝试解析尽可能少的版本。
 
-### Adding a Test to a Workspace
+### 向工作空间添加测试
 
-For another enhancement, let’s add a test of the `add_one::add_one` function
-within the `add_one` crate:
+为了另一个增强，让我们在 `add_one` crate 中添加 `add_one::add_one` 函数的测试：
 
 <span class="filename">Filename: add_one/src/lib.rs</span>
 
@@ -303,9 +238,7 @@ within the `add_one` crate:
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add/add_one/src/lib.rs}}
 ```
 
-Now run `cargo test` in the top-level _add_ directory. Running `cargo test` in
-a workspace structured like this one will run the tests for all the crates in
-the workspace:
+现在在顶层 _add_ 目录中运行 `cargo test`。在像这样的工作空间中运行 `cargo test` 将为工作空间中的所有 crate 运行测试：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -339,14 +272,9 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-The first section of the output shows that the `it_works` test in the `add_one`
-crate passed. The next section shows that zero tests were found in the `adder`
-crate, and then the last section shows that zero documentation tests were found
-in the `add_one` crate.
+输出的第一部分显示 `add_one` crate 中的 `it_works` 测试通过了。下一部分显示在 `adder` crate 中找到了零个测试，然后最后一部分显示在 `add_one` crate 中找到了零个文档测试。
 
-We can also run tests for one particular crate in a workspace from the
-top-level directory by using the `-p` flag and specifying the name of the crate
-we want to test:
+我们还可以通过使用 `-p` 标志并从顶层目录指定我们想要测试的 crate 名称来运行工作空间中特定 crate 的测试：
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -371,19 +299,10 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-This output shows `cargo test` only ran the tests for the `add_one` crate and
-didn’t run the `adder` crate tests.
+此输出显示 `cargo test` 只运行了 `add_one` crate 的测试，没有运行 `adder` crate 测试。
 
-If you publish the crates in the workspace to
-[crates.io](https://crates.io/)<!-- ignore -->, each crate in the workspace
-will need to be published separately. Like `cargo test`, we can publish a
-particular crate in our workspace by using the `-p` flag and specifying the
-name of the crate we want to publish.
+如果你将工作空间中的 crate 发布到 [crates.io](https://crates.io/)<!-- ignore -->，工作空间中的每个 crate 都需要单独发布。就像 `cargo test` 一样，我们可以通过使用 `-p` 标志并指定我们想要发布的 crate 名称来发布工作空间中的特定 crate。
 
-For additional practice, add an `add_two` crate to this workspace in a similar
-way as the `add_one` crate!
+为了额外的练习，以与 `add_one` crate 类似的方式向此工作空间添加 `add_two` crate！
 
-As your project grows, consider using a workspace: It enables you to work with
-smaller, easier-to-understand components than one big blob of code.
-Furthermore, keeping the crates in a workspace can make coordination between
-crates easier if they are often changed at the same time.
+随着项目增长，考虑使用工作空间：它使你能够使用比一大块代码更小、更容易理解的组件。此外，如果 crate 经常同时更改，将 crate 保留在工作空间中可以使 crate 之间的协调更容易。

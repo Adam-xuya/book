@@ -2,28 +2,13 @@
 
 <a id="installing-binaries-from-cratesio-with-cargo-install"></a>
 
-## Installing Binaries with `cargo install`
+## 使用 `cargo install` 安装二进制文件
 
-The `cargo install` command allows you to install and use binary crates
-locally. This isn’t intended to replace system packages; it’s meant to be a
-convenient way for Rust developers to install tools that others have shared on
-[crates.io](https://crates.io/)<!-- ignore -->. Note that you can only install
-packages that have binary targets. A _binary target_ is the runnable program
-that is created if the crate has a _src/main.rs_ file or another file specified
-as a binary, as opposed to a library target that isn’t runnable on its own but
-is suitable for including within other programs. Usually, crates have
-information in the README file about whether a crate is a library, has a
-binary target, or both.
+`cargo install` 命令允许你本地安装和使用二进制 crate。这不是为了替代系统包；它是为了方便 Rust 开发人员安装其他人已在 [crates.io](https://crates.io/)<!-- ignore --> 上共享的工具。注意，你只能安装具有二进制目标的包。_二进制目标_ 是如果 crate 有 _src/main.rs_ 文件或指定为二进制的另一个文件而创建的可运行程序，与库目标相反，库目标本身不可运行但适合包含在其他程序中。通常，crate 在 README 文件中有关于 crate 是库、有二进制目标还是两者兼有的信息。
 
-All binaries installed with `cargo install` are stored in the installation
-root’s _bin_ folder. If you installed Rust using _rustup.rs_ and don’t have any
-custom configurations, this directory will be *$HOME/.cargo/bin*. Ensure that
-this directory is in your `$PATH` to be able to run programs you’ve installed
-with `cargo install`.
+所有使用 `cargo install` 安装的二进制文件都存储在安装根的 _bin_ 文件夹中。如果你使用 _rustup.rs_ 安装 Rust 并且没有任何自定义配置，此目录将是 *$HOME/.cargo/bin*。确保此目录在你的 `$PATH` 中，以便能够运行你使用 `cargo install` 安装的程序。
 
-For example, in Chapter 12 we mentioned that there’s a Rust implementation of
-the `grep` tool called `ripgrep` for searching files. To install `ripgrep`, we
-can run the following:
+例如，在第 12 章中，我们提到了 `grep` 工具的 Rust 实现，称为 `ripgrep`，用于搜索文件。要安装 `ripgrep`，我们可以运行以下命令：
 
 <!-- manual-regeneration
 cargo install something you don't have, copy relevant output below
@@ -42,7 +27,4 @@ $ cargo install ripgrep
    Installed package `ripgrep v14.1.1` (executable `rg`)
 ```
 
-The second-to-last line of the output shows the location and the name of the
-installed binary, which in the case of `ripgrep` is `rg`. As long as the
-installation directory is in your `$PATH`, as mentioned previously, you can
-then run `rg --help` and start using a faster, Rustier tool for searching files!
+输出的倒数第二行显示已安装二进制文件的位置和名称，对于 `ripgrep`，它是 `rg`。只要安装目录在你的 `$PATH` 中，如前所述，然后你可以运行 `rg --help` 并开始使用更快、更 Rust 的工具来搜索文件！
