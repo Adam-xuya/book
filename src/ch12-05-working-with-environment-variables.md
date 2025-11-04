@@ -1,25 +1,16 @@
-## Working with Environment Variables
+## 使用环境变量
 
-We’ll improve the `minigrep` binary by adding an extra feature: an option for
-case-insensitive searching that the user can turn on via an environment
-variable. We could make this feature a command line option and require that
-users enter it each time they want it to apply, but by instead making it an
-environment variable, we allow our users to set the environment variable once
-and have all their searches be case insensitive in that terminal session.
+我们将通过添加额外功能来改进 `minigrep` 二进制文件：用户可以通过环境变量打开的选项，用于不区分大小写的搜索。我们可以将此功能设为命令行选项，并要求用户每次想要应用它时都输入它，但通过将其设为环境变量，我们允许用户设置一次环境变量，并在该终端会话中的所有搜索都不区分大小写。
 
 <!-- Old headings. Do not remove or links may break. -->
+
 <a id="writing-a-failing-test-for-the-case-insensitive-search-function"></a>
 
-### Writing a Failing Test for Case-Insensitive Search
+### 为不区分大小写的搜索编写失败的测试
 
-We first add a new `search_case_insensitive` function to the `minigrep` library
-that will be called when the environment variable has a value. We’ll continue
-to follow the TDD process, so the first step is again to write a failing test.
-We’ll add a new test for the new `search_case_insensitive` function and rename
-our old test from `one_result` to `case_sensitive` to clarify the differences
-between the two tests, as shown in Listing 12-20.
+我们首先向 `minigrep` 库添加一个新的 `search_case_insensitive` 函数，当环境变量有值时将调用它。我们将继续遵循 TDD 过程，所以第一步是再次编写失败的测试。我们将为新 `search_case_insensitive` 函数添加新测试，并将我们的旧测试从 `one_result` 重命名为 `case_sensitive`，以澄清两个测试之间的差异，如代码清单 12-20 所示。
 
-<Listing number="12-20" file-name="src/lib.rs" caption="Adding a new failing test for the case-insensitive function we’re about to add">
+<Listing number="12-20" file-name="src/lib.rs" caption="为我们即将添加的不区分大小写函数添加新的失败测试">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-20/src/lib.rs:here}}
@@ -27,30 +18,15 @@ between the two tests, as shown in Listing 12-20.
 
 </Listing>
 
-Note that we’ve edited the old test’s `contents` too. We’ve added a new line
-with the text `"Duct tape."` using a capital _D_ that shouldn’t match the query
-`"duct"` when we’re searching in a case-sensitive manner. Changing the old test
-in this way helps ensure that we don’t accidentally break the case-sensitive
-search functionality that we’ve already implemented. This test should pass now
-and should continue to pass as we work on the case-insensitive search.
+注意，我们也编辑了旧测试的 `contents`。我们添加了一行新文本 `"Duct tape."`，使用大写 _D_，当我们以区分大小写的方式搜索时，它不应该匹配查询 `"duct"`。以这种方式更改旧测试有助于确保我们不会意外破坏我们已经实现的区分大小写搜索功能。此测试现在应该通过，并且应该在我们处理不区分大小写搜索时继续通过。
 
-The new test for the case-_insensitive_ search uses `"rUsT"` as its query. In
-the `search_case_insensitive` function we’re about to add, the query `"rUsT"`
-should match the line containing `"Rust:"` with a capital _R_ and match the
-line `"Trust me."` even though both have different casing from the query. This
-is our failing test, and it will fail to compile because we haven’t yet defined
-the `search_case_insensitive` function. Feel free to add a skeleton
-implementation that always returns an empty vector, similar to the way we did
-for the `search` function in Listing 12-16 to see the test compile and fail.
+不区分大小写搜索的新测试使用 `"rUsT"` 作为其查询。在我们即将添加的 `search_case_insensitive` 函数中，查询 `"rUsT"` 应该匹配包含大写 _R_ 的 `"Rust:"` 行，并匹配 `"Trust me."` 行，即使两者都有与查询不同的大小写。这是我们失败的测试，它将无法编译，因为我们还没有定义 `search_case_insensitive` 函数。随意添加一个始终返回空向量的骨架实现，类似于我们在代码清单 12-16 中为 `search` 函数所做的那样，以查看测试编译和失败。
 
-### Implementing the `search_case_insensitive` Function
+### 实现 `search_case_insensitive` 函数
 
-The `search_case_insensitive` function, shown in Listing 12-21, will be almost
-the same as the `search` function. The only difference is that we’ll lowercase
-the `query` and each `line` so that whatever the case of the input arguments,
-they’ll be the same case when we check whether the line contains the query.
+`search_case_insensitive` 函数，如代码清单 12-21 所示，将与 `search` 函数几乎相同。唯一的区别是我们将 `query` 和每个 `line` 转换为小写，这样无论输入参数的大小写如何，当我们检查行是否包含查询时，它们都是相同的大小写。
 
-<Listing number="12-21" file-name="src/lib.rs" caption="Defining the `search_case_insensitive` function to lowercase the query and the line before comparing them">
+<Listing number="12-21" file-name="src/lib.rs" caption="定义 `search_case_insensitive` 函数，在比较之前将查询和行转换为小写">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-21/src/lib.rs:here}}
@@ -58,38 +34,19 @@ they’ll be the same case when we check whether the line contains the query.
 
 </Listing>
 
-First, we lowercase the `query` string and store it in a new variable with the
-same name, shadowing the original `query`. Calling `to_lowercase` on the query
-is necessary so that no matter whether the user’s query is `"rust"`, `"RUST"`,
-`"Rust"`, or `"rUsT"`, we’ll treat the query as if it were `"rust"` and be
-insensitive to the case. While `to_lowercase` will handle basic Unicode, it
-won’t be 100 percent accurate. If we were writing a real application, we’d want
-to do a bit more work here, but this section is about environment variables,
-not Unicode, so we’ll leave it at that here.
+首先，我们将 `query` 字符串转换为小写并将其存储在具有相同名称的新变量中，遮蔽原始 `query`。在查询上调用 `to_lowercase` 是必要的，这样无论用户的查询是 `"rust"`、`"RUST"`、`"Rust"` 还是 `"rUsT"`，我们都会将查询视为 `"rust"` 并且对大小写不敏感。虽然 `to_lowercase` 将处理基本 Unicode，但它不会 100% 准确。如果我们正在编写真实应用程序，我们会想在这里做更多工作，但本节是关于环境变量的，不是 Unicode，所以我们将在这里保持原样。
 
-Note that `query` is now a `String` rather than a string slice because calling
-`to_lowercase` creates new data rather than referencing existing data. Say the
-query is `"rUsT"`, as an example: That string slice doesn’t contain a lowercase
-`u` or `t` for us to use, so we have to allocate a new `String` containing
-`"rust"`. When we pass `query` as an argument to the `contains` method now, we
-need to add an ampersand because the signature of `contains` is defined to take
-a string slice.
+注意，`query` 现在是 `String` 而不是字符串切片，因为调用 `to_lowercase` 会创建新数据而不是引用现有数据。假设查询是 `"rUsT"` 作为示例：该字符串切片不包含我们可以使用的小写 `u` 或 `t`，所以我们必须分配一个包含 `"rust"` 的新 `String`。当我们现在将 `query` 作为参数传递给 `contains` 方法时，我们需要添加一个与号，因为 `contains` 的签名定义为接受字符串切片。
 
-Next, we add a call to `to_lowercase` on each `line` to lowercase all
-characters. Now that we’ve converted `line` and `query` to lowercase, we’ll
-find matches no matter what the case of the query is.
+接下来，我们在每个 `line` 上添加对 `to_lowercase` 的调用，以将所有字符转换为小写。现在我们已经将 `line` 和 `query` 转换为小写，无论查询的大小写如何，我们都会找到匹配项。
 
-Let’s see if this implementation passes the tests:
+让我们看看此实现是否通过测试：
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-21/output.txt}}
 ```
 
-Great! They passed. Now let’s call the new `search_case_insensitive` function
-from the `run` function. First, we’ll add a configuration option to the `Config`
-struct to switch between case-sensitive and case-insensitive search. Adding
-this field will cause compiler errors because we aren’t initializing this field
-anywhere yet:
+太好了！它们通过了。现在让我们从 `run` 函数调用新的 `search_case_insensitive` 函数。首先，我们将向 `Config` 结构体添加配置选项，以在区分大小写和不区分大小写搜索之间切换。添加此字段将导致编译器错误，因为我们还没有在任何地方初始化此字段：
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -97,12 +54,9 @@ anywhere yet:
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-22/src/main.rs:here}}
 ```
 
-We added the `ignore_case` field that holds a Boolean. Next, we need the `run`
-function to check the `ignore_case` field’s value and use that to decide
-whether to call the `search` function or the `search_case_insensitive`
-function, as shown in Listing 12-22. This still won’t compile yet.
+我们添加了保存布尔值的 `ignore_case` 字段。接下来，我们需要 `run` 函数检查 `ignore_case` 字段的值，并使用它来决定调用 `search` 函数还是 `search_case_insensitive` 函数，如代码清单 12-22 所示。这仍然不能编译。
 
-<Listing number="12-22" file-name="src/main.rs" caption="Calling either `search` or `search_case_insensitive` based on the value in `config.ignore_case`">
+<Listing number="12-22" file-name="src/main.rs" caption="基于 `config.ignore_case` 中的值调用 `search` 或 `search_case_insensitive`">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-22/src/main.rs:there}}
@@ -110,13 +64,9 @@ function, as shown in Listing 12-22. This still won’t compile yet.
 
 </Listing>
 
-Finally, we need to check for the environment variable. The functions for
-working with environment variables are in the `env` module in the standard
-library, which is already in scope at the top of _src/main.rs_. We’ll use the
-`var` function from the `env` module to check to see if any value has been set
-for an environment variable named `IGNORE_CASE`, as shown in Listing 12-23.
+最后，我们需要检查环境变量。处理环境变量的函数在标准库的 `env` 模块中，它已经在 _src/main.rs_ 顶部的作用域中。我们将使用 `env` 模块的 `var` 函数来检查是否已为名为 `IGNORE_CASE` 的环境变量设置了任何值，如代码清单 12-23 所示。
 
-<Listing number="12-23" file-name="src/main.rs" caption="Checking for any value in an environment variable named `IGNORE_CASE`">
+<Listing number="12-23" file-name="src/main.rs" caption="检查名为 `IGNORE_CASE` 的环境变量中的任何值">
 
 ```rust,ignore,noplayground
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-23/src/main.rs:here}}
@@ -124,55 +74,37 @@ for an environment variable named `IGNORE_CASE`, as shown in Listing 12-23.
 
 </Listing>
 
-Here, we create a new variable, `ignore_case`. To set its value, we call the
-`env::var` function and pass it the name of the `IGNORE_CASE` environment
-variable. The `env::var` function returns a `Result` that will be the
-successful `Ok` variant that contains the value of the environment variable if
-the environment variable is set to any value. It will return the `Err` variant
-if the environment variable is not set.
+这里，我们创建一个新变量 `ignore_case`。为了设置其值，我们调用 `env::var` 函数并向其传递 `IGNORE_CASE` 环境变量的名称。`env::var` 函数返回一个 `Result`，如果环境变量设置为任何值，它将是包含环境变量值的成功 `Ok` 变体。如果环境变量未设置，它将返回 `Err` 变体。
 
-We’re using the `is_ok` method on the `Result` to check whether the environment
-variable is set, which means the program should do a case-insensitive search.
-If the `IGNORE_CASE` environment variable isn’t set to anything, `is_ok` will
-return `false` and the program will perform a case-sensitive search. We don’t
-care about the _value_ of the environment variable, just whether it’s set or
-unset, so we’re checking `is_ok` rather than using `unwrap`, `expect`, or any
-of the other methods we’ve seen on `Result`.
+我们在 `Result` 上使用 `is_ok` 方法来检查环境变量是否已设置，这意味着程序应该执行不区分大小写的搜索。如果 `IGNORE_CASE` 环境变量未设置为任何值，`is_ok` 将返回 `false`，程序将执行区分大小写的搜索。我们不关心环境变量的 _值_，只关心它是设置还是未设置，所以我们检查 `is_ok` 而不是使用 `unwrap`、`expect` 或我们在 `Result` 上看到的任何其他方法。
 
-We pass the value in the `ignore_case` variable to the `Config` instance so
-that the `run` function can read that value and decide whether to call
-`search_case_insensitive` or `search`, as we implemented in Listing 12-22.
+我们将 `ignore_case` 变量中的值传递给 `Config` 实例，以便 `run` 函数可以读取该值并决定调用 `search_case_insensitive` 还是 `search`，正如我们在代码清单 12-22 中实现的那样。
 
-Let’s give it a try! First, we’ll run our program without the environment
-variable set and with the query `to`, which should match any line that contains
-the word _to_ in all lowercase:
+让我们试试看！首先，我们将在没有设置环境变量的情况下运行我们的程序，并使用查询 `to`，它应该匹配任何包含全小写单词 _to_ 的行：
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-23/output.txt}}
 ```
 
-Looks like that still works! Now let’s run the program with `IGNORE_CASE` set
-to `1` but with the same query `to`:
+看起来仍然有效！现在让我们在 `IGNORE_CASE` 设置为 `1` 的情况下运行程序，但使用相同的查询 `to`：
 
 ```console
 $ IGNORE_CASE=1 cargo run -- to poem.txt
 ```
 
-If you’re using PowerShell, you will need to set the environment variable and
-run the program as separate commands:
+如果你使用 PowerShell，你需要将环境变量设置为单独的命令并运行程序：
 
 ```console
 PS> $Env:IGNORE_CASE=1; cargo run -- to poem.txt
 ```
 
-This will make `IGNORE_CASE` persist for the remainder of your shell session.
-It can be unset with the `Remove-Item` cmdlet:
+这将使 `IGNORE_CASE` 在你的 shell 会话的剩余时间内持续存在。可以使用 `Remove-Item` cmdlet 取消设置：
 
 ```console
 PS> Remove-Item Env:IGNORE_CASE
 ```
 
-We should get lines that contain _to_ that might have uppercase letters:
+我们应该得到包含 _to_ 的行，这些行可能有大写字母：
 
 <!-- manual-regeneration
 cd listings/ch12-an-io-project/listing-12-23
@@ -187,18 +119,8 @@ To tell your name the livelong day
 To an admiring bog!
 ```
 
-Excellent, we also got lines containing _To_! Our `minigrep` program can now do
-case-insensitive searching controlled by an environment variable. Now you know
-how to manage options set using either command line arguments or environment
-variables.
+太好了，我们也得到了包含 _To_ 的行！我们的 `minigrep` 程序现在可以通过环境变量控制进行不区分大小写的搜索。现在你知道如何管理使用命令行参数或环境变量设置的选项。
 
-Some programs allow arguments _and_ environment variables for the same
-configuration. In those cases, the programs decide that one or the other takes
-precedence. For another exercise on your own, try controlling case sensitivity
-through either a command line argument or an environment variable. Decide
-whether the command line argument or the environment variable should take
-precedence if the program is run with one set to case sensitive and one set to
-ignore case.
+一些程序允许同一配置的参数 _和_ 环境变量。在这些情况下，程序决定其中一个或另一个优先。作为你自己的另一个练习，尝试通过命令行参数或环境变量控制大小写敏感性。如果程序运行时一个设置为区分大小写，另一个设置为忽略大小写，请决定命令行参数或环境变量应该优先。
 
-The `std::env` module contains many more useful features for dealing with
-environment variables: Check out its documentation to see what is available.
+`std::env` 模块包含许多用于处理环境变量的有用功能：查看其文档以了解可用的内容。
