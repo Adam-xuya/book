@@ -1,167 +1,73 @@
-# Fundamentals of Asynchronous Programming: Async, Await, Futures, and Streams
+# 异步编程基础：Async、Await、Futures 和 Streams
 
-Many operations we ask the computer to do can take a while to finish. It would
-be nice if we could do something else while we’re waiting for those
-long-running processes to complete. Modern computers offer two techniques for
-working on more than one operation at a time: parallelism and concurrency. Our
-programs’ logic, however, is written in a mostly linear fashion. We’d like to
-be able to specify the operations a program should perform and points at which
-a function could pause and some other part of the program could run instead,
-without needing to specify up front exactly the order and manner in which each
-bit of code should run. _Asynchronous programming_ is an abstraction that lets
-us express our code in terms of potential pausing points and eventual results
-that takes care of the details of coordination for us.
+我们要求计算机执行的许多操作可能需要一段时间才能完成。如果我们能在等待这些长时间运行的过程完成的同时做一些其他事情，那就太好了。现代计算机提供了两种同时处理多个操作的技术：并行性和并发性。然而，我们程序的逻辑是以大部分线性的方式编写的。我们希望能够指定程序应该执行的操作，以及函数可以暂停的点，让程序的其他部分可以运行，而不需要预先指定每一段代码运行的确切顺序和方式。_异步编程_是一种抽象，让我们能够以潜在的暂停点和最终结果来表达我们的代码，并为我们处理协调的细节。
 
-This chapter builds on Chapter 16’s use of threads for parallelism and
-concurrency by introducing an alternative approach to writing code: Rust’s
-futures, streams, and the `async` and `await` syntax that let us express how
-operations could be asynchronous, and the third-party crates that implement
-asynchronous runtimes: code that manages and coordinates the execution of
-asynchronous operations.
+本章在第16章使用线程进行并行和并发的基础上，介绍了一种编写代码的替代方法：Rust 的 futures、streams，以及 `async` 和 `await` 语法，它们让我们能够表达操作如何可以是异步的，以及实现异步运行时的第三方 crate：管理和协调异步执行代码的代码。
 
-Let’s consider an example. Say you’re exporting a video you’ve created of a
-family celebration, an operation that could take anywhere from minutes to
-hours. The video export will use as much CPU and GPU power as it can. If you
-had only one CPU core and your operating system didn’t pause that export until
-it completed—that is, if it executed the export _synchronously_—you couldn’t do
-anything else on your computer while that task was running. That would be a
-pretty frustrating experience. Fortunately, your computer’s operating system
-can, and does, invisibly interrupt the export often enough to let you get other
-work done simultaneously.
+让我们考虑一个例子。假设你正在导出一个你创建的家庭庆祝视频，这个操作可能需要几分钟到几小时。视频导出将尽可能多地使用 CPU 和 GPU 资源。如果你只有一个 CPU 核心，并且你的操作系统在导出完成之前不会暂停它——也就是说，如果它以_同步_方式执行导出——那么在该任务运行时，你无法在计算机上做任何其他事情。这将是一个非常令人沮丧的体验。幸运的是，你计算机的操作系统可以，也确实会频繁地、不可见地中断导出，让你能够同时完成其他工作。
 
-Now say you’re downloading a video shared by someone else, which can also take
-a while but does not take up as much CPU time. In this case, the CPU has to
-wait for data to arrive from the network. While you can start reading the data
-once it starts to arrive, it might take some time for all of it to show up.
-Even once the data is all present, if the video is quite large, it could take
-at least a second or two to load it all. That might not sound like much, but
-it’s a very long time for a modern processor, which can perform billions of
-operations every second. Again, your operating system will invisibly interrupt
-your program to allow the CPU to perform other work while waiting for the
-network call to finish.
+现在假设你正在下载其他人分享的视频，这也可能需要一段时间，但不会占用太多 CPU 时间。在这种情况下，CPU 必须等待数据从网络到达。虽然你可以在数据开始到达时开始读取数据，但所有数据可能需要一些时间才能全部显示。即使所有数据都已存在，如果视频相当大，加载全部内容可能至少需要一两秒。这可能听起来不算多，但对于现代处理器来说，这是很长的时间，它每秒可以执行数十亿次操作。同样，你的操作系统会不可见地中断你的程序，以允许 CPU 在等待网络调用完成时执行其他工作。
 
-The video export is an example of a _CPU-bound_ or _compute-bound_ operation.
-It’s limited by the computer’s potential data processing speed within the CPU
-or GPU, and how much of that speed it can dedicate to the operation. The video
-download is an example of an _I/O-bound_ operation, because it’s limited by the
-speed of the computer’s _input and output_; it can only go as fast as the data
-can be sent across the network.
+视频导出是_CPU 密集型_或_计算密集型_操作的示例。它受到计算机在 CPU 或 GPU 内的潜在数据处理速度以及它可以为该操作分配多少速度的限制。视频下载是_I/O 密集型_操作的示例，因为它受到计算机_输入和输出_速度的限制；它只能以数据通过网络传输的速度进行。
 
-In both of these examples, the operating system’s invisible interrupts provide
-a form of concurrency. That concurrency happens only at the level of the entire
-program, though: the operating system interrupts one program to let other
-programs get work done. In many cases, because we understand our programs at a
-much more granular level than the operating system does, we can spot
-opportunities for concurrency that the operating system can’t see.
+在这两个例子中，操作系统的不可见中断提供了一种并发形式。然而，这种并发只发生在整个程序的级别：操作系统中断一个程序以让其他程序完成工作。在许多情况下，因为我们比操作系统更细粒度地理解我们的程序，我们可以发现操作系统看不到的并发机会。
 
-For example, if we’re building a tool to manage file downloads, we should be
-able to write our program so that starting one download won’t lock up the UI,
-and users should be able to start multiple downloads at the same time. Many
-operating system APIs for interacting with the network are _blocking_, though;
-that is, they block the program’s progress until the data they’re processing is
-completely ready.
+例如，如果我们正在构建一个管理文件下载的工具，我们应该能够编写我们的程序，使得启动一个下载不会锁定 UI，用户应该能够同时启动多个下载。然而，许多用于与网络交互的操作系统 API 都是_阻塞的_；也就是说，它们会阻塞程序的进度，直到它们正在处理的数据完全准备好。
 
-> Note: This is how _most_ function calls work, if you think about it. However,
-> the term _blocking_ is usually reserved for function calls that interact with
-> files, the network, or other resources on the computer, because those are the
-> cases where an individual program would benefit from the operation being
-> _non_-blocking.
+> 注意：如果你仔细想想，这是_大多数_函数调用的工作方式。但是，术语_阻塞_通常保留用于与文件、网络或计算机上的其他资源交互的函数调用，因为这些是单个程序会从操作_非_阻塞中受益的情况。
 
-We could avoid blocking our main thread by spawning a dedicated thread to
-download each file. However, the overhead of the system resources used by those
-threads would eventually become a problem. It would be preferable if the call
-didn’t block in the first place, and instead we could define a number of tasks
-that we’d like our program to complete and allow the runtime to choose the best
-order and manner in which to run them.
+我们可以通过生成一个专用线程来下载每个文件来避免阻塞我们的主线程。然而，这些线程使用的系统资源开销最终会成为一个问题。如果调用一开始就不阻塞，那就更好了，我们可以定义我们希望程序完成的一系列任务，并允许运行时选择运行它们的最佳顺序和方式。
 
-That is exactly what Rust’s _async_ (short for _asynchronous_) abstraction
-gives us. In this chapter, you’ll learn all about async as we cover the
-following topics:
+这正是 Rust 的_async_（_异步_的缩写）抽象为我们提供的。在本章中，你将学习所有关于 async 的知识，因为我们涵盖以下主题：
 
-- How to use Rust’s `async` and `await` syntax and execute asynchronous
-  functions with a runtime
-- How to use the async model to solve some of the same challenges we looked at
-  in Chapter 16
-- How multithreading and async provide complementary solutions that you can
-  combine in many cases
+- 如何使用 Rust 的 `async` 和 `await` 语法，并使用运行时执行异步函数
+- 如何使用 async 模型来解决我们在第16章中看到的一些相同挑战
+- 多线程和 async 如何提供互补的解决方案，你可以在许多情况下组合使用
 
-Before we see how async works in practice, though, we need to take a short
-detour to discuss the differences between parallelism and concurrency.
+然而，在我们看到 async 在实践中如何工作之前，我们需要稍微绕一下路来讨论并行性和并发性之间的区别。
 
-## Parallelism and Concurrency
+## 并行性和并发性
 
-We’ve treated parallelism and concurrency as mostly interchangeable so far. Now
-we need to distinguish between them more precisely, because the differences
-will show up as we start working.
+到目前为止，我们一直将并行性和并发性视为基本上可以互换的。现在我们需要更精确地区分它们，因为在我们开始工作时，差异会显现出来。
 
-Consider the different ways a team could split up work on a software project.
-You could assign a single member multiple tasks, assign each member one task,
-or use a mix of the two approaches.
+考虑团队可以以不同方式分配软件项目工作。你可以为单个成员分配多个任务，为每个成员分配一个任务，或者混合使用这两种方法。
 
-When an individual works on several different tasks before any of them is
-complete, this is _concurrency_. One way to implement concurrency is similar to
-having two different projects checked out on your computer, and when you get
-bored or stuck on one project, you switch to the other. You’re just one person,
-so you can’t make progress on both tasks at the exact same time, but you can
-multitask, making progress on one at a time by switching between them (see
-Figure 17-1).
+当个人在完成任何任务之前处理几个不同的任务时，这就是_并发_。实现并发的一种方式类似于在你的计算机上检出两个不同的项目，当你对一个项目感到无聊或卡住时，你切换到另一个项目。你只是一个人，所以你无法在完全相同的时刻在两个任务上取得进展，但你可以多任务处理，通过在它们之间切换一次在一个任务上取得进展（见图17-1）。
 
 <figure>
 
 <img src="img/trpl17-01.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. Arrows point from A1 to B1, B1 to A2, A2 to B2, B2 to A3, A3 to A4, and A4 to B3. The arrows between the subtasks cross the boxes between Task A and Task B." />
 
-<figcaption>Figure 17-1: A concurrent workflow, switching between Task A and Task B</figcaption>
+<figcaption>图17-1：并发工作流，在任务 A 和任务 B 之间切换</figcaption>
 
 </figure>
 
-When the team splits up a group of tasks by having each member take one task
-and work on it alone, this is _parallelism_. Each person on the team can make
-progress at the exact same time (see Figure 17-2).
+当团队通过让每个成员承担一个任务并单独工作来分配一组任务时，这就是_并行性_。团队中的每个人可以在完全相同的时刻取得进展（见图17-2）。
 
 <figure>
 
 <img src="img/trpl17-02.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. Arrows point from A1 to A2, A2 to A3, A3 to A4, B1 to B2, and B2 to B3. No arrows cross between the boxes for Task A and Task B." />
 
-<figcaption>Figure 17-2: A parallel workflow, where work happens on Task A and Task B independently</figcaption>
+<figcaption>图17-2：并行工作流，任务 A 和任务 B 独立进行</figcaption>
 
 </figure>
 
-In both of these workflows, you might have to coordinate between different
-tasks. Maybe you thought the task assigned to one person was totally
-independent from everyone else’s work, but it actually requires another person
-on the team to finish their task first. Some of the work could be done in
-parallel, but some of it was actually _serial_: it could only happen in a
-series, one task after the other, as in Figure 17-3.
+在这两种工作流中，你可能需要在不同任务之间进行协调。也许你认为分配给一个人的任务完全独立于其他人的工作，但实际上它需要团队中的另一个人先完成他们的任务。一些工作可以并行完成，但其中一些实际上是_串行的_：它只能按顺序发生，一个任务接一个任务，如图17-3所示。
 
 <figure>
 
-<img src="img/trpl17-03.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. In Task A, arrows point from A1 to A2, from A2 to a pair of thick vertical lines like a “pause” symbol, and from that symbol to A3. In task B, arrows point from B1 to B2, from B2 to B3, from B3 to A3, and from B3 to B4." />
+<img src="img/trpl17-03.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. In Task A, arrows point from A1 to A2, from A2 to a pair of thick vertical lines like a "pause" symbol, and from that symbol to A3. In task B, arrows point from B1 to B2, from B2 to B3, from B3 to A3, and from B3 to B4." />
 
-<figcaption>Figure 17-3: A partially parallel workflow, where work happens on Task A and Task B independently until Task A3 is blocked on the results of Task B3.</figcaption>
+<figcaption>图17-3：部分并行工作流，任务 A 和任务 B 独立进行，直到任务 A3 被任务 B3 的结果阻塞</figcaption>
 
 </figure>
 
-Likewise, you might realize that one of your own tasks depends on another of
-your tasks. Now your concurrent work has also become serial.
+同样，你可能会意识到你自己的一个任务依赖于你的另一个任务。现在你的并发工作也变成了串行的。
 
-Parallelism and concurrency can intersect with each other, too. If you learn
-that a colleague is stuck until you finish one of your tasks, you’ll probably
-focus all your efforts on that task to “unblock” your colleague. You and your
-coworker are no longer able to work in parallel, and you’re also no longer able
-to work concurrently on your own tasks.
+并行性和并发性也可以相互交叉。如果你了解到一个同事在你完成你的一个任务之前被卡住了，你可能会将所有精力集中在该任务上，以“解除阻塞”你的同事。你和你的同事不再能够并行工作，你也无法再在你自己的任务上并发工作。
 
-The same basic dynamics come into play with software and hardware. On a machine
-with a single CPU core, the CPU can perform only one operation at a time, but
-it can still work concurrently. Using tools such as threads, processes, and
-async, the computer can pause one activity and switch to others before
-eventually cycling back to that first activity again. On a machine with
-multiple CPU cores, it can also do work in parallel. One core can be performing
-one task while another core performs a completely unrelated one, and those
-operations actually happen at the same time.
+软件和硬件中也存在相同的基本动态。在具有单个 CPU 核心的机器上，CPU 一次只能执行一个操作，但它仍然可以并发工作。使用线程、进程和 async 等工具，计算机可以暂停一个活动并切换到其他活动，然后最终再次循环回到第一个活动。在具有多个 CPU 核心的机器上，它也可以并行工作。一个核心可以执行一个任务，而另一个核心执行完全无关的任务，这些操作实际上同时发生。
 
-Running async code in Rust usually happens concurrently. Depending on the
-hardware, the operating system, and the async runtime we are using (more on
-async runtimes shortly), that concurrency may also use parallelism under the
-hood.
+在 Rust 中运行 async 代码通常以并发方式发生。根据硬件、操作系统和我们正在使用的 async 运行时（关于 async 运行时的更多内容稍后会介绍），这种并发也可能在底层使用并行性。
 
-Now, let’s dive into how async programming in Rust actually works.
+现在，让我们深入了解 Rust 中的异步编程实际上是如何工作的。

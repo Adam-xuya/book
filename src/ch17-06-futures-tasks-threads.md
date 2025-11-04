@@ -1,68 +1,25 @@
-## Putting It All Together: Futures, Tasks, and Threads
+## 总结：Futures、Tasks 和 Threads
 
-As we saw in [Chapter 16][ch16]<!-- ignore -->, threads provide one approach to
-concurrency. We’ve seen another approach in this chapter: using async with
-futures and streams. If you’re wondering when to choose one method over the other,
-the answer is: it depends! And in many cases, the choice isn’t threads _or_
-async but rather threads _and_ async.
+正如我们在[第16章][ch16]<!-- ignore -->中看到的，线程提供了一种并发方法。我们在本章中看到了另一种方法：使用 async 与 futures 和 streams。如果你想知道何时选择一种方法而不是另一种，答案是：这取决于！在许多情况下，选择不是线程_或_ async，而是线程_和_ async。
 
-Many operating systems have supplied threading-based concurrency models for
-decades now, and many programming languages support them as a result. However,
-these models are not without their tradeoffs. On many operating systems, they
-use a fair bit of memory for each thread. Threads are also only an option when
-your operating system and hardware support them. Unlike mainstream desktop and
-mobile computers, some embedded systems don’t have an OS at all, so they also
-don’t have threads.
+许多操作系统现在已经提供了基于线程的并发模型几十年了，许多编程语言因此支持它们。但是，这些模型并非没有它们的权衡。在许多操作系统上，它们为每个线程使用相当多的内存。线程也只有在你的操作系统和硬件支持它们时才是一个选项。与主流桌面和移动计算机不同，一些嵌入式系统根本没有操作系统，因此它们也没有线程。
 
-The async model provides a different—and ultimately complementary—set of
-tradeoffs. In the async model, concurrent operations don’t require their own
-threads. Instead, they can run on tasks, as when we used `trpl::spawn_task` to
-kick off work from a synchronous function in the streams section. A task is
-similar to a thread, but instead of being managed by the operating system, it’s
-managed by library-level code: the runtime.
+async 模型提供了一套不同——并且最终互补——的权衡。在 async 模型中，并发操作不需要它们自己的线程。相反，它们可以在任务上运行，就像我们在流部分中使用 `trpl::spawn_task` 从同步函数启动工作一样。任务类似于线程，但不是由操作系统管理，而是由库级代码管理：运行时。
 
-There’s a reason the APIs for spawning threads and spawning tasks are so
-similar. Threads act as a boundary for sets of synchronous operations;
-concurrency is possible _between_ threads. Tasks act as a boundary for sets of
-_asynchronous_ operations; concurrency is possible both _between_ and _within_
-tasks, because a task can switch between futures in its body. Finally, futures
-are Rust’s most granular unit of concurrency, and each future may represent a
-tree of other futures. The runtime—specifically, its executor—manages tasks,
-and tasks manage futures. In that regard, tasks are similar to lightweight,
-runtime-managed threads with added capabilities that come from being managed by
-a runtime instead of by the operating system.
+线程和任务生成的 API 如此相似是有原因的。线程充当同步操作集的边界；并发是_在线程之间_可能的。任务充当_异步_操作集的边界；并发在任务_之间_和_内部_都是可能的，因为任务可以在其主体中的 futures 之间切换。最后，futures 是 Rust 最细粒度的并发单元，每个 future 可能代表其他 futures 的树。运行时——特别是它的执行器——管理任务，任务管理 futures。在这方面，任务类似于轻量级、运行时管理的线程，具有由运行时而不是操作系统管理所带来的额外功能。
 
-This doesn’t mean that async tasks are always better than threads (or vice
-versa). Concurrency with threads is in some ways a simpler programming model
-than concurrency with `async`. That can be a strength or a weakness. Threads are
-somewhat “fire and forget”; they have no native equivalent to a future, so they
-simply run to completion without being interrupted except by the operating
-system itself.
+这并不意味着 async 任务总是比线程更好（反之亦然）。使用线程的并发在某些方面比使用 `async` 的并发更简单的编程模型。这可能是优势也可能是劣势。线程有点“发射后不管”；它们没有 future 的本地等价物，所以它们只是运行到完成，除了操作系统本身之外不会被中断。
 
-And it turns out that threads and tasks often work
-very well together, because tasks can (at least in some runtimes) be moved
-around between threads. In fact, under the hood, the runtime we’ve been
-using—including the `spawn_blocking` and `spawn_task` functions—is multithreaded
-by default! Many runtimes use an approach called _work stealing_ to
-transparently move tasks around between threads, based on how the threads are
-currently being utilized, to improve the system’s overall performance. That
-approach actually requires threads _and_ tasks, and therefore futures.
+事实证明，线程和任务经常很好地协同工作，因为任务可以（至少在某些运行时中）在线程之间移动。事实上，在底层，我们一直在使用的运行时——包括 `spawn_blocking` 和 `spawn_task` 函数——默认是多线程的！许多运行时使用称为_工作窃取_的方法，根据线程当前的使用情况，在线程之间透明地移动任务，以提高系统的整体性能。这种方法实际上需要线程_和_任务，因此需要 futures。
 
-When thinking about which method to use when, consider these rules of thumb:
+在考虑何时使用哪种方法时，请考虑这些经验法则：
 
-- If the work is _very parallelizable_ (that is, CPU-bound), such as processing
-  a bunch of data where each part can be processed separately, threads are a
-  better choice.
-- If the work is _very concurrent_ (that is, I/O-bound), such as handling
-  messages from a bunch of different sources that may come in at different
-  intervals or different rates, async is a better choice.
+- 如果工作_非常可并行化_（即 CPU 密集型），例如处理一堆可以单独处理的数据部分，线程是更好的选择。
+- 如果工作_非常并发_（即 I/O 密集型），例如处理来自一堆不同来源的消息，这些消息可能以不同的间隔或不同的速率到达，async 是更好的选择。
 
-And if you need both parallelism and concurrency, you don’t have to choose
-between threads and async. You can use them together freely, letting each
-play the part it’s best at. For example, Listing 17-25 shows a fairly common
-example of this kind of mix in real-world Rust code.
+如果你需要并行性和并发性，你不必在线程和 async 之间选择。你可以自由地一起使用它们，让每个都发挥其最擅长的部分。例如，代码清单17-25显示了在现实世界的 Rust 代码中这种混合的一个相当常见的例子。
 
-<Listing number="17-25" caption="Sending messages with blocking code in a thread and awaiting the messages in an async block" file-name="src/main.rs">
+<Listing number="17-25" caption="在线程中发送带有阻塞代码的消息，并在 async 块中等待消息" file-name="src/main.rs">
 
 ```rust
 {{#rustdoc_include ../listings/ch17-async-await/listing-17-25/src/main.rs:all}}
@@ -70,34 +27,17 @@ example of this kind of mix in real-world Rust code.
 
 </Listing>
 
-We begin by creating an async channel, then spawning a thread that takes
-ownership of the sender side of the channel using the `move` keyword. Within
-the thread, we send the numbers 1 through 10, sleeping for a second between
-each. Finally, we run a future created with an async block passed to
-`trpl::block_on` just as we have throughout the chapter. In that future, we
-await those messages, just as in the other message-passing examples we have
-seen.
+我们首先创建一个 async channel，然后生成一个使用 `move` 关键字获取 channel 发送端所有权的线程。在线程内，我们发送数字1到10，在每条之间休眠一秒。最后，我们运行一个使用传递给 `trpl::block_on` 的 async 块创建的 future，就像我们在整个章节中一直做的那样。在该 future 中，我们等待这些消息，就像我们在其他消息传递示例中看到的那样。
 
-To return to the scenario we opened the chapter with, imagine running a set of
-video encoding tasks using a dedicated thread (because video encoding is
-compute-bound) but notifying the UI that those operations are done with an
-async channel. There are countless examples of these kinds of combinations in
-real-world use cases.
+回到我们在本章开头打开的场景，想象使用专用线程运行一组视频编码任务（因为视频编码是计算密集型的），但使用 async channel 通知 UI 这些操作已完成。在现实世界的用例中有无数这样的组合示例。
 
-## Summary
+## 总结
 
-This isn’t the last you’ll see of concurrency in this book. The project in
-[Chapter 21][ch21]<!-- ignore --> will apply these concepts in a more realistic
-situation than the simpler examples discussed here and compare problem-solving
-with threading versus tasks and futures more directly.
+这不是你在本书中最后一次看到并发。[第21章][ch21]<!-- ignore -->中的项目将在比这里讨论的更简单的示例更现实的情况下应用这些概念，并更直接地比较使用线程与任务和 futures 解决问题。
 
-No matter which of these approaches you choose, Rust gives you the tools you
-need to write safe, fast, concurrent code—whether for a high-throughput web
-server or an embedded operating system.
+无论你选择这些方法中的哪一种，Rust 都为你提供了编写安全、快速、并发代码所需的工具——无论是用于高吞吐量 Web 服务器还是嵌入式操作系统。
 
-Next, we’ll talk about idiomatic ways to model problems and structure solutions
-as your Rust programs get bigger. In addition, we’ll discuss how Rust’s idioms
-relate to those you might be familiar with from object-oriented programming.
+接下来，我们将讨论随着 Rust 程序变大，如何以惯用的方式建模问题和构建解决方案。此外，我们将讨论 Rust 的惯用法与你可能从面向对象编程中熟悉的那些之间的关系。
 
 [ch16]: http://localhost:3000/ch16-00-concurrency.html
 [combining-futures]: ch17-03-more-futures.html#building-our-own-async-abstractions
