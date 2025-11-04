@@ -1,41 +1,23 @@
-# Final Project: Building a Multithreaded Web Server
+# 最终项目：构建多线程 Web 服务器
 
-It’s been a long journey, but we’ve reached the end of the book. In this
-chapter, we’ll build one more project together to demonstrate some of the
-concepts we covered in the final chapters, as well as recap some earlier
-lessons.
+这是一段漫长的旅程，但我们已经到达了本书的结尾。在本章中，我们将一起再构建一个项目，以演示我们在最后几章中介绍的一些概念，并回顾一些早期的课程。
 
-For our final project, we’ll make a web server that says “Hello!” and looks like
-Figure 21-1 in a web browser.
+对于我们的最终项目，我们将制作一个 Web 服务器，它说"Hello!"，并在 Web 浏览器中看起来像图21-1。
 
-Here is our plan for building the web server:
+这是我们构建 Web 服务器的计划：
 
-1. Learn a bit about TCP and HTTP.
-2. Listen for TCP connections on a socket.
-3. Parse a small number of HTTP requests.
-4. Create a proper HTTP response.
-5. Improve the throughput of our server with a thread pool.
+1. 学习一些 TCP 和 HTTP 知识。
+2. 在套接字上监听 TCP 连接。
+3. 解析少量 HTTP 请求。
+4. 创建适当的 HTTP 响应。
+5. 使用线程池提高服务器的吞吐量。
 
-<img alt="Screenshot of a web browser visiting the address 127.0.0.1:8080 displaying a webpage with the text content “Hello! Hi from Rust”" src="img/trpl21-01.png" class="center" style="width: 50%;" />
+<img alt="Screenshot of a web browser visiting the address 127.0.0.1:8080 displaying a webpage with the text content "Hello! Hi from Rust"" src="img/trpl21-01.png" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 21-1: Our final shared project</span>
+<span class="caption">图21-1：我们的最终共享项目</span>
 
-Before we get started, we should mention two details. First, the method we’ll
-use won’t be the best way to build a web server with Rust. Community members
-have published a number of production-ready crates available at
-[crates.io](https://crates.io/) that provide more complete web server and
-thread pool implementations than we’ll build. However, our intention in this
-chapter is to help you learn, not to take the easy route. Because Rust is a
-systems programming language, we can choose the level of abstraction we want to
-work with and can go to a lower level than is possible or practical in other
-languages.
+在我们开始之前，我们应该提到两个细节。首先，我们将使用的方法不是用 Rust 构建 Web 服务器的最佳方法。社区成员已经在 [crates.io](https://crates.io/) 上发布了许多生产就绪的 crate，它们提供了比我们将构建的更完整的 Web 服务器和线程池实现。但是，我们在本章中的意图是帮助你学习，而不是走捷径。因为 Rust 是一种系统编程语言，我们可以选择我们想要工作的抽象级别，并且可以深入到在其他语言中不可能或不实用的较低级别。
 
-Second, we will not be using async and await here. Building a thread pool is a
-big enough challenge on its own, without adding in building an async runtime!
-However, we will note how async and await might be applicable to some of the
-same problems we will see in this chapter. Ultimately, as we noted back in
-Chapter 17, many async runtimes use thread pools for managing their work.
+其次，我们这里不会使用 async 和 await。构建线程池本身就是一个足够大的挑战，更不用说构建异步运行时了！但是，我们将注意到 async 和 await 可能如何适用于我们在本章中看到的相同问题。最终，正如我们在第17章中提到的，许多异步运行时使用线程池来管理它们的工作。
 
-We’ll therefore write the basic HTTP server and thread pool manually so that
-you can learn the general ideas and techniques behind the crates you might use
-in the future.
+因此，我们将手动编写基本的 HTTP 服务器和线程池，以便你可以学习你可能在未来使用的 crate 背后的一般想法和技术。
