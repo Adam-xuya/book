@@ -1,34 +1,11 @@
-# Writing Automated Tests
+# 编写自动化测试
 
-In his 1972 essay “The Humble Programmer,” Edsger W. Dijkstra said that “program
-testing can be a very effective way to show the presence of bugs, but it is
-hopelessly inadequate for showing their absence.” That doesn’t mean we shouldn’t
-try to test as much as we can!
+Edsger W. Dijkstra 在他 1972 年的文章《谦逊的程序员》中说："程序测试可以非常有效地显示 bug 的存在，但它对于显示它们的缺失来说是无望地不足的。"这并不意味着我们不应该尽可能多地测试！
 
-_Correctness_ in our programs is the extent to which our code does what we
-intend it to do. Rust is designed with a high degree of concern about the
-correctness of programs, but correctness is complex and not easy to prove.
-Rust’s type system shoulders a huge part of this burden, but the type system
-cannot catch everything. As such, Rust includes support for writing automated
-software tests.
+我们程序中的 _正确性_ 是我们的代码按我们预期的方式工作的程度。Rust 的设计非常关注程序的正确性，但正确性是复杂的，不容易证明。Rust 的类型系统承担了这负担的很大一部分，但类型系统无法捕获所有内容。因此，Rust 包括对编写自动化软件测试的支持。
 
-Say we write a function `add_two` that adds 2 to whatever number is passed to
-it. This function’s signature accepts an integer as a parameter and returns an
-integer as a result. When we implement and compile that function, Rust does all
-the type checking and borrow checking that you’ve learned so far to ensure
-that, for instance, we aren’t passing a `String` value or an invalid reference
-to this function. But Rust _can’t_ check that this function will do precisely
-what we intend, which is return the parameter plus 2 rather than, say, the
-parameter plus 10 or the parameter minus 50! That’s where tests come in.
+假设我们编写一个函数 `add_two`，它将 2 添加到传递给它的任何数字。此函数的签名接受一个整数作为参数并返回一个整数作为结果。当我们实现并编译该函数时，Rust 会进行你到目前为止学到的所有类型检查和借用检查，以确保例如我们不会将 `String` 值或无效引用传递给此函数。但是 Rust _不能_ 检查此函数将精确地执行我们预期的操作，即返回参数加 2，而不是参数加 10 或参数减 50！这就是测试的用武之地。
 
-We can write tests that assert, for example, that when we pass `3` to the
-`add_two` function, the returned value is `5`. We can run these tests whenever
-we make changes to our code to make sure any existing correct behavior has not
-changed.
+我们可以编写测试来断言，例如，当我们将 `3` 传递给 `add_two` 函数时，返回的值是 `5`。每当我们对代码进行更改时，我们可以运行这些测试，以确保任何现有的正确行为没有改变。
 
-Testing is a complex skill: Although we can’t cover in one chapter every detail
-about how to write good tests, in this chapter we will discuss the mechanics of
-Rust’s testing facilities. We’ll talk about the annotations and macros
-available to you when writing your tests, the default behavior and options
-provided for running your tests, and how to organize tests into unit tests and
-integration tests.
+测试是一项复杂的技能：虽然我们无法在一章中涵盖关于如何编写好测试的每个细节，但在本章中，我们将讨论 Rust 测试设施的机制。我们将讨论编写测试时可用的注释和宏、运行测试的默认行为和选项，以及如何将测试组织成单元测试和集成测试。
