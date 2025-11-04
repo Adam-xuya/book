@@ -1,48 +1,22 @@
-# Generic Types, Traits, and Lifetimes
+# 泛型类型、Trait 和生命周期
 
-Every programming language has tools for effectively handling the duplication
-of concepts. In Rust, one such tool is _generics_: abstract stand-ins for
-concrete types or other properties. We can express the behavior of generics or
-how they relate to other generics without knowing what will be in their place
-when compiling and running the code.
+每种编程语言都有有效处理概念重复的工具。在 Rust 中，其中一个工具是 _泛型_：具体类型或其他属性的抽象占位符。我们可以表达泛型的行为或它们如何与其他泛型相关，而无需知道在编译和运行代码时它们的位置将是什么。
 
-Functions can take parameters of some generic type, instead of a concrete type
-like `i32` or `String`, in the same way they take parameters with unknown
-values to run the same code on multiple concrete values. In fact, we already
-used generics in Chapter 6 with `Option<T>`, in Chapter 8 with `Vec<T>` and
-`HashMap<K, V>`, and in Chapter 9 with `Result<T, E>`. In this chapter, you’ll
-explore how to define your own types, functions, and methods with generics!
+函数可以接受某些泛型类型的参数，而不是像 `i32` 或 `String` 这样的具体类型，就像它们接受具有未知值的参数以在多个具体值上运行相同代码一样。事实上，我们在第 6 章使用 `Option<T>`，在第 8 章使用 `Vec<T>` 和 `HashMap<K, V>`，在第 9 章使用 `Result<T, E>` 时已经使用了泛型。在本章中，你将探索如何使用泛型定义自己的类型、函数和方法！
 
-First, we’ll review how to extract a function to reduce code duplication. We’ll
-then use the same technique to make a generic function from two functions that
-differ only in the types of their parameters. We’ll also explain how to use
-generic types in struct and enum definitions.
+首先，我们将回顾如何提取函数以减少代码重复。然后，我们将使用相同的技术从两个仅在参数类型上不同的函数中创建一个泛型函数。我们还将解释如何在结构体和枚举定义中使用泛型类型。
 
-Then, you’ll learn how to use traits to define behavior in a generic way. You
-can combine traits with generic types to constrain a generic type to accept
-only those types that have a particular behavior, as opposed to just any type.
+然后，你将学习如何使用 trait 以泛型方式定义行为。你可以将 trait 与泛型类型结合使用，以将泛型类型限制为仅接受具有特定行为的类型，而不是仅仅任何类型。
 
-Finally, we’ll discuss _lifetimes_: a variety of generics that give the
-compiler information about how references relate to each other. Lifetimes allow
-us to give the compiler enough information about borrowed values so that it can
-ensure that references will be valid in more situations than it could without
-our help.
+最后，我们将讨论 _生命周期_：一种泛型，它向编译器提供有关引用如何相互关联的信息。生命周期允许我们向编译器提供关于借用值的足够信息，以便它可以确保引用在更多情况下有效，而不是在没有我们帮助的情况下可以确保的情况。
 
-## Removing Duplication by Extracting a Function
+## 通过提取函数消除重复
 
-Generics allow us to replace specific types with a placeholder that represents
-multiple types to remove code duplication. Before diving into generics syntax,
-let’s first look at how to remove duplication in a way that doesn’t involve
-generic types by extracting a function that replaces specific values with a
-placeholder that represents multiple values. Then, we’ll apply the same
-technique to extract a generic function! By looking at how to recognize
-duplicated code you can extract into a function, you’ll start to recognize
-duplicated code that can use generics.
+泛型允许我们用代表多种类型的占位符替换特定类型以消除代码重复。在深入了解泛型语法之前，让我们首先看看如何通过提取函数来消除重复，该函数用代表多个值的占位符替换特定值。然后，我们将应用相同的技术来提取泛型函数！通过查看如何识别可以提取到函数中的重复代码，你将开始识别可以使用泛型的重复代码。
 
-We’ll begin with the short program in Listing 10-1 that finds the largest
-number in a list.
+我们将从代码清单 10-1 中的简短程序开始，该程序在列表中查找最大数字。
 
-<Listing number="10-1" file-name="src/main.rs" caption="Finding the largest number in a list of numbers">
+<Listing number="10-1" file-name="src/main.rs" caption="在数字列表中查找最大数字">
 
 ```rust
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-01/src/main.rs:here}}
@@ -50,20 +24,11 @@ number in a list.
 
 </Listing>
 
-We store a list of integers in the variable `number_list` and place a reference
-to the first number in the list in a variable named `largest`. We then iterate
-through all the numbers in the list, and if the current number is greater than
-the number stored in `largest`, we replace the reference in that variable.
-However, if the current number is less than or equal to the largest number seen
-so far, the variable doesn’t change, and the code moves on to the next number
-in the list. After considering all the numbers in the list, `largest` should
-refer to the largest number, which in this case is 100.
+我们将整数列表存储在变量 `number_list` 中，并将列表中第一个数字的引用放在名为 `largest` 的变量中。然后，我们遍历列表中的所有数字，如果当前数字大于存储在 `largest` 中的数字，我们替换该变量中的引用。但是，如果当前数字小于或等于到目前为止看到的最大数字，变量不会更改，代码继续到列表中的下一个数字。在考虑列表中的所有数字之后，`largest` 应该引用最大数字，在这种情况下是 100。
 
-We’ve now been tasked with finding the largest number in two different lists of
-numbers. To do so, we can choose to duplicate the code in Listing 10-1 and use
-the same logic at two different places in the program, as shown in Listing 10-2.
+现在我们已经接到任务，要在两个不同的数字列表中找到最大数字。为此，我们可以选择复制代码清单 10-1 中的代码，并在程序的两个不同位置使用相同的逻辑，如代码清单 10-2 所示。
 
-<Listing number="10-2" file-name="src/main.rs" caption="Code to find the largest number in *two* lists of numbers">
+<Listing number="10-2" file-name="src/main.rs" caption="在两个数字列表中查找最大数字的代码">
 
 ```rust
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-02/src/main.rs}}
@@ -71,21 +36,13 @@ the same logic at two different places in the program, as shown in Listing 10-2.
 
 </Listing>
 
-Although this code works, duplicating code is tedious and error-prone. We also
-have to remember to update the code in multiple places when we want to change
-it.
+尽管这段代码有效，但复制代码很繁琐且容易出错。当我们想要更改它时，我们还必须记住在多个地方更新代码。
 
-To eliminate this duplication, we’ll create an abstraction by defining a
-function that operates on any list of integers passed in as a parameter. This
-solution makes our code clearer and lets us express the concept of finding the
-largest number in a list abstractly.
+为了消除这种重复，我们将通过定义一个函数来创建一个抽象，该函数对作为参数传递的任何整数列表进行操作。这个解决方案使我们的代码更清晰，让我们抽象地表达在列表中查找最大数字的概念。
 
-In Listing 10-3, we extract the code that finds the largest number into a
-function named `largest`. Then, we call the function to find the largest number
-in the two lists from Listing 10-2. We could also use the function on any other
-list of `i32` values we might have in the future.
+在代码清单 10-3 中，我们将查找最大数字的代码提取到名为 `largest` 的函数中。然后，我们调用该函数来查找代码清单 10-2 中两个列表的最大数字。我们也可以在未来可能拥有的任何其他 `i32` 值列表上使用该函数。
 
-<Listing number="10-3" file-name="src/main.rs" caption="Abstracted code to find the largest number in two lists">
+<Listing number="10-3" file-name="src/main.rs" caption="抽象代码以在两个列表中查找最大数字">
 
 ```rust
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-03/src/main.rs:here}}
@@ -93,23 +50,14 @@ list of `i32` values we might have in the future.
 
 </Listing>
 
-The `largest` function has a parameter called `list`, which represents any
-concrete slice of `i32` values we might pass into the function. As a result,
-when we call the function, the code runs on the specific values that we pass
-in.
+`largest` 函数有一个名为 `list` 的参数，它代表我们可能传递给函数的任何具体 `i32` 值切片。因此，当我们调用函数时，代码在我们传递的特定值上运行。
 
-In summary, here are the steps we took to change the code from Listing 10-2 to
-Listing 10-3:
+总结一下，以下是我们将代码从代码清单 10-2 更改为代码清单 10-3 的步骤：
 
-1. Identify duplicate code.
-1. Extract the duplicate code into the body of the function, and specify the
-   inputs and return values of that code in the function signature.
-1. Update the two instances of duplicated code to call the function instead.
+1. 识别重复代码。
+1. 将重复代码提取到函数体中，并在函数签名中指定该代码的输入和返回值。
+1. 更新重复代码的两个实例以调用函数。
 
-Next, we’ll use these same steps with generics to reduce code duplication. In
-the same way that the function body can operate on an abstract `list` instead
-of specific values, generics allow code to operate on abstract types.
+接下来，我们将使用这些相同的步骤和泛型来减少代码重复。就像函数体可以在抽象 `list` 上操作而不是在特定值上操作一样，泛型允许代码在抽象类型上操作。
 
-For example, say we had two functions: one that finds the largest item in a
-slice of `i32` values and one that finds the largest item in a slice of `char`
-values. How would we eliminate that duplication? Let’s find out!
+例如，假设我们有两个函数：一个在 `i32` 值切片中查找最大项，另一个在 `char` 值切片中查找最大项。我们如何消除这种重复？让我们找出答案！

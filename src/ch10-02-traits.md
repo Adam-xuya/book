@@ -2,37 +2,21 @@
 
 <a id="traits-defining-shared-behavior"></a>
 
-## Defining Shared Behavior with Traits
+## 使用 Trait 定义共享行为
 
-A _trait_ defines the functionality a particular type has and can share with
-other types. We can use traits to define shared behavior in an abstract way. We
-can use _trait bounds_ to specify that a generic type can be any type that has
-certain behavior.
+_Trait_ 定义特定类型具有并可以与其他类型共享的功能。我们可以使用 trait 以抽象方式定义共享行为。我们可以使用 _trait 约束_ 来指定泛型类型可以是具有某些行为的任何类型。
 
-> Note: Traits are similar to a feature often called _interfaces_ in other
-> languages, although with some differences.
+> 注意：Trait 类似于其他语言中通常称为 _接口_ 的功能，尽管有一些差异。
 
-### Defining a Trait
+### 定义 Trait
 
-A type’s behavior consists of the methods we can call on that type. Different
-types share the same behavior if we can call the same methods on all of those
-types. Trait definitions are a way to group method signatures together to
-define a set of behaviors necessary to accomplish some purpose.
+类型的行为由我们可以在该类型上调用的方法组成。如果我们可以在所有这些类型上调用相同的方法，则不同类型共享相同的行为。Trait 定义是一种将方法签名组合在一起以定义完成某些目的所需的一组行为的方法。
 
-For example, let’s say we have multiple structs that hold various kinds and
-amounts of text: a `NewsArticle` struct that holds a news story filed in a
-particular location and a `SocialPost` that can have, at most, 280 characters
-along with metadata that indicates whether it was a new post, a repost, or a
-reply to another post.
+例如，假设我们有多个结构体，它们保存各种类型和数量的文本：一个 `NewsArticle` 结构体，它保存在特定位置归档的新闻故事，以及一个 `SocialPost`，它最多可以有 280 个字符以及指示它是新帖子、转发还是对另一个帖子的回复的元数据。
 
-We want to make a media aggregator library crate named `aggregator` that can
-display summaries of data that might be stored in a `NewsArticle` or
-`SocialPost` instance. To do this, we need a summary from each type, and we’ll
-request that summary by calling a `summarize` method on an instance. Listing
-10-12 shows the definition of a public `Summary` trait that expresses this
-behavior.
+我们想要创建一个名为 `aggregator` 的媒体聚合器库 crate，它可以显示可能存储在 `NewsArticle` 或 `SocialPost` 实例中的数据摘要。为此，我们需要每个类型的摘要，我们将通过在实例上调用 `summarize` 方法来请求该摘要。代码清单 10-12 显示了一个公共 `Summary` trait 的定义，它表达了这种行为。
 
-<Listing number="10-12" file-name="src/lib.rs" caption="A `Summary` trait that consists of the behavior provided by a `summarize` method">
+<Listing number="10-12" file-name="src/lib.rs" caption="一个 `Summary` trait，由 `summarize` 方法提供的行为组成">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-12/src/lib.rs}}
@@ -40,33 +24,17 @@ behavior.
 
 </Listing>
 
-Here, we declare a trait using the `trait` keyword and then the trait’s name,
-which is `Summary` in this case. We also declare the trait as `pub` so that
-crates depending on this crate can make use of this trait too, as we’ll see in
-a few examples. Inside the curly brackets, we declare the method signatures
-that describe the behaviors of the types that implement this trait, which in
-this case is `fn summarize(&self) -> String`.
+这里，我们使用 `trait` 关键字然后是该 trait 的名称来声明一个 trait，在这种情况下是 `Summary`。我们还将 trait 声明为 `pub`，以便依赖此 crate 的 crate 也可以使用此 trait，我们将在几个示例中看到。在花括号内，我们声明描述实现此 trait 的类型的行为的方法签名，在这种情况下是 `fn summarize(&self) -> String`。
 
-After the method signature, instead of providing an implementation within curly
-brackets, we use a semicolon. Each type implementing this trait must provide
-its own custom behavior for the body of the method. The compiler will enforce
-that any type that has the `Summary` trait will have the method `summarize`
-defined with this signature exactly.
+在方法签名之后，我们不在花括号内提供实现，而是使用分号。实现此 trait 的每个类型必须为方法的主体提供自己的自定义行为。编译器将强制任何具有 `Summary` trait 的类型都使用此签名定义 `summarize` 方法。
 
-A trait can have multiple methods in its body: The method signatures are listed
-one per line, and each line ends in a semicolon.
+Trait 可以在其主体中有多个方法：方法签名每行列出一个，每行以分号结尾。
 
-### Implementing a Trait on a Type
+### 在类型上实现 Trait
 
-Now that we’ve defined the desired signatures of the `Summary` trait’s methods,
-we can implement it on the types in our media aggregator. Listing 10-13 shows
-an implementation of the `Summary` trait on the `NewsArticle` struct that uses
-the headline, the author, and the location to create the return value of
-`summarize`. For the `SocialPost` struct, we define `summarize` as the username
-followed by the entire text of the post, assuming that the post content is
-already limited to 280 characters.
+既然我们已经定义了 `Summary` trait 的方法的所需签名，我们可以在媒体聚合器中的类型上实现它。代码清单 10-13 显示了在 `NewsArticle` 结构体上实现 `Summary` trait，它使用标题、作者和位置来创建 `summarize` 的返回值。对于 `SocialPost` 结构体，我们将 `summarize` 定义为用户名后跟帖子的整个文本，假设帖子内容已经限制为 280 个字符。
 
-<Listing number="10-13" file-name="src/lib.rs" caption="Implementing the `Summary` trait on the `NewsArticle` and `SocialPost` types">
+<Listing number="10-13" file-name="src/lib.rs" caption="在 `NewsArticle` 和 `SocialPost` 类型上实现 `Summary` trait">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-13/src/lib.rs:here}}
@@ -74,64 +42,31 @@ already limited to 280 characters.
 
 </Listing>
 
-Implementing a trait on a type is similar to implementing regular methods. The
-difference is that after `impl`, we put the trait name we want to implement,
-then use the `for` keyword, and then specify the name of the type we want to
-implement the trait for. Within the `impl` block, we put the method signatures
-that the trait definition has defined. Instead of adding a semicolon after each
-signature, we use curly brackets and fill in the method body with the specific
-behavior that we want the methods of the trait to have for the particular type.
+在类型上实现 trait 类似于实现常规方法。区别在于在 `impl` 之后，我们放置我们想要实现的 trait 名称，然后使用 `for` 关键字，然后指定我们想要为其实现 trait 的类型名称。在 `impl` 块内，我们放置 trait 定义定义的方法签名。我们不在每个签名后添加分号，而是使用花括号并用我们希望 trait 的方法对于特定类型具有的特定行为填充方法主体。
 
-Now that the library has implemented the `Summary` trait on `NewsArticle` and
-`SocialPost`, users of the crate can call the trait methods on instances of
-`NewsArticle` and `SocialPost` in the same way we call regular methods. The only
-difference is that the user must bring the trait into scope as well as the
-types. Here’s an example of how a binary crate could use our `aggregator`
-library crate:
+既然库已经在 `NewsArticle` 和 `SocialPost` 上实现了 `Summary` trait，crate 的用户可以在 `NewsArticle` 和 `SocialPost` 的实例上以与我们调用常规方法相同的方式调用 trait 方法。唯一的区别是用户必须将 trait 引入作用域以及类型。以下是如何使用我们的 `aggregator` 库 crate 的二进制 crate 的示例：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-01-calling-trait-method/src/main.rs}}
 ```
 
-This code prints `1 new post: horse_ebooks: of course, as you probably already
-know, people`.
+此代码打印 `1 new post: horse_ebooks: of course, as you probably already know, people`。
 
-Other crates that depend on the `aggregator` crate can also bring the `Summary`
-trait into scope to implement `Summary` on their own types. One restriction to
-note is that we can implement a trait on a type only if either the trait or the
-type, or both, are local to our crate. For example, we can implement standard
-library traits like `Display` on a custom type like `SocialPost` as part of our
-`aggregator` crate functionality because the type `SocialPost` is local to our
-`aggregator` crate. We can also implement `Summary` on `Vec<T>` in our
-`aggregator` crate because the trait `Summary` is local to our `aggregator`
-crate.
+依赖 `aggregator` crate 的其他 crate 也可以将 `Summary` trait 引入作用域，以便在他们自己的类型上实现 `Summary`。需要注意的一个限制是，只有当 trait 或类型，或两者都是我们 crate 本地的时，我们才能在类型上实现 trait。例如，我们可以在像 `SocialPost` 这样的自定义类型上实现标准库 trait，如 `Display`，作为我们 `aggregator` crate 功能的一部分，因为类型 `SocialPost` 是我们 `aggregator` crate 本地的。我们也可以在我们的 `aggregator` crate 中的 `Vec<T>` 上实现 `Summary`，因为 trait `Summary` 是我们 `aggregator` crate 本地的。
 
-But we can’t implement external traits on external types. For example, we can’t
-implement the `Display` trait on `Vec<T>` within our `aggregator` crate,
-because `Display` and `Vec<T>` are both defined in the standard library and
-aren’t local to our `aggregator` crate. This restriction is part of a property
-called _coherence_, and more specifically the _orphan rule_, so named because
-the parent type is not present. This rule ensures that other people’s code
-can’t break your code and vice versa. Without the rule, two crates could
-implement the same trait for the same type, and Rust wouldn’t know which
-implementation to use.
+但是我们不能在外部类型上实现外部 trait。例如，我们不能在我们 `aggregator` crate 内的 `Vec<T>` 上实现 `Display` trait，因为 `Display` 和 `Vec<T>` 都在标准库中定义，不是我们 `aggregator` crate 本地的。此限制是称为 _一致性_ 的属性的一部分，更具体地说是 _孤儿规则_，之所以这样命名是因为父类型不存在。此规则确保其他人的代码无法破坏你的代码，反之亦然。如果没有此规则，两个 crate 可以为同一类型实现相同的 trait，而 Rust 不知道使用哪个实现。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="default-implementations"></a>
 
-### Using Default Implementations
+### 使用默认实现
 
-Sometimes it’s useful to have default behavior for some or all of the methods
-in a trait instead of requiring implementations for all methods on every type.
-Then, as we implement the trait on a particular type, we can keep or override
-each method’s default behavior.
+有时为 trait 中的某些或所有方法具有默认行为而不是要求每个类型上的所有方法都有实现是有用的。然后，当我们在特定类型上实现 trait 时，我们可以保留或覆盖每个方法的默认行为。
 
-In Listing 10-14, we specify a default string for the `summarize` method of the
-`Summary` trait instead of only defining the method signature, as we did in
-Listing 10-12.
+在代码清单 10-14 中，我们为 `Summary` trait 的 `summarize` 方法指定默认字符串，而不是仅定义方法签名，就像我们在代码清单 10-12 中所做的那样。
 
-<Listing number="10-14" file-name="src/lib.rs" caption="Defining a `Summary` trait with a default implementation of the `summarize` method">
+<Listing number="10-14" file-name="src/lib.rs" caption="定义一个带有 `summarize` 方法默认实现的 `Summary` trait">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-14/src/lib.rs:here}}
@@ -139,94 +74,61 @@ Listing 10-12.
 
 </Listing>
 
-To use a default implementation to summarize instances of `NewsArticle`, we
-specify an empty `impl` block with `impl Summary for NewsArticle {}`.
+要使用默认实现来汇总 `NewsArticle` 的实例，我们使用 `impl Summary for NewsArticle {}` 指定一个空的 `impl` 块。
 
-Even though we’re no longer defining the `summarize` method on `NewsArticle`
-directly, we’ve provided a default implementation and specified that
-`NewsArticle` implements the `Summary` trait. As a result, we can still call
-the `summarize` method on an instance of `NewsArticle`, like this:
+即使我们不再直接在 `NewsArticle` 上定义 `summarize` 方法，我们也提供了默认实现并指定 `NewsArticle` 实现 `Summary` trait。因此，我们仍然可以在 `NewsArticle` 的实例上调用 `summarize` 方法，如下所示：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-02-calling-default-impl/src/main.rs:here}}
 ```
 
-This code prints `New article available! (Read more...)`.
+此代码打印 `New article available! (Read more...)`。
 
-Creating a default implementation doesn’t require us to change anything about
-the implementation of `Summary` on `SocialPost` in Listing 10-13. The reason is
-that the syntax for overriding a default implementation is the same as the
-syntax for implementing a trait method that doesn’t have a default
-implementation.
+创建默认实现不需要我们更改代码清单 10-13 中 `SocialPost` 上 `Summary` 实现的任何内容。原因是覆盖默认实现的语法与实现没有默认实现的 trait 方法的语法相同。
 
-Default implementations can call other methods in the same trait, even if those
-other methods don’t have a default implementation. In this way, a trait can
-provide a lot of useful functionality and only require implementors to specify
-a small part of it. For example, we could define the `Summary` trait to have a
-`summarize_author` method whose implementation is required, and then define a
-`summarize` method that has a default implementation that calls the
-`summarize_author` method:
+默认实现可以调用同一 trait 中的其他方法，即使这些其他方法没有默认实现。通过这种方式，trait 可以提供大量有用的功能，只需要实现者指定其中的一小部分。例如，我们可以定义 `Summary` trait 具有一个 `summarize_author` 方法，其实现是必需的，然后定义一个具有默认实现的 `summarize` 方法，该方法调用 `summarize_author` 方法：
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:here}}
 ```
 
-To use this version of `Summary`, we only need to define `summarize_author`
-when we implement the trait on a type:
+要使用此版本的 `Summary`，我们只需要在类型上实现 trait 时定义 `summarize_author`：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:impl}}
 ```
 
-After we define `summarize_author`, we can call `summarize` on instances of the
-`SocialPost` struct, and the default implementation of `summarize` will call the
-definition of `summarize_author` that we’ve provided. Because we’ve implemented
-`summarize_author`, the `Summary` trait has given us the behavior of the
-`summarize` method without requiring us to write any more code. Here’s what
-that looks like:
+在我们定义 `summarize_author` 之后，我们可以在 `SocialPost` 结构体的实例上调用 `summarize`，`summarize` 的默认实现将调用我们提供的 `summarize_author` 定义。因为我们已经实现了 `summarize_author`，`Summary` trait 为我们提供了 `summarize` 方法的行为，而无需我们编写任何更多代码。这就是它的样子：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/main.rs:here}}
 ```
 
-This code prints `1 new post: (Read more from @horse_ebooks...)`.
+此代码打印 `1 new post: (Read more from @horse_ebooks...)`。
 
-Note that it isn’t possible to call the default implementation from an
-overriding implementation of that same method.
+注意，不可能从该方法的覆盖实现中调用默认实现。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="traits-as-parameters"></a>
 
-### Using Traits as Parameters
+### 使用 Trait 作为参数
 
-Now that you know how to define and implement traits, we can explore how to use
-traits to define functions that accept many different types. We’ll use the
-`Summary` trait we implemented on the `NewsArticle` and `SocialPost` types in
-Listing 10-13 to define a `notify` function that calls the `summarize` method
-on its `item` parameter, which is of some type that implements the `Summary`
-trait. To do this, we use the `impl Trait` syntax, like this:
+既然你知道如何定义和实现 trait，我们可以探索如何使用 trait 来定义接受许多不同类型的函数。我们将使用我们在代码清单 10-13 中在 `NewsArticle` 和 `SocialPost` 类型上实现的 `Summary` trait 来定义一个 `notify` 函数，该函数在其 `item` 参数上调用 `summarize` 方法，该参数是某种实现 `Summary` trait 的类型。为此，我们使用 `impl Trait` 语法，如下所示：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-04-traits-as-parameters/src/lib.rs:here}}
 ```
 
-Instead of a concrete type for the `item` parameter, we specify the `impl`
-keyword and the trait name. This parameter accepts any type that implements the
-specified trait. In the body of `notify`, we can call any methods on `item`
-that come from the `Summary` trait, such as `summarize`. We can call `notify`
-and pass in any instance of `NewsArticle` or `SocialPost`. Code that calls the
-function with any other type, such as a `String` or an `i32`, won’t compile,
-because those types don’t implement `Summary`.
+我们不是为 `item` 参数指定具体类型，而是指定 `impl` 关键字和 trait 名称。此参数接受实现指定 trait 的任何类型。在 `notify` 的主体中，我们可以在 `item` 上调用来自 `Summary` trait 的任何方法，例如 `summarize`。我们可以调用 `notify` 并传入 `NewsArticle` 或 `SocialPost` 的任何实例。使用任何其他类型（如 `String` 或 `i32`）调用函数的代码将无法编译，因为那些类型不实现 `Summary`。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="fixing-the-largest-function-with-trait-bounds"></a>
 
-#### Trait Bound Syntax
+#### Trait 约束语法
 
-The `impl Trait` syntax works for straightforward cases but is actually syntax
-sugar for a longer form known as a _trait bound_; it looks like this:
+`impl Trait` 语法适用于简单的情况，但实际上是称为 _trait 约束_ 的较长形式的语法糖；它看起来像这样：
 
 ```rust,ignore
 pub fn notify<T: Summary>(item: &T) {
@@ -234,128 +136,83 @@ pub fn notify<T: Summary>(item: &T) {
 }
 ```
 
-This longer form is equivalent to the example in the previous section but is
-more verbose. We place trait bounds with the declaration of the generic type
-parameter after a colon and inside angle brackets.
+这种较长形式等效于上一节中的示例，但更冗长。我们将 trait 约束与泛型类型参数的声明一起放在冒号之后和尖括号内。
 
-The `impl Trait` syntax is convenient and makes for more concise code in simple
-cases, while the fuller trait bound syntax can express more complexity in other
-cases. For example, we can have two parameters that implement `Summary`. Doing
-so with the `impl Trait` syntax looks like this:
+`impl Trait` 语法很方便，在简单情况下使代码更简洁，而完整的 trait 约束语法可以在其他情况下表达更复杂的复杂性。例如，我们可以有两个实现 `Summary` 的参数。使用 `impl Trait` 语法这样做如下所示：
 
 ```rust,ignore
 pub fn notify(item1: &impl Summary, item2: &impl Summary) {
 ```
 
-Using `impl Trait` is appropriate if we want this function to allow `item1` and
-`item2` to have different types (as long as both types implement `Summary`). If
-we want to force both parameters to have the same type, however, we must use a
-trait bound, like this:
+如果我们希望此函数允许 `item1` 和 `item2` 具有不同的类型（只要两种类型都实现 `Summary`），使用 `impl Trait` 是合适的。但是，如果我们想强制两个参数具有相同的类型，我们必须使用 trait 约束，如下所示：
 
 ```rust,ignore
 pub fn notify<T: Summary>(item1: &T, item2: &T) {
 ```
 
-The generic type `T` specified as the type of the `item1` and `item2`
-parameters constrains the function such that the concrete type of the value
-passed as an argument for `item1` and `item2` must be the same.
+指定为 `item1` 和 `item2` 参数类型的泛型类型 `T` 限制了函数，使得作为 `item1` 和 `item2` 的参数传递的值的具体类型必须相同。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="specifying-multiple-trait-bounds-with-the--syntax"></a>
 
-#### Multiple Trait Bounds with the `+` Syntax
+#### 使用 `+` 语法的多个 Trait 约束
 
-We can also specify more than one trait bound. Say we wanted `notify` to use
-display formatting as well as `summarize` on `item`: We specify in the `notify`
-definition that `item` must implement both `Display` and `Summary`. We can do
-so using the `+` syntax:
+我们还可以指定多个 trait 约束。假设我们想要 `notify` 在 `item` 上使用显示格式以及 `summarize`：我们在 `notify` 定义中指定 `item` 必须同时实现 `Display` 和 `Summary`。我们可以使用 `+` 语法这样做：
 
 ```rust,ignore
 pub fn notify(item: &(impl Summary + Display)) {
 ```
 
-The `+` syntax is also valid with trait bounds on generic types:
+`+` 语法也适用于泛型类型上的 trait 约束：
 
 ```rust,ignore
 pub fn notify<T: Summary + Display>(item: &T) {
 ```
 
-With the two trait bounds specified, the body of `notify` can call `summarize`
-and use `{}` to format `item`.
+指定了两个 trait 约束后，`notify` 的主体可以调用 `summarize` 并使用 `{}` 格式化 `item`。
 
-#### Clearer Trait Bounds with `where` Clauses
+#### 使用 `where` 子句的更清晰的 Trait 约束
 
-Using too many trait bounds has its downsides. Each generic has its own trait
-bounds, so functions with multiple generic type parameters can contain lots of
-trait bound information between the function’s name and its parameter list,
-making the function signature hard to read. For this reason, Rust has alternate
-syntax for specifying trait bounds inside a `where` clause after the function
-signature. So, instead of writing this:
+使用太多 trait 约束有其缺点。每个泛型都有自己的 trait 约束，所以具有多个泛型类型参数的函数可以在函数名称和其参数列表之间包含大量 trait 约束信息，使函数签名难以阅读。因此，Rust 在函数签名之后使用 `where` 子句内指定 trait 约束的替代语法。所以，而不是写这个：
 
 ```rust,ignore
 fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
 ```
 
-we can use a `where` clause, like this:
+我们可以使用 `where` 子句，如下所示：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-07-where-clause/src/lib.rs:here}}
 ```
 
-This function’s signature is less cluttered: The function name, parameter list,
-and return type are close together, similar to a function without lots of trait
-bounds.
+此函数的签名不那么杂乱：函数名称、参数列表和返回类型紧密在一起，类似于没有大量 trait 约束的函数。
 
-### Returning Types That Implement Traits
+### 返回实现 Trait 的类型
 
-We can also use the `impl Trait` syntax in the return position to return a
-value of some type that implements a trait, as shown here:
+我们还可以在返回位置使用 `impl Trait` 语法来返回实现 trait 的某种类型的值，如下所示：
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-05-returning-impl-trait/src/lib.rs:here}}
 ```
 
-By using `impl Summary` for the return type, we specify that the
-`returns_summarizable` function returns some type that implements the `Summary`
-trait without naming the concrete type. In this case, `returns_summarizable`
-returns a `SocialPost`, but the code calling this function doesn’t need to know
-that.
+通过使用 `impl Summary` 作为返回类型，我们指定 `returns_summarizable` 函数返回实现 `Summary` trait 的某种类型，而不命名具体类型。在这种情况下，`returns_summarizable` 返回一个 `SocialPost`，但调用此函数的代码不需要知道这一点。
 
-The ability to specify a return type only by the trait it implements is
-especially useful in the context of closures and iterators, which we cover in
-Chapter 13. Closures and iterators create types that only the compiler knows or
-types that are very long to specify. The `impl Trait` syntax lets you concisely
-specify that a function returns some type that implements the `Iterator` trait
-without needing to write out a very long type.
+仅通过它实现的 trait 指定返回类型的能力在闭包和迭代器的上下文中特别有用，我们在第 13 章中介绍。闭包和迭代器创建只有编译器知道的类型或非常长的类型。`impl Trait` 语法让你可以简洁地指定函数返回实现 `Iterator` trait 的某种类型，而无需写出非常长的类型。
 
-However, you can only use `impl Trait` if you’re returning a single type. For
-example, this code that returns either a `NewsArticle` or a `SocialPost` with
-the return type specified as `impl Summary` wouldn’t work:
+但是，如果你只返回单个类型，则只能使用 `impl Trait`。例如，这段代码返回 `NewsArticle` 或 `SocialPost`，返回类型指定为 `impl Summary`，不会工作：
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-06-impl-trait-returns-one-type/src/lib.rs:here}}
 ```
 
-Returning either a `NewsArticle` or a `SocialPost` isn’t allowed due to
-restrictions around how the `impl Trait` syntax is implemented in the compiler.
-We’ll cover how to write a function with this behavior in the [“Using Trait
-Objects to Abstract over Shared Behavior”][trait-objects]<!-- ignore -->
-section of Chapter 18.
+由于编译器如何实现 `impl Trait` 语法的限制，不允许返回 `NewsArticle` 或 `SocialPost`。我们将在第 18 章的["使用 Trait 对象抽象共享行为"][trait-objects]<!-- ignore -->部分介绍如何编写具有此行为的函数。
 
-### Using Trait Bounds to Conditionally Implement Methods
+### 使用 Trait 约束有条件地实现方法
 
-By using a trait bound with an `impl` block that uses generic type parameters,
-we can implement methods conditionally for types that implement the specified
-traits. For example, the type `Pair<T>` in Listing 10-15 always implements the
-`new` function to return a new instance of `Pair<T>` (recall from the [“Method
-Syntax”][methods]<!-- ignore --> section of Chapter 5 that `Self` is a type
-alias for the type of the `impl` block, which in this case is `Pair<T>`). But
-in the next `impl` block, `Pair<T>` only implements the `cmp_display` method if
-its inner type `T` implements the `PartialOrd` trait that enables comparison
-_and_ the `Display` trait that enables printing.
+通过使用带有使用泛型类型参数的 `impl` 块的 trait 约束，我们可以有条件地为实现指定 trait 的类型实现方法。例如，代码清单 10-15 中的类型 `Pair<T>` 总是实现 `new` 函数以返回 `Pair<T>` 的新实例（回想第 5 章的["方法语法"][methods]<!-- ignore -->部分，`Self` 是 `impl` 块类型的类型别名，在这种情况下是 `Pair<T>`）。但是在下一个 `impl` 块中，只有当其内部类型 `T` 实现启用比较的 `PartialOrd` trait _和_ 启用打印的 `Display` trait 时，`Pair<T>` 才实现 `cmp_display` 方法。
 
-<Listing number="10-15" file-name="src/lib.rs" caption="Conditionally implementing methods on a generic type depending on trait bounds">
+<Listing number="10-15" file-name="src/lib.rs" caption="根据 trait 约束有条件地在泛型类型上实现方法">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-15/src/lib.rs}}
@@ -363,12 +220,7 @@ _and_ the `Display` trait that enables printing.
 
 </Listing>
 
-We can also conditionally implement a trait for any type that implements
-another trait. Implementations of a trait on any type that satisfies the trait
-bounds are called _blanket implementations_ and are used extensively in the
-Rust standard library. For example, the standard library implements the
-`ToString` trait on any type that implements the `Display` trait. The `impl`
-block in the standard library looks similar to this code:
+我们也可以有条件地为实现另一个 trait 的任何类型实现 trait。在满足 trait 约束的任何类型上的 trait 实现称为 _覆盖实现_，并在 Rust 标准库中广泛使用。例如，标准库在任何实现 `Display` trait 的类型上实现 `ToString` trait。标准库中的 `impl` 块看起来类似于此代码：
 
 ```rust,ignore
 impl<T: Display> ToString for T {
@@ -376,29 +228,15 @@ impl<T: Display> ToString for T {
 }
 ```
 
-Because the standard library has this blanket implementation, we can call the
-`to_string` method defined by the `ToString` trait on any type that implements
-the `Display` trait. For example, we can turn integers into their corresponding
-`String` values like this because integers implement `Display`:
+因为标准库具有此覆盖实现，我们可以在任何实现 `Display` trait 的类型上调用由 `ToString` trait 定义的 `to_string` 方法。例如，我们可以将整数转换为它们对应的 `String` 值，如下所示，因为整数实现 `Display`：
 
 ```rust
 let s = 3.to_string();
 ```
 
-Blanket implementations appear in the documentation for the trait in the
-“Implementors” section.
+覆盖实现出现在 trait 文档的"实现者"部分。
 
-Traits and trait bounds let us write code that uses generic type parameters to
-reduce duplication but also specify to the compiler that we want the generic
-type to have particular behavior. The compiler can then use the trait bound
-information to check that all the concrete types used with our code provide the
-correct behavior. In dynamically typed languages, we would get an error at
-runtime if we called a method on a type that didn’t define the method. But Rust
-moves these errors to compile time so that we’re forced to fix the problems
-before our code is even able to run. Additionally, we don’t have to write code
-that checks for behavior at runtime, because we’ve already checked at compile
-time. Doing so improves performance without having to give up the flexibility
-of generics.
+Trait 和 trait 约束让我们编写使用泛型类型参数来减少重复的代码，但也向编译器指定我们希望泛型类型具有特定行为。然后编译器可以使用 trait 约束信息来检查与我们代码一起使用的所有具体类型是否提供正确的行为。在动态类型语言中，如果我们在未定义该方法的类型上调用方法，我们会在运行时收到错误。但是 Rust 将这些错误移到编译时，以便我们在代码甚至能够运行之前被迫修复问题。此外，我们不必编写在运行时检查行为的代码，因为我们已经在编译时检查过了。这样做可以提高性能，而不必放弃泛型的灵活性。
 
 [trait-objects]: ch18-02-trait-objects.html#using-trait-objects-to-abstract-over-shared-behavior
 [methods]: ch05-03-method-syntax.html#method-syntax
