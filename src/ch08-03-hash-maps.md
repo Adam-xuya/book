@@ -1,30 +1,16 @@
-## Storing Keys with Associated Values in Hash Maps
+## 在哈希映射中存储键和关联值
 
-The last of our common collections is the hash map. The type `HashMap<K, V>`
-stores a mapping of keys of type `K` to values of type `V` using a _hashing
-function_, which determines how it places these keys and values into memory.
-Many programming languages support this kind of data structure, but they often
-use a different name, such as _hash_, _map_, _object_, _hash table_,
-_dictionary_, or _associative array_, just to name a few.
+我们常见集合中的最后一个是哈希映射。类型 `HashMap<K, V>` 使用 _哈希函数_ 存储类型 `K` 的键到类型 `V` 的值的映射，该函数决定了它如何将这些键和值放入内存。许多编程语言支持这种数据结构，但它们经常使用不同的名称，例如 _hash_、_map_、_object_、_hash table_、_dictionary_ 或 _associative array_，仅举几例。
 
-Hash maps are useful when you want to look up data not by using an index, as
-you can with vectors, but by using a key that can be of any type. For example,
-in a game, you could keep track of each team’s score in a hash map in which
-each key is a team’s name and the values are each team’s score. Given a team
-name, you can retrieve its score.
+当你想要通过使用键（可以是任何类型）而不是使用索引（就像你可以使用向量一样）来查找数据时，哈希映射很有用。例如，在游戏中，你可以在哈希映射中跟踪每个团队的分数，其中每个键是团队名称，值是每个团队的分数。给定团队名称，你可以检索其分数。
 
-We’ll go over the basic API of hash maps in this section, but many more goodies
-are hiding in the functions defined on `HashMap<K, V>` by the standard library.
-As always, check the standard library documentation for more information.
+我们将在本节中介绍哈希映射的基本 API，但标准库在 `HashMap<K, V>` 上定义的函数中隐藏了更多好东西。一如既往，请查看标准库文档以获取更多信息。
 
-### Creating a New Hash Map
+### 创建新哈希映射
 
-One way to create an empty hash map is to use `new` and to add elements with
-`insert`. In Listing 8-20, we’re keeping track of the scores of two teams whose
-names are _Blue_ and _Yellow_. The Blue team starts with 10 points, and the
-Yellow team starts with 50.
+创建空哈希映射的一种方法是使用 `new` 并使用 `insert` 添加元素。在代码清单 8-20 中，我们跟踪两个团队的分数，它们的名称是 _Blue_ 和 _Yellow_。Blue 团队以 10 分开始，Yellow 团队以 50 分开始。
 
-<Listing number="8-20" caption="Creating a new hash map and inserting some keys and values">
+<Listing number="8-20" caption="创建新哈希映射并插入一些键和值">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-20/src/main.rs:here}}
@@ -32,23 +18,15 @@ Yellow team starts with 50.
 
 </Listing>
 
-Note that we need to first `use` the `HashMap` from the collections portion of
-the standard library. Of our three common collections, this one is the least
-often used, so it’s not included in the features brought into scope
-automatically in the prelude. Hash maps also have less support from the
-standard library; there’s no built-in macro to construct them, for example.
+注意，我们需要首先从标准库的集合部分 `use` `HashMap`。在我们的三个常见集合中，这是最不常用的，所以它不包含在预导入模块中自动引入作用域的功能中。哈希映射从标准库得到的支持也较少；例如，没有内置宏来构造它们。
 
-Just like vectors, hash maps store their data on the heap. This `HashMap` has
-keys of type `String` and values of type `i32`. Like vectors, hash maps are
-homogeneous: All of the keys must have the same type, and all of the values
-must have the same type.
+就像向量一样，哈希映射将其数据存储在堆上。这个 `HashMap` 的键类型是 `String`，值类型是 `i32`。就像向量一样，哈希映射是同质的：所有键必须具有相同的类型，所有值必须具有相同的类型。
 
-### Accessing Values in a Hash Map
+### 访问哈希映射中的值
 
-We can get a value out of the hash map by providing its key to the `get`
-method, as shown in Listing 8-21.
+我们可以通过向 `get` 方法提供其键来从哈希映射中获取值，如代码清单 8-21 所示。
 
-<Listing number="8-21" caption="Accessing the score for the Blue team stored in the hash map">
+<Listing number="8-21" caption="访问存储在哈希映射中的 Blue 团队的分数">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-21/src/main.rs:here}}
@@ -56,21 +34,15 @@ method, as shown in Listing 8-21.
 
 </Listing>
 
-Here, `score` will have the value that’s associated with the Blue team, and the
-result will be `10`. The `get` method returns an `Option<&V>`; if there’s no
-value for that key in the hash map, `get` will return `None`. This program
-handles the `Option` by calling `copied` to get an `Option<i32>` rather than an
-`Option<&i32>`, then `unwrap_or` to set `score` to zero if `scores` doesn’t
-have an entry for the key.
+这里，`score` 将具有与 Blue 团队关联的值，结果将是 `10`。`get` 方法返回 `Option<&V>`；如果哈希映射中没有该键的值，`get` 将返回 `None`。此程序通过调用 `copied` 获取 `Option<i32>` 而不是 `Option<&i32>` 来处理 `Option`，然后使用 `unwrap_or` 如果 `scores` 没有该键的条目，则将 `score` 设置为零。
 
-We can iterate over each key-value pair in a hash map in a similar manner as we
-do with vectors, using a `for` loop:
+我们可以使用 `for` 循环以与向量类似的方式迭代哈希映射中的每个键值对：
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/no-listing-03-iterate-over-hashmap/src/main.rs:here}}
 ```
 
-This code will print each pair in an arbitrary order:
+这段代码将以任意顺序打印每对：
 
 ```text
 Yellow: 50
@@ -81,13 +53,11 @@ Blue: 10
 
 <a id="hash-maps-and-ownership"></a>
 
-### Managing Ownership in Hash Maps
+### 管理哈希映射中的所有权
 
-For types that implement the `Copy` trait, like `i32`, the values are copied
-into the hash map. For owned values like `String`, the values will be moved and
-the hash map will be the owner of those values, as demonstrated in Listing 8-22.
+对于实现 `Copy` trait 的类型，如 `i32`，值被复制到哈希映射中。对于拥有的值，如 `String`，值将被移动，哈希映射将成为这些值的所有者，如代码清单 8-22 所示。
 
-<Listing number="8-22" caption="Showing that keys and values are owned by the hash map once they’re inserted">
+<Listing number="8-22" caption="显示键和值在插入后由哈希映射拥有">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-22/src/main.rs:here}}
@@ -95,38 +65,21 @@ the hash map will be the owner of those values, as demonstrated in Listing 8-22.
 
 </Listing>
 
-We aren’t able to use the variables `field_name` and `field_value` after
-they’ve been moved into the hash map with the call to `insert`.
+在通过调用 `insert` 将它们移动到哈希映射后，我们无法使用变量 `field_name` 和 `field_value`。
 
-If we insert references to values into the hash map, the values won’t be moved
-into the hash map. The values that the references point to must be valid for at
-least as long as the hash map is valid. We’ll talk more about these issues in
-[“Validating References with
-Lifetimes”][validating-references-with-lifetimes]<!-- ignore --> in Chapter 10.
+如果我们将值的引用插入到哈希映射中，值不会被移动到哈希映射中。引用指向的值必须至少在哈希映射有效的时间内有效。我们将在第 10 章的["使用生命周期验证引用"][validating-references-with-lifetimes]<!-- ignore -->中更详细地讨论这些问题。
 
-### Updating a Hash Map
+### 更新哈希映射
 
-Although the number of key and value pairs is growable, each unique key can
-only have one value associated with it at a time (but not vice versa: For
-example, both the Blue team and the Yellow team could have the value `10`
-stored in the `scores` hash map).
+尽管键值对的数量是可增长的，但每个唯一键一次只能有一个与其关联的值（但反之则不然：例如，Blue 团队和 Yellow 团队都可以在 `scores` 哈希映射中存储值 `10`）。
 
-When you want to change the data in a hash map, you have to decide how to
-handle the case when a key already has a value assigned. You could replace the
-old value with the new value, completely disregarding the old value. You could
-keep the old value and ignore the new value, only adding the new value if the
-key _doesn’t_ already have a value. Or you could combine the old value and the
-new value. Let’s look at how to do each of these!
+当你想要更改哈希映射中的数据时，你必须决定如何处理键已分配值的情况。你可以用新值替换旧值，完全忽略旧值。你可以保留旧值并忽略新值，仅在键 _没有_ 值时才添加新值。或者你可以组合旧值和新值。让我们看看如何做到这些！
 
-#### Overwriting a Value
+#### 覆盖值
 
-If we insert a key and a value into a hash map and then insert that same key
-with a different value, the value associated with that key will be replaced.
-Even though the code in Listing 8-23 calls `insert` twice, the hash map will
-only contain one key-value pair because we’re inserting the value for the Blue
-team’s key both times.
+如果我们将键和值插入到哈希映射中，然后用不同的值插入相同的键，与该键关联的值将被替换。尽管代码清单 8-23 中的代码调用 `insert` 两次，哈希映射将只包含一个键值对，因为我们在两次调用中都为 Blue 团队的键插入值。
 
-<Listing number="8-23" caption="Replacing a value stored with a particular key">
+<Listing number="8-23" caption="替换与特定键一起存储的值">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-23/src/main.rs:here}}
@@ -134,28 +87,19 @@ team’s key both times.
 
 </Listing>
 
-This code will print `{"Blue": 25}`. The original value of `10` has been
-overwritten.
+这段代码将打印 `{"Blue": 25}`。原始值 `10` 已被覆盖。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="only-inserting-a-value-if-the-key-has-no-value"></a>
 
-#### Adding a Key and Value Only If a Key Isn’t Present
+#### 仅在键不存在时添加键和值
 
-It’s common to check whether a particular key already exists in the hash map
-with a value and then to take the following actions: If the key does exist in
-the hash map, the existing value should remain the way it is; if the key
-doesn’t exist, insert it and a value for it.
+检查特定键是否已在哈希映射中存在值，然后采取以下操作是很常见的：如果键确实存在于哈希映射中，现有值应保持原样；如果键不存在，则插入它和它的值。
 
-Hash maps have a special API for this called `entry` that takes the key you
-want to check as a parameter. The return value of the `entry` method is an enum
-called `Entry` that represents a value that might or might not exist. Let’s say
-we want to check whether the key for the Yellow team has a value associated
-with it. If it doesn’t, we want to insert the value `50`, and the same for the
-Blue team. Using the `entry` API, the code looks like Listing 8-24.
+哈希映射有一个用于此目的的特殊 API，称为 `entry`，它接受你想要检查的键作为参数。`entry` 方法的返回值是一个名为 `Entry` 的枚举，它表示可能存在也可能不存在的值。假设我们想检查 Yellow 团队的键是否有与其关联的值。如果没有，我们想插入值 `50`，Blue 团队也是如此。使用 `entry` API，代码看起来像代码清单 8-24。
 
-<Listing number="8-24" caption="Using the `entry` method to only insert if the key does not already have a value">
+<Listing number="8-24" caption="使用 `entry` 方法仅在键还没有值时插入">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-24/src/main.rs:here}}
@@ -163,28 +107,15 @@ Blue team. Using the `entry` API, the code looks like Listing 8-24.
 
 </Listing>
 
-The `or_insert` method on `Entry` is defined to return a mutable reference to
-the value for the corresponding `Entry` key if that key exists, and if not, it
-inserts the parameter as the new value for this key and returns a mutable
-reference to the new value. This technique is much cleaner than writing the
-logic ourselves and, in addition, plays more nicely with the borrow checker.
+`Entry` 上的 `or_insert` 方法定义为如果该键存在，则返回对相应 `Entry` 键值的可变引用，如果不存在，它将参数作为该键的新值插入并返回对新值的可变引用。这种技术比我们自己编写逻辑要干净得多，此外，它与借用检查器配合得更好。
 
-Running the code in Listing 8-24 will print `{"Yellow": 50, "Blue": 10}`. The
-first call to `entry` will insert the key for the Yellow team with the value
-`50` because the Yellow team doesn’t have a value already. The second call to
-`entry` will not change the hash map, because the Blue team already has the
-value `10`.
+运行代码清单 8-24 中的代码将打印 `{"Yellow": 50, "Blue": 10}`。第一次调用 `entry` 将为 Yellow 团队插入键，值为 `50`，因为 Yellow 团队还没有值。第二次调用 `entry` 不会更改哈希映射，因为 Blue 团队已经有值 `10`。
 
-#### Updating a Value Based on the Old Value
+#### 基于旧值更新值
 
-Another common use case for hash maps is to look up a key’s value and then
-update it based on the old value. For instance, Listing 8-25 shows code that
-counts how many times each word appears in some text. We use a hash map with
-the words as keys and increment the value to keep track of how many times we’ve
-seen that word. If it’s the first time we’ve seen a word, we’ll first insert
-the value `0`.
+哈希映射的另一个常见用例是查找键的值，然后基于旧值更新它。例如，代码清单 8-25 显示了计算每个单词在文本中出现次数的代码。我们使用一个以单词为键的哈希映射，并递增该值以跟踪我们看到该单词的次数。如果这是我们第一次看到单词，我们将首先插入值 `0`。
 
-<Listing number="8-25" caption="Counting occurrences of words using a hash map that stores words and counts">
+<Listing number="8-25" caption="使用存储单词和计数的哈希映射计算单词出现次数">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-25/src/main.rs:here}}
@@ -192,60 +123,27 @@ the value `0`.
 
 </Listing>
 
-This code will print `{"world": 2, "hello": 1, "wonderful": 1}`. You might see
-the same key-value pairs printed in a different order: Recall from [“Accessing
-Values in a Hash Map”][access]<!-- ignore --> that iterating over a hash map
-happens in an arbitrary order.
+这段代码将打印 `{"world": 2, "hello": 1, "wonderful": 1}`。你可能会看到相同的键值对以不同的顺序打印：回想["访问哈希映射中的值"][access]<!-- ignore -->，迭代哈希映射以任意顺序发生。
 
-The `split_whitespace` method returns an iterator over subslices, separated by
-whitespace, of the value in `text`. The `or_insert` method returns a mutable
-reference (`&mut V`) to the value for the specified key. Here, we store that
-mutable reference in the `count` variable, so in order to assign to that value,
-we must first dereference `count` using the asterisk (`*`). The mutable
-reference goes out of scope at the end of the `for` loop, so all of these
-changes are safe and allowed by the borrowing rules.
+`split_whitespace` 方法返回 `text` 中值的子切片的迭代器，由空白分隔。`or_insert` 方法返回对指定键值的可变引用（`&mut V`）。这里，我们将该可变引用存储在 `count` 变量中，因此为了分配给该值，我们必须首先使用星号（`*`）解引用 `count`。可变引用在 `for` 循环结束时超出作用域，所以所有这些更改都是安全的，并且允许借用规则。
 
-### Hashing Functions
+### 哈希函数
 
-By default, `HashMap` uses a hashing function called _SipHash_ that can provide
-resistance to denial-of-service (DoS) attacks involving hash
-tables[^siphash]<!-- ignore -->. This is not the fastest hashing algorithm
-available, but the trade-off for better security that comes with the drop in
-performance is worth it. If you profile your code and find that the default
-hash function is too slow for your purposes, you can switch to another function
-by specifying a different hasher. A _hasher_ is a type that implements the
-`BuildHasher` trait. We’ll talk about traits and how to implement them in
-[Chapter 10][traits]<!-- ignore -->. You don’t necessarily have to implement
-your own hasher from scratch; [crates.io](https://crates.io/)<!-- ignore -->
-has libraries shared by other Rust users that provide hashers implementing many
-common hashing algorithms.
+默认情况下，`HashMap` 使用称为 _SipHash_ 的哈希函数，可以提供对涉及哈希表的拒绝服务（DoS）攻击的抵抗力[^siphash]<!-- ignore -->。这不是最快的可用哈希算法，但为了更好的安全性而降低性能的权衡是值得的。如果你分析代码并发现默认哈希函数对你的目的来说太慢，你可以通过指定不同的 hasher 来切换到另一个函数。_hasher_ 是实现 `BuildHasher` trait 的类型。我们将在[第 10 章][traits]<!-- ignore -->中讨论 trait 以及如何实现它们。你不一定需要从头实现自己的 hasher；[crates.io](https://crates.io/)<!-- ignore -->上有其他 Rust 用户共享的库，这些库提供了实现许多常见哈希算法的 hasher。
 
 [^siphash]: [https://en.wikipedia.org/wiki/SipHash](https://en.wikipedia.org/wiki/SipHash)
 
-## Summary
+## 总结
 
-Vectors, strings, and hash maps will provide a large amount of functionality
-necessary in programs when you need to store, access, and modify data. Here are
-some exercises you should now be equipped to solve:
+向量、字符串和哈希映射将在你需要存储、访问和修改数据的程序中提供大量必要的功能。以下是一些你现在应该能够解决的练习：
 
-1. Given a list of integers, use a vector and return the median (when sorted,
-   the value in the middle position) and mode (the value that occurs most
-   often; a hash map will be helpful here) of the list.
-1. Convert strings to Pig Latin. The first consonant of each word is moved to
-   the end of the word and _ay_ is added, so _first_ becomes _irst-fay_. Words
-   that start with a vowel have _hay_ added to the end instead (_apple_ becomes
-   _apple-hay_). Keep in mind the details about UTF-8 encoding!
-1. Using a hash map and vectors, create a text interface to allow a user to add
-   employee names to a department in a company; for example, “Add Sally to
-   Engineering” or “Add Amir to Sales.” Then, let the user retrieve a list of
-   all people in a department or all people in the company by department, sorted
-   alphabetically.
+1. 给定一个整数列表，使用向量并返回列表的中位数（排序后，中间位置的值）和众数（出现最频繁的值；哈希映射在这里会很有帮助）。
+1. 将字符串转换为 Pig Latin。每个单词的第一个辅音移动到单词的末尾并添加 _ay_，所以 _first_ 变成 _irst-fay_。以元音开头的单词在末尾添加 _hay_（_apple_ 变成 _apple-hay_）。记住 UTF-8 编码的细节！
+1. 使用哈希映射和向量，创建一个文本界面，允许用户将员工姓名添加到公司中的部门；例如，"Add Sally to Engineering" 或 "Add Amir to Sales"。然后，让用户按字母顺序检索部门中的所有人员或公司中按部门的所有人员列表。
 
-The standard library API documentation describes methods that vectors, strings,
-and hash maps have that will be helpful for these exercises!
+标准库 API 文档描述了向量、字符串和哈希映射具有的方法，这些方法对这些练习很有帮助！
 
-We’re getting into more complex programs in which operations can fail, so it’s
-a perfect time to discuss error handling. We’ll do that next!
+我们正在进入更复杂的程序，其中操作可能会失败，所以这是讨论错误处理的最佳时机。我们接下来会这样做！
 
 [validating-references-with-lifetimes]: ch10-03-lifetime-syntax.html#validating-references-with-lifetimes
 [access]: #accessing-values-in-a-hash-map

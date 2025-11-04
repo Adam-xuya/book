@@ -1,17 +1,12 @@
-## Storing Lists of Values with Vectors
+## 使用向量存储值列表
 
-The first collection type we’ll look at is `Vec<T>`, also known as a vector.
-Vectors allow you to store more than one value in a single data structure that
-puts all the values next to each other in memory. Vectors can only store values
-of the same type. They are useful when you have a list of items, such as the
-lines of text in a file or the prices of items in a shopping cart.
+我们将查看的第一个集合类型是 `Vec<T>`，也称为向量。向量允许你在单个数据结构中存储多个值，这些值在内存中彼此相邻放置。向量只能存储相同类型的值。当你有一个项目列表时，它们很有用，例如文件中的文本行或购物车中商品的价格。
 
-### Creating a New Vector
+### 创建新向量
 
-To create a new, empty vector, we call the `Vec::new` function, as shown in
-Listing 8-1.
+要创建一个新的空向量，我们调用 `Vec::new` 函数，如代码清单 8-1 所示。
 
-<Listing number="8-1" caption="Creating a new, empty vector to hold values of type `i32`">
+<Listing number="8-1" caption="创建一个新的空向量以保存类型为 `i32` 的值">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-01/src/main.rs:here}}
@@ -19,24 +14,11 @@ Listing 8-1.
 
 </Listing>
 
-Note that we added a type annotation here. Because we aren’t inserting any
-values into this vector, Rust doesn’t know what kind of elements we intend to
-store. This is an important point. Vectors are implemented using generics;
-we’ll cover how to use generics with your own types in Chapter 10. For now,
-know that the `Vec<T>` type provided by the standard library can hold any type.
-When we create a vector to hold a specific type, we can specify the type within
-angle brackets. In Listing 8-1, we’ve told Rust that the `Vec<T>` in `v` will
-hold elements of the `i32` type.
+注意，我们在这里添加了类型注释。因为我们没有向此向量插入任何值，Rust 不知道我们打算存储什么类型的元素。这是一个重要的点。向量是使用泛型实现的；我们将在第 10 章介绍如何在自己的类型中使用泛型。现在，要知道标准库提供的 `Vec<T>` 类型可以保存任何类型。当我们创建一个向量来保存特定类型时，我们可以在尖括号内指定类型。在代码清单 8-1 中，我们告诉 Rust `v` 中的 `Vec<T>` 将保存 `i32` 类型的元素。
 
-More often, you’ll create a `Vec<T>` with initial values, and Rust will infer
-the type of value you want to store, so you rarely need to do this type
-annotation. Rust conveniently provides the `vec!` macro, which will create a
-new vector that holds the values you give it. Listing 8-2 creates a new
-`Vec<i32>` that holds the values `1`, `2`, and `3`. The integer type is `i32`
-because that’s the default integer type, as we discussed in the [“Data
-Types”][data-types]<!-- ignore --> section of Chapter 3.
+更常见的是，你将创建一个具有初始值的 `Vec<T>`，Rust 将推断你想要存储的值的类型，所以你很少需要这样做类型注释。Rust 方便地提供了 `vec!` 宏，它将创建一个保存你给它的值的新向量。代码清单 8-2 创建一个新的 `Vec<i32>`，它保存值 `1`、`2` 和 `3`。整数类型是 `i32`，因为这是默认整数类型，正如我们在第 3 章的["数据类型"][data-types]<!-- ignore -->部分中讨论的那样。
 
-<Listing number="8-2" caption="Creating a new vector containing values">
+<Listing number="8-2" caption="创建一个包含值的新向量">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-02/src/main.rs:here}}
@@ -44,16 +26,13 @@ Types”][data-types]<!-- ignore --> section of Chapter 3.
 
 </Listing>
 
-Because we’ve given initial `i32` values, Rust can infer that the type of `v`
-is `Vec<i32>`, and the type annotation isn’t necessary. Next, we’ll look at how
-to modify a vector.
+因为我们已经给出了初始的 `i32` 值，Rust 可以推断 `v` 的类型是 `Vec<i32>`，类型注释不是必需的。接下来，我们将看看如何修改向量。
 
-### Updating a Vector
+### 更新向量
 
-To create a vector and then add elements to it, we can use the `push` method,
-as shown in Listing 8-3.
+要创建向量然后向其添加元素，我们可以使用 `push` 方法，如代码清单 8-3 所示。
 
-<Listing number="8-3" caption="Using the `push` method to add values to a vector">
+<Listing number="8-3" caption="使用 `push` 方法向向量添加值">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-03/src/main.rs:here}}
@@ -61,21 +40,15 @@ as shown in Listing 8-3.
 
 </Listing>
 
-As with any variable, if we want to be able to change its value, we need to
-make it mutable using the `mut` keyword, as discussed in Chapter 3. The numbers
-we place inside are all of type `i32`, and Rust infers this from the data, so
-we don’t need the `Vec<i32>` annotation.
+与任何变量一样，如果我们希望能够更改其值，我们需要使用 `mut` 关键字使其可变，如第 3 章中讨论的那样。我们放入的数字都是 `i32` 类型，Rust 从数据中推断出这一点，所以我们不需要 `Vec<i32>` 注释。
 
-### Reading Elements of Vectors
+### 读取向量元素
 
-There are two ways to reference a value stored in a vector: via indexing or by
-using the `get` method. In the following examples, we’ve annotated the types of
-the values that are returned from these functions for extra clarity.
+有两种方法可以引用存储在向量中的值：通过索引或使用 `get` 方法。在以下示例中，我们注释了从这些函数返回的值的类型以增加清晰度。
 
-Listing 8-4 shows both methods of accessing a value in a vector, with indexing
-syntax and the `get` method.
+代码清单 8-4 显示了访问向量中值的两种方法，使用索引语法和 `get` 方法。
 
-<Listing number="8-4" caption="Using indexing syntax and using the `get` method to access an item in a vector">
+<Listing number="8-4" caption="使用索引语法和使用 `get` 方法访问向量中的项">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-04/src/main.rs:here}}
@@ -83,19 +56,11 @@ syntax and the `get` method.
 
 </Listing>
 
-Note a few details here. We use the index value of `2` to get the third element
-because vectors are indexed by number, starting at zero. Using `&` and `[]`
-gives us a reference to the element at the index value. When we use the `get`
-method with the index passed as an argument, we get an `Option<&T>` that we can
-use with `match`.
+注意这里的一些细节。我们使用索引值 `2` 来获取第三个元素，因为向量是按数字索引的，从零开始。使用 `&` 和 `[]` 给我们一个对索引值处元素的引用。当我们使用 `get` 方法并将索引作为参数传递时，我们得到一个 `Option<&T>`，我们可以与 `match` 一起使用。
 
-Rust provides these two ways to reference an element so that you can choose how
-the program behaves when you try to use an index value outside the range of
-existing elements. As an example, let’s see what happens when we have a vector
-of five elements and then we try to access an element at index 100 with each
-technique, as shown in Listing 8-5.
+Rust 提供这两种引用元素的方法，以便你可以选择程序在尝试使用超出现有元素范围的索引值时的行为。例如，让我们看看当我们有一个包含五个元素的向量，然后尝试使用每种技术访问索引 100 处的元素时会发生什么，如代码清单 8-5 所示。
 
-<Listing number="8-5" caption="Attempting to access the element at index 100 in a vector containing five elements">
+<Listing number="8-5" caption="尝试访问包含五个元素的向量中索引 100 处的元素">
 
 ```rust,should_panic,panics
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-05/src/main.rs:here}}
@@ -103,32 +68,13 @@ technique, as shown in Listing 8-5.
 
 </Listing>
 
-When we run this code, the first `[]` method will cause the program to panic
-because it references a nonexistent element. This method is best used when you
-want your program to crash if there’s an attempt to access an element past the
-end of the vector.
+当我们运行此代码时，第一个 `[]` 方法会导致程序 panic，因为它引用了一个不存在的元素。当你希望程序在尝试访问向量末尾之后的元素时崩溃时，最好使用此方法。
 
-When the `get` method is passed an index that is outside the vector, it returns
-`None` without panicking. You would use this method if accessing an element
-beyond the range of the vector may happen occasionally under normal
-circumstances. Your code will then have logic to handle having either
-`Some(&element)` or `None`, as discussed in Chapter 6. For example, the index
-could be coming from a person entering a number. If they accidentally enter a
-number that’s too large and the program gets a `None` value, you could tell the
-user how many items are in the current vector and give them another chance to
-enter a valid value. That would be more user-friendly than crashing the program
-due to a typo!
+当 `get` 方法传递一个超出向量范围的索引时，它会返回 `None` 而不会 panic。如果你在正常情况下偶尔可能访问超出向量范围的元素，你会使用此方法。然后你的代码将具有处理 `Some(&element)` 或 `None` 的逻辑，如第 6 章中讨论的那样。例如，索引可能来自输入数字的人。如果他们意外输入了一个太大的数字，程序得到一个 `None` 值，你可以告诉用户当前向量中有多少项，并给他们另一次输入有效值的机会。这比由于拼写错误而使程序崩溃更用户友好！
 
-When the program has a valid reference, the borrow checker enforces the
-ownership and borrowing rules (covered in Chapter 4) to ensure that this
-reference and any other references to the contents of the vector remain valid.
-Recall the rule that states you can’t have mutable and immutable references in
-the same scope. That rule applies in Listing 8-6, where we hold an immutable
-reference to the first element in a vector and try to add an element to the
-end. This program won’t work if we also try to refer to that element later in
-the function.
+当程序有有效引用时，借用检查器强制执行所有权和借用规则（在第 4 章中介绍），以确保此引用和对向量内容的任何其他引用保持有效。回想一下规则，它规定你不能在同一作用域中拥有可变和不可变引用。该规则适用于代码清单 8-6，其中我们持有对向量中第一个元素的不可变引用，并尝试在末尾添加元素。如果我们还尝试在函数后面引用该元素，此程序将无法工作。
 
-<Listing number="8-6" caption="Attempting to add an element to a vector while holding a reference to an item">
+<Listing number="8-6" caption="在持有对项的引用时尝试向向量添加元素">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-06/src/main.rs:here}}
@@ -136,33 +82,21 @@ the function.
 
 </Listing>
 
-Compiling this code will result in this error:
+编译此代码将导致此错误：
 
 ```console
 {{#include ../listings/ch08-common-collections/listing-08-06/output.txt}}
 ```
 
-The code in Listing 8-6 might look like it should work: Why should a reference
-to the first element care about changes at the end of the vector? This error is
-due to the way vectors work: Because vectors put the values next to each other
-in memory, adding a new element onto the end of the vector might require
-allocating new memory and copying the old elements to the new space, if there
-isn’t enough room to put all the elements next to each other where the vector
-is currently stored. In that case, the reference to the first element would be
-pointing to deallocated memory. The borrowing rules prevent programs from
-ending up in that situation.
+代码清单 8-6 中的代码可能看起来应该可以工作：为什么对第一个元素的引用应该关心向量末尾的变化？此错误是由于向量的工作方式造成的：因为向量将值彼此相邻放在内存中，如果向量当前存储的位置没有足够的空间将所有元素彼此相邻放置，向向量末尾添加新元素可能需要分配新内存并将旧元素复制到新空间。在这种情况下，对第一个元素的引用将指向已释放的内存。借用规则防止程序陷入这种情况。
 
-> Note: For more on the implementation details of the `Vec<T>` type, see [“The
-> Rustonomicon”][nomicon].
+> 注意：有关 `Vec<T>` 类型的实现细节的更多信息，请参阅["The Rustonomicon"][nomicon]。
 
-### Iterating Over the Values in a Vector
+### 迭代向量中的值
 
-To access each element in a vector in turn, we would iterate through all of the
-elements rather than use indices to access one at a time. Listing 8-7 shows how
-to use a `for` loop to get immutable references to each element in a vector of
-`i32` values and print them.
+要依次访问向量中的每个元素，我们将遍历所有元素，而不是使用索引一次访问一个。代码清单 8-7 显示了如何使用 `for` 循环获取 `i32` 值向量中每个元素的不可变引用并打印它们。
 
-<Listing number="8-7" caption="Printing each element in a vector by iterating over the elements using a `for` loop">
+<Listing number="8-7" caption="通过使用 `for` 循环遍历元素来打印向量中的每个元素">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-07/src/main.rs:here}}
@@ -170,11 +104,9 @@ to use a `for` loop to get immutable references to each element in a vector of
 
 </Listing>
 
-We can also iterate over mutable references to each element in a mutable vector
-in order to make changes to all the elements. The `for` loop in Listing 8-8
-will add `50` to each element.
+我们还可以迭代可变向量中每个元素的可变引用，以便对所有元素进行更改。代码清单 8-8 中的 `for` 循环将为每个元素添加 `50`。
 
-<Listing number="8-8" caption="Iterating over mutable references to elements in a vector">
+<Listing number="8-8" caption="迭代向量中元素的可变引用">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-08/src/main.rs:here}}
@@ -182,34 +114,17 @@ will add `50` to each element.
 
 </Listing>
 
-To change the value that the mutable reference refers to, we have to use the
-`*` dereference operator to get to the value in `i` before we can use the `+=`
-operator. We’ll talk more about the dereference operator in the [“Following the
-Reference to the Value”][deref]<!-- ignore --> section of Chapter 15.
+要更改可变引用所指的值，我们必须使用 `*` 解引用操作符来获取 `i` 中的值，然后才能使用 `+=` 操作符。我们将在第 15 章的["跟随引用到值"][deref]<!-- ignore -->部分更详细地讨论解引用操作符。
 
-Iterating over a vector, whether immutably or mutably, is safe because of the
-borrow checker’s rules. If we attempted to insert or remove items in the `for`
-loop bodies in Listing 8-7 and Listing 8-8, we would get a compiler error
-similar to the one we got with the code in Listing 8-6. The reference to the
-vector that the `for` loop holds prevents simultaneous modification of the
-whole vector.
+由于借用检查器的规则，迭代向量（无论是不可变的还是可变的）是安全的。如果我们尝试在代码清单 8-7 和代码清单 8-8 中的 `for` 循环体中插入或删除项，我们将得到一个类似于代码清单 8-6 中代码的编译器错误。`for` 循环持有的对向量的引用防止同时修改整个向量。
 
-### Using an Enum to Store Multiple Types
+### 使用枚举存储多种类型
 
-Vectors can only store values that are of the same type. This can be
-inconvenient; there are definitely use cases for needing to store a list of
-items of different types. Fortunately, the variants of an enum are defined
-under the same enum type, so when we need one type to represent elements of
-different types, we can define and use an enum!
+向量只能存储相同类型的值。这可能不方便；肯定有需要存储不同类型项目列表的用例。幸运的是，枚举的变体在同一个枚举类型下定义，所以当我们需要一种类型来表示不同类型的元素时，我们可以定义并使用枚举！
 
-For example, say we want to get values from a row in a spreadsheet in which
-some of the columns in the row contain integers, some floating-point numbers,
-and some strings. We can define an enum whose variants will hold the different
-value types, and all the enum variants will be considered the same type: that
-of the enum. Then, we can create a vector to hold that enum and so, ultimately,
-hold different types. We’ve demonstrated this in Listing 8-9.
+例如，假设我们想要从电子表格的一行中获取值，其中行的某些列包含整数、一些浮点数和一些字符串。我们可以定义一个枚举，其变体将保存不同的值类型，并且所有枚举变体将被视为同一类型：枚举的类型。然后，我们可以创建一个向量来保存该枚举，因此最终可以保存不同的类型。我们在代码清单 8-9 中演示了这一点。
 
-<Listing number="8-9" caption="Defining an enum to store values of different types in one vector">
+<Listing number="8-9" caption="定义一个枚举以在一个向量中存储不同类型的值">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-09/src/main.rs:here}}
@@ -217,29 +132,17 @@ hold different types. We’ve demonstrated this in Listing 8-9.
 
 </Listing>
 
-Rust needs to know what types will be in the vector at compile time so that it
-knows exactly how much memory on the heap will be needed to store each element.
-We must also be explicit about what types are allowed in this vector. If Rust
-allowed a vector to hold any type, there would be a chance that one or more of
-the types would cause errors with the operations performed on the elements of
-the vector. Using an enum plus a `match` expression means that Rust will ensure
-at compile time that every possible case is handled, as discussed in Chapter 6.
+Rust 需要在编译时知道向量中将有什么类型，以便它确切知道堆上需要多少内存来存储每个元素。我们还必须明确说明此向量中允许哪些类型。如果 Rust 允许向量保存任何类型，则一种或多种类型可能会导致对向量元素执行的操作出错。使用枚举加上 `match` 表达式意味着 Rust 将在编译时确保处理每种可能的情况，如第 6 章中讨论的那样。
 
-If you don’t know the exhaustive set of types a program will get at runtime to
-store in a vector, the enum technique won’t work. Instead, you can use a trait
-object, which we’ll cover in Chapter 18.
+如果你不知道程序在运行时将获得的类型的完整集合以存储在向量中，枚举技术将不起作用。相反，你可以使用 trait 对象，我们将在第 18 章中介绍。
 
-Now that we’ve discussed some of the most common ways to use vectors, be sure
-to review [the API documentation][vec-api]<!-- ignore --> for all of the many
-useful methods defined on `Vec<T>` by the standard library. For example, in
-addition to `push`, a `pop` method removes and returns the last element.
+现在我们已经讨论了一些使用向量的最常见方法，请务必查看[API 文档][vec-api]<!-- ignore -->以了解标准库在 `Vec<T>` 上定义的所有许多有用方法。例如，除了 `push` 之外，`pop` 方法会删除并返回最后一个元素。
 
-### Dropping a Vector Drops Its Elements
+### 丢弃向量会丢弃其元素
 
-Like any other `struct`, a vector is freed when it goes out of scope, as
-annotated in Listing 8-10.
+与任何其他 `struct` 一样，向量在超出作用域时会被释放，如代码清单 8-10 中注释的那样。
 
-<Listing number="8-10" caption="Showing where the vector and its elements are dropped">
+<Listing number="8-10" caption="显示向量及其元素被丢弃的位置">
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-10/src/main.rs:here}}
@@ -247,12 +150,9 @@ annotated in Listing 8-10.
 
 </Listing>
 
-When the vector gets dropped, all of its contents are also dropped, meaning the
-integers it holds will be cleaned up. The borrow checker ensures that any
-references to contents of a vector are only used while the vector itself is
-valid.
+当向量被丢弃时，其所有内容也会被丢弃，这意味着它保存的整数将被清理。借用检查器确保只有在向量本身有效时才使用对向量内容的任何引用。
 
-Let’s move on to the next collection type: `String`!
+让我们继续下一个集合类型：`String`！
 
 [data-types]: ch03-02-data-types.html#data-types
 [nomicon]: ../nomicon/vec/vec.html
