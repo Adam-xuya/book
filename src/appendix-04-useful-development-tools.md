@@ -1,35 +1,22 @@
-## Appendix D: Useful Development Tools
+## 附录 D：有用的开发工具
 
-In this appendix, we talk about some useful development tools that the Rust
-project provides. We’ll look at automatic formatting, quick ways to apply
-warning fixes, a linter, and integrating with IDEs.
+在本附录中，我们讨论 Rust 项目提供的一些有用的开发工具。我们将介绍自动格式化、应用警告修复的快速方法、linter 以及与 IDE 的集成。
 
-### Automatic Formatting with `rustfmt`
+### 使用 `rustfmt` 自动格式化
 
-The `rustfmt` tool reformats your code according to the community code style.
-Many collaborative projects use `rustfmt` to prevent arguments about which
-style to use when writing Rust: Everyone formats their code using the tool.
+`rustfmt` 工具根据社区代码样式重新格式化你的代码。许多协作项目使用 `rustfmt` 来防止在编写 Rust 时关于使用哪种样式的争论：每个人都使用该工具格式化代码。
 
-Rust installations include `rustfmt` by default, so you should already have the
-programs `rustfmt` and `cargo-fmt` on your system. These two commands are
-analogous to `rustc` and `cargo` in that `rustfmt` allows finer grained control
-and `cargo-fmt` understands conventions of a project that uses Cargo. To format
-any Cargo project, enter the following:
+Rust 安装默认包含 `rustfmt`，因此你的系统上应该已经有 `rustfmt` 和 `cargo-fmt` 程序。这两个命令类似于 `rustc` 和 `cargo`，因为 `rustfmt` 允许更细粒度的控制，而 `cargo-fmt` 理解使用 Cargo 的项目约定。要格式化任何 Cargo 项目，请输入以下内容：
 
 ```console
 $ cargo fmt
 ```
 
-Running this command reformats all the Rust code in the current crate. This
-should only change the code style, not the code semantics. For more information
-on `rustfmt`, see [its documentation][rustfmt].
+运行此命令会重新格式化当前 crate 中的所有 Rust 代码。这应该只更改代码样式，而不更改代码语义。有关 `rustfmt` 的更多信息，请参阅[其文档][rustfmt]。
 
-### Fix Your Code with `rustfix`
+### 使用 `rustfix` 修复代码
 
-The `rustfix` tool is included with Rust installations and can automatically
-fix compiler warnings that have a clear way to correct the problem that’s
-likely what you want. You’ve probably seen compiler warnings before. For
-example, consider this code:
+`rustfix` 工具包含在 Rust 安装中，可以自动修复编译器警告，这些警告有明确的纠正问题的方法，可能是你想要的。你可能之前见过编译器警告。例如，考虑以下代码：
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -40,8 +27,7 @@ fn main() {
 }
 ```
 
-Here, we’re defining the variable `x` as mutable, but we never actually mutate
-it. Rust warns us about that:
+这里，我们将变量 `x` 定义为可变的，但我们实际上从未改变它。Rust 警告我们：
 
 ```console
 $ cargo build
@@ -57,9 +43,7 @@ warning: variable does not need to be mutable
   = note: `#[warn(unused_mut)]` on by default
 ```
 
-The warning suggests that we remove the `mut` keyword. We can automatically
-apply that suggestion using the `rustfix` tool by running the command `cargo
-fix`:
+警告建议我们删除 `mut` 关键字。我们可以通过运行命令 `cargo fix` 使用 `rustfix` 工具自动应用该建议：
 
 ```console
 $ cargo fix
@@ -68,8 +52,7 @@ $ cargo fix
     Finished dev [unoptimized + debuginfo] target(s) in 0.59s
 ```
 
-When we look at _src/main.rs_ again, we’ll see that `cargo fix` has changed the
-code:
+当我们再次查看 _src/main.rs_ 时，我们会看到 `cargo fix` 已更改代码：
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -80,26 +63,21 @@ fn main() {
 }
 ```
 
-The variable `x` is now immutable, and the warning no longer appears.
+变量 `x` 现在是不可变的，警告不再出现。
 
-You can also use the `cargo fix` command to transition your code between
-different Rust editions. Editions are covered in [Appendix E][editions]<!--
-ignore -->.
+你也可以使用 `cargo fix` 命令在不同 Rust 版本之间转换代码。版本在[附录 E][editions]<!-- ignore -->中介绍。
 
-### More Lints with Clippy
+### 使用 Clippy 进行更多 Lint
 
-The Clippy tool is a collection of lints to analyze your code so that you can
-catch common mistakes and improve your Rust code. Clippy is included with
-standard Rust installations.
+Clippy 工具是一个 lint 集合，用于分析你的代码，以便你可以捕获常见错误并改进 Rust 代码。Clippy 包含在标准 Rust 安装中。
 
-To run Clippy’s lints on any Cargo project, enter the following:
+要在任何 Cargo 项目上运行 Clippy 的 lint，请输入以下内容：
 
 ```console
 $ cargo clippy
 ```
 
-For example, say you write a program that uses an approximation of a
-mathematical constant, such as pi, as this program does:
+例如，假设你编写一个使用数学常数（如 pi）的近似值的程序，如下所示：
 
 <Listing file-name="src/main.rs">
 
@@ -113,7 +91,7 @@ fn main() {
 
 </Listing>
 
-Running `cargo clippy` on this project results in this error:
+在此项目上运行 `cargo clippy` 会导致此错误：
 
 ```text
 error: approximate value of `f{32, 64}::consts::PI` found
@@ -127,11 +105,9 @@ error: approximate value of `f{32, 64}::consts::PI` found
   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#approx_constant
 ```
 
-This error lets you know that Rust already has a more precise `PI` constant
-defined, and that your program would be more correct if you used the constant
-instead. You would then change your code to use the `PI` constant.
+此错误让你知道 Rust 已经定义了更精确的 `PI` 常量，如果你的程序使用该常量而不是近似值，将更加正确。然后，你将更改代码以使用 `PI` 常量。
 
-The following code doesn’t result in any errors or warnings from Clippy:
+以下代码不会导致 Clippy 的任何错误或警告：
 
 <Listing file-name="src/main.rs">
 
@@ -145,21 +121,13 @@ fn main() {
 
 </Listing>
 
-For more information on Clippy, see [its documentation][clippy].
+有关 Clippy 的更多信息，请参阅[其文档][clippy]。
 
-### IDE Integration Using `rust-analyzer`
+### 使用 `rust-analyzer` 进行 IDE 集成
 
-To help with IDE integration, the Rust community recommends using
-[`rust-analyzer`][rust-analyzer]<!-- ignore -->. This tool is a set of
-compiler-centric utilities that speak [Language Server Protocol][lsp]<!--
-ignore -->, which is a specification for IDEs and programming languages to
-communicate with each other. Different clients can use `rust-analyzer`, such as
-[the Rust analyzer plug-in for Visual Studio Code][vscode].
+为了帮助 IDE 集成，Rust 社区建议使用 [`rust-analyzer`][rust-analyzer]<!-- ignore -->。此工具是一组以编译器为中心的工具，它们使用[语言服务器协议][lsp]<!-- ignore -->，这是 IDE 和编程语言相互通信的规范。不同的客户端可以使用 `rust-analyzer`，例如[Visual Studio Code 的 Rust analyzer 插件][vscode]。
 
-Visit the `rust-analyzer` project’s [home page][rust-analyzer]<!-- ignore -->
-for installation instructions, then install the language server support in your
-particular IDE. Your IDE will gain capabilities such as autocompletion, jump to
-definition, and inline errors.
+访问 `rust-analyzer` 项目的[主页][rust-analyzer]<!-- ignore -->以获取安装说明，然后在你的特定 IDE 中安装语言服务器支持。你的 IDE 将获得诸如自动完成、跳转到定义和内联错误等功能。
 
 [rustfmt]: https://github.com/rust-lang/rustfmt
 [editions]: appendix-05-editions.md

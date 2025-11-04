@@ -1,183 +1,88 @@
-## Appendix C: Derivable Traits
+## 附录 C：可派生 Traits
 
-In various places in the book, we’ve discussed the `derive` attribute, which
-you can apply to a struct or enum definition. The `derive` attribute generates
-code that will implement a trait with its own default implementation on the
-type you’ve annotated with the `derive` syntax.
+在本书的各个地方，我们讨论了 `derive` 属性，你可以将其应用于结构体或枚举定义。`derive` 属性生成代码，该代码将在你使用 `derive` 语法注释的类型上实现一个 trait，并提供其自己的默认实现。
 
-In this appendix, we provide a reference of all the traits in the standard
-library that you can use with `derive`. Each section covers:
+在本附录中，我们提供了标准库中所有可以与 `derive` 一起使用的 traits 的参考。每个部分涵盖：
 
-- What operators and methods deriving this trait will enable
-- What the implementation of the trait provided by `derive` does
-- What implementing the trait signifies about the type
-- The conditions in which you’re allowed or not allowed to implement the trait
-- Examples of operations that require the trait
+- 派生此 trait 将启用的运算符和方法
+- `derive` 提供的 trait 实现的作用
+- 实现 trait 对类型的意义
+- 允许或不允许实现 trait 的条件
+- 需要 trait 的操作示例
 
-If you want different behavior from that provided by the `derive` attribute,
-consult the [standard library documentation](../std/index.html)<!-- ignore -->
-for each trait for details on how to manually implement them.
+如果你想要 `derive` 属性提供的行为之外的不同行为，请查阅[标准库文档](../std/index.html)<!-- ignore -->以了解每个 trait 的详细信息，了解如何手动实现它们。
 
-The traits listed here are the only ones defined by the standard library that
-can be implemented on your types using `derive`. Other traits defined in the
-standard library don’t have sensible default behavior, so it’s up to you to
-implement them in the way that makes sense for what you’re trying to accomplish.
+这里列出的 traits 是标准库定义的唯一可以使用 `derive` 在你的类型上实现的 traits。标准库中定义的其他 traits 没有合理的默认行为，因此你需要根据你尝试完成的任务以有意义的方式实现它们。
 
-An example of a trait that can’t be derived is `Display`, which handles
-formatting for end users. You should always consider the appropriate way to
-display a type to an end user. What parts of the type should an end user be
-allowed to see? What parts would they find relevant? What format of the data
-would be most relevant to them? The Rust compiler doesn’t have this insight, so
-it can’t provide appropriate default behavior for you.
+无法派生的 trait 的一个例子是 `Display`，它处理最终用户的格式化。你应该始终考虑向最终用户显示类型的适当方式。最终用户应该能够看到类型的哪些部分？他们会发现哪些部分相关？数据的哪种格式对他们最相关？Rust 编译器没有这种洞察力，因此它无法为你提供适当的默认行为。
 
-The list of derivable traits provided in this appendix is not comprehensive:
-Libraries can implement `derive` for their own traits, making the list of
-traits you can use `derive` with truly open ended. Implementing `derive`
-involves using a procedural macro, which is covered in the [“Custom `derive`
-Macros”][custom-derive-macros]<!-- ignore --> section in Chapter 20.
+本附录中提供的可派生 traits 列表并不全面：库可以为它们自己的 traits 实现 `derive`，使你可以使用 `derive` 的 traits 列表真正开放。实现 `derive` 涉及使用过程宏，这在第20章的[“自定义 `derive` 宏”][custom-derive-macros]<!-- ignore -->部分中介绍。
 
-### `Debug` for Programmer Output
+### `Debug` 用于程序员输出
 
-The `Debug` trait enables debug formatting in format strings, which you
-indicate by adding `:?` within `{}` placeholders.
+`Debug` trait 启用格式字符串中的调试格式化，你通过在 `{}` 占位符内添加 `:?` 来指示。
 
-The `Debug` trait allows you to print instances of a type for debugging
-purposes, so you and other programmers using your type can inspect an instance
-at a particular point in a program’s execution.
+`Debug` trait 允许你打印类型的实例以进行调试，因此你和其他使用你的类型的程序员可以在程序执行的特定点检查实例。
 
-The `Debug` trait is required, for example, in the use of the `assert_eq!`
-macro. This macro prints the values of instances given as arguments if the
-equality assertion fails so that programmers can see why the two instances
-weren’t equal.
+例如，`Debug` trait 在使用 `assert_eq!` 宏时是必需的。如果相等断言失败，此宏会打印作为参数给出的实例的值，以便程序员可以看到为什么两个实例不相等。
 
-### `PartialEq` and `Eq` for Equality Comparisons
+### `PartialEq` 和 `Eq` 用于相等比较
 
-The `PartialEq` trait allows you to compare instances of a type to check for
-equality and enables use of the `==` and `!=` operators.
+`PartialEq` trait 允许你比较类型的实例以检查相等性，并启用 `==` 和 `!=` 运算符的使用。
 
-Deriving `PartialEq` implements the `eq` method. When `PartialEq` is derived on
-structs, two instances are equal only if _all_ fields are equal, and the
-instances are not equal if _any_ fields are not equal. When derived on enums,
-each variant is equal to itself and not equal to the other variants.
+派生 `PartialEq` 实现 `eq` 方法。当在结构体上派生 `PartialEq` 时，两个实例只有在_所有_字段都相等时才相等，如果_任何_字段不相等，则实例不相等。当在枚举上派生时，每个变体等于自身，不等于其他变体。
 
-The `PartialEq` trait is required, for example, with the use of the
-`assert_eq!` macro, which needs to be able to compare two instances of a type
-for equality.
+例如，`PartialEq` trait 在使用 `assert_eq!` 宏时是必需的，该宏需要能够比较两个类型的实例是否相等。
 
-The `Eq` trait has no methods. Its purpose is to signal that for every value of
-the annotated type, the value is equal to itself. The `Eq` trait can only be
-applied to types that also implement `PartialEq`, although not all types that
-implement `PartialEq` can implement `Eq`. One example of this is floating-point
-number types: The implementation of floating-point numbers states that two
-instances of the not-a-number (`NaN`) value are not equal to each other.
+`Eq` trait 没有方法。其目的是表示对于注释类型的每个值，该值等于自身。`Eq` trait 只能应用于也实现 `PartialEq` 的类型，尽管并非所有实现 `PartialEq` 的类型都可以实现 `Eq`。一个例子是浮点数类型：浮点数的实现表明两个非数字（`NaN`）值的实例彼此不相等。
 
-An example of when `Eq` is required is for keys in a `HashMap<K, V>` so that
-the `HashMap<K, V>` can tell whether two keys are the same.
+需要 `Eq` 的一个例子是 `HashMap<K, V>` 中的键，以便 `HashMap<K, V>` 可以判断两个键是否相同。
 
-### `PartialOrd` and `Ord` for Ordering Comparisons
+### `PartialOrd` 和 `Ord` 用于排序比较
 
-The `PartialOrd` trait allows you to compare instances of a type for sorting
-purposes. A type that implements `PartialOrd` can be used with the `<`, `>`,
-`<=`, and `>=` operators. You can only apply the `PartialOrd` trait to types
-that also implement `PartialEq`.
+`PartialOrd` trait 允许你比较类型的实例以进行排序。实现 `PartialOrd` 的类型可以与 `<`、`>`、`<=` 和 `>=` 运算符一起使用。你只能将 `PartialOrd` trait 应用于也实现 `PartialEq` 的类型。
 
-Deriving `PartialOrd` implements the `partial_cmp` method, which returns an
-`Option<Ordering>` that will be `None` when the values given don’t produce an
-ordering. An example of a value that doesn’t produce an ordering, even though
-most values of that type can be compared, is the `NaN` floating point value.
-Calling `partial_cmp` with any floating-point number and the `NaN`
-floating-point value will return `None`.
+派生 `PartialOrd` 实现 `partial_cmp` 方法，该方法返回一个 `Option<Ordering>`，当给定的值不产生排序时，该值将为 `None`。即使该类型的大多数值可以比较，不产生排序的值的一个例子是 `NaN` 浮点值。用任何浮点数和 `NaN` 浮点值调用 `partial_cmp` 将返回 `None`。
 
-When derived on structs, `PartialOrd` compares two instances by comparing the
-value in each field in the order in which the fields appear in the struct
-definition. When derived on enums, variants of the enum declared earlier in the
-enum definition are considered less than the variants listed later.
+当在结构体上派生时，`PartialOrd` 通过按字段在结构体定义中出现的顺序比较每个字段的值来比较两个实例。当在枚举上派生时，在枚举定义中较早声明的枚举变体被认为小于后面列出的变体。
 
-The `PartialOrd` trait is required, for example, for the `gen_range` method
-from the `rand` crate that generates a random value in the range specified by a
-range expression.
+例如，`PartialOrd` trait 对于来自 `rand` crate 的 `gen_range` 方法是必需的，该方法在由范围表达式指定的范围内生成随机值。
 
-The `Ord` trait allows you to know that for any two values of the annotated
-type, a valid ordering will exist. The `Ord` trait implements the `cmp` method,
-which returns an `Ordering` rather than an `Option<Ordering>` because a valid
-ordering will always be possible. You can only apply the `Ord` trait to types
-that also implement `PartialOrd` and `Eq` (and `Eq` requires `PartialEq`). When
-derived on structs and enums, `cmp` behaves the same way as the derived
-implementation for `partial_cmp` does with `PartialOrd`.
+`Ord` trait 允许你知道对于注释类型的任何两个值，将存在有效的排序。`Ord` trait 实现 `cmp` 方法，该方法返回 `Ordering` 而不是 `Option<Ordering>`，因为总是可能进行有效的排序。你只能将 `Ord` trait 应用于也实现 `PartialOrd` 和 `Eq` 的类型（`Eq` 需要 `PartialEq`）。当在结构体和枚举上派生时，`cmp` 的行为方式与 `PartialOrd` 的派生实现对 `partial_cmp` 的行为方式相同。
 
-An example of when `Ord` is required is when storing values in a `BTreeSet<T>`,
-a data structure that stores data based on the sort order of the values.
+需要 `Ord` 的一个例子是在 `BTreeSet<T>` 中存储值时，这是一个基于值的排序顺序存储数据结构。
 
-### `Clone` and `Copy` for Duplicating Values
+### `Clone` 和 `Copy` 用于复制值
 
-The `Clone` trait allows you to explicitly create a deep copy of a value, and
-the duplication process might involve running arbitrary code and copying heap
-data. See the [“Variables and Data Interacting with
-Clone”][variables-and-data-interacting-with-clone]<!-- ignore --> section in
-Chapter 4 for more information on `Clone`.
+`Clone` trait 允许你显式创建值的深层副本，复制过程可能涉及运行任意代码和复制堆数据。有关 `Clone` 的更多信息，请参阅第4章中的[“变量和数据与 Clone 交互”][variables-and-data-interacting-with-clone]<!-- ignore -->部分。
 
-Deriving `Clone` implements the `clone` method, which when implemented for the
-whole type, calls `clone` on each of the parts of the type. This means all the
-fields or values in the type must also implement `Clone` to derive `Clone`.
+派生 `Clone` 实现 `clone` 方法，当为整个类型实现时，该方法在类型的每个部分上调用 `clone`。这意味着类型中的所有字段或值也必须实现 `Clone` 才能派生 `Clone`。
 
-An example of when `Clone` is required is when calling the `to_vec` method on a
-slice. The slice doesn’t own the type instances it contains, but the vector
-returned from `to_vec` will need to own its instances, so `to_vec` calls
-`clone` on each item. Thus, the type stored in the slice must implement `Clone`.
+需要 `Clone` 的一个例子是在切片上调用 `to_vec` 方法时。切片不拥有它包含的类型实例，但从 `to_vec` 返回的向量将需要拥有其实例，因此 `to_vec` 在每个项上调用 `clone`。因此，存储在切片中的类型必须实现 `Clone`。
 
-The `Copy` trait allows you to duplicate a value by only copying bits stored on
-the stack; no arbitrary code is necessary. See the [“Stack-Only Data:
-Copy”][stack-only-data-copy]<!-- ignore --> section in Chapter 4 for more
-information on `Copy`.
+`Copy` trait 允许你仅通过复制存储在栈上的位来复制值；不需要任意代码。有关 `Copy` 的更多信息，请参阅第4章中的[“仅栈数据：Copy”][stack-only-data-copy]<!-- ignore -->部分。
 
-The `Copy` trait doesn’t define any methods to prevent programmers from
-overloading those methods and violating the assumption that no arbitrary code
-is being run. That way, all programmers can assume that copying a value will be
-very fast.
+`Copy` trait 不定义任何方法来防止程序员重载这些方法并违反不运行任意代码的假设。这样，所有程序员都可以假设复制值将非常快。
 
-You can derive `Copy` on any type whose parts all implement `Copy`. A type that
-implements `Copy` must also implement `Clone` because a type that implements
-`Copy` has a trivial implementation of `Clone` that performs the same task as
-`Copy`.
+你可以在其所有部分都实现 `Copy` 的任何类型上派生 `Copy`。实现 `Copy` 的类型也必须实现 `Clone`，因为实现 `Copy` 的类型具有 `Clone` 的平凡实现，该实现执行与 `Copy` 相同的任务。
 
-The `Copy` trait is rarely required; types that implement `Copy` have
-optimizations available, meaning you don’t have to call `clone`, which makes
-the code more concise.
+`Copy` trait 很少需要；实现 `Copy` 的类型具有可用的优化，这意味着你不必调用 `clone`，这使代码更简洁。
 
-Everything possible with `Copy` you can also accomplish with `Clone`, but the
-code might be slower or have to use `clone` in places.
+使用 `Copy` 可以实现的所有功能，你也可以使用 `Clone` 完成，但代码可能较慢或必须在某些地方使用 `clone`。
 
-### `Hash` for Mapping a Value to a Value of Fixed Size
+### `Hash` 用于将值映射到固定大小的值
 
-The `Hash` trait allows you to take an instance of a type of arbitrary size and
-map that instance to a value of fixed size using a hash function. Deriving
-`Hash` implements the `hash` method. The derived implementation of the `hash`
-method combines the result of calling `hash` on each of the parts of the type,
-meaning all fields or values must also implement `Hash` to derive `Hash`.
+`Hash` trait 允许你获取任意大小的类型的实例，并使用哈希函数将该实例映射到固定大小的值。派生 `Hash` 实现 `hash` 方法。`hash` 方法的派生实现组合了在类型的每个部分上调用 `hash` 的结果，这意味着所有字段或值也必须实现 `Hash` 才能派生 `Hash`。
 
-An example of when `Hash` is required is in storing keys in a `HashMap<K, V>`
-to store data efficiently.
+需要 `Hash` 的一个例子是在 `HashMap<K, V>` 中存储键以高效存储数据。
 
-### `Default` for Default Values
+### `Default` 用于默认值
 
-The `Default` trait allows you to create a default value for a type. Deriving
-`Default` implements the `default` function. The derived implementation of the
-`default` function calls the `default` function on each part of the type,
-meaning all fields or values in the type must also implement `Default` to
-derive `Default`.
+`Default` trait 允许你为类型创建默认值。派生 `Default` 实现 `default` 函数。`default` 函数的派生实现在类型的每个部分上调用 `default` 函数，这意味着类型中的所有字段或值也必须实现 `Default` 才能派生 `Default`。
 
-The `Default::default` function is commonly used in combination with the struct
-update syntax discussed in the [“Creating Instances from Other Instances with
-Struct Update
-Syntax”][creating-instances-from-other-instances-with-struct-update-syntax]<!--
-ignore --> section in Chapter 5. You can customize a few fields of a struct and
-then set and use a default value for the rest of the fields by using
-`..Default::default()`.
+`Default::default` 函数通常与第5章中[“使用结构体更新语法从其他实例创建实例”][creating-instances-from-other-instances-with-struct-update-syntax]<!-- ignore -->部分中讨论的结构体更新语法结合使用。你可以自定义结构体的几个字段，然后通过使用 `..Default::default()` 为其余字段设置并使用默认值。
 
-The `Default` trait is required when you use the method `unwrap_or_default` on
-`Option<T>` instances, for example. If the `Option<T>` is `None`, the method
-`unwrap_or_default` will return the result of `Default::default` for the type
-`T` stored in the `Option<T>`.
+当你对 `Option<T>` 实例使用方法 `unwrap_or_default` 时，`Default` trait 是必需的，例如。如果 `Option<T>` 是 `None`，方法 `unwrap_or_default` 将返回存储在 `Option<T>` 中的类型 `T` 的 `Default::default` 结果。
 
 [creating-instances-from-other-instances-with-struct-update-syntax]: ch05-01-defining-structs.html#creating-instances-from-other-instances-with-struct-update-syntax
 [stack-only-data-copy]: ch04-01-what-is-ownership.html#stack-only-data-copy

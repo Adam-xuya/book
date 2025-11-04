@@ -1,17 +1,12 @@
-## Appendix B: Operators and Symbols
+## 附录 B：运算符和符号
 
-This appendix contains a glossary of Rust’s syntax, including operators and
-other symbols that appear by themselves or in the context of paths, generics,
-trait bounds, macros, attributes, comments, tuples, and brackets.
+本附录包含 Rust 语法的词汇表，包括运算符和其他符号，它们单独出现或在路径、泛型、trait 限制、宏、属性、注释、元组和括号的上下文中出现。
 
-### Operators
+### 运算符
 
-Table B-1 contains the operators in Rust, an example of how the operator would
-appear in context, a short explanation, and whether that operator is
-overloadable. If an operator is overloadable, the relevant trait to use to
-overload that operator is listed.
+表 B-1 包含 Rust 中的运算符、运算符在上下文中的示例、简短说明以及该运算符是否可重载。如果运算符可重载，则列出用于重载该运算符的相关 trait。
 
-<span class="caption">Table B-1: Operators</span>
+<span class="caption">表 B-1：运算符</span>
 
 | Operator                  | Example                                                 | Explanation                                                           | Overloadable?  |
 | ------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- | -------------- |
@@ -43,7 +38,7 @@ overload that operator is listed.
 | `..`                      | `..`, `expr..`, `..expr`, `expr..expr`                  | Right-exclusive range literal                                         | `PartialOrd`   |
 | `..=`                     | `..=expr`, `expr..=expr`                                | Right-inclusive range literal                                         | `PartialOrd`   |
 | `..`                      | `..expr`                                                | Struct literal update syntax                                          |                |
-| `..`                      | `variant(x, ..)`, `struct_type { x, .. }`               | “And the rest” pattern binding                                        |                |
+| `..`                      | `variant(x, ..)`, `struct_type { x, .. }`               | "And the rest" pattern binding                                        |                |
 | `...`                     | `expr...expr`                                           | (Deprecated, use `..=` instead) In a pattern: inclusive range pattern |                |
 | `/`                       | `expr / expr`                                           | Arithmetic division                                                   | `Div`          |
 | `/=`                      | `var /= expr`                                           | Arithmetic division and assignment                                    | `DivAssign`    |
@@ -72,15 +67,13 @@ overload that operator is listed.
 | <code>&vert;&vert;</code> | <code>expr &vert;&vert; expr</code>                     | Short-circuiting logical OR                                           |                |
 | `?`                       | `expr?`                                                 | Error propagation                                                     |                |
 
-### Non-operator Symbols
+### 非运算符符号
 
-The following tables contain all symbols that don’t function as operators; that
-is, they don’t behave like a function or method call.
+下表包含不作为运算符功能的所有符号；也就是说，它们的行为不像函数或方法调用。
 
-Table B-2 shows symbols that appear on their own and are valid in a variety of
-locations.
+表 B-2 显示了单独出现并在各种位置有效的符号。
 
-<span class="caption">Table B-2: Stand-alone Syntax</span>
+<span class="caption">表 B-2：独立语法</span>
 
 | Symbol                                                                 | Explanation                                                            |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -94,12 +87,11 @@ locations.
 | `b'...'`                                                               | ASCII byte literal                                                     |
 | <code>&vert;...&vert; expr</code>                                      | Closure                                                                |
 | `!`                                                                    | Always-empty bottom type for diverging functions                       |
-| `_`                                                                    | “Ignored” pattern binding; also used to make integer literals readable |
+| `_`                                                                    | "Ignored" pattern binding; also used to make integer literals readable |
 
-Table B-3 shows symbols that appear in the context of a path through the module
-hierarchy to an item.
+表 B-3 显示了在通过模块层次结构到项的路径上下文中出现的符号。
 
-<span class="caption">Table B-3: Path-Related Syntax</span>
+<span class="caption">表 B-3：路径相关语法</span>
 
 | Symbol                                  | Explanation                                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------|
@@ -110,13 +102,12 @@ hierarchy to an item.
 | `type::ident`, `<type as trait>::ident` | Associated constants, functions, and types                                                                   |
 | `<type>::...`                           | Associated item for a type that cannot be directly named (for example, `<&T>::...`, `<[T]>::...`, and so on) |
 | `trait::method(...)`                    | Disambiguating a method call by naming the trait that defines it                                             |
-| `type::method(...)`                     | Disambiguating a method call by naming the type for which it’s defined                                       |
+| `type::method(...)`                     | Disambiguating a method call by naming the type for which it's defined                                       |
 | `<type as trait>::method(...)`          | Disambiguating a method call by naming the trait and type                                                    |
 
-Table B-4 shows symbols that appear in the context of using generic type
-parameters.
+表 B-4 显示了在使用泛型类型参数的上下文中出现的符号。
 
-<span class="caption">Table B-4: Generics</span>
+<span class="caption">表 B-4：泛型</span>
 
 | Symbol                         | Explanation                                                                                                                                         |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -129,10 +120,9 @@ parameters.
 | `for<...> type`                | Higher ranked lifetime bounds                                                                                                                       |
 | `type<ident=type>`             | A generic type where one or more associated types have specific assignments (for example, `Iterator<Item=T>`)                                       |
 
-Table B-5 shows symbols that appear in the context of constraining generic type
-parameters with trait bounds.
+表 B-5 显示了在使用 trait 限制约束泛型类型参数的上下文中出现的符号。
 
-<span class="caption">Table B-5: Trait Bound Constraints</span>
+<span class="caption">表 B-5：Trait 限制约束</span>
 
 | Symbol                        | Explanation                                                                                                                                |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -143,10 +133,9 @@ parameters with trait bounds.
 | `T: ?Sized`                   | Allow generic type parameter to be a dynamically sized type                                                                                |
 | `'a + trait`, `trait + trait` | Compound type constraint                                                                                                                   |
 
-Table B-6 shows symbols that appear in the context of calling or defining
-macros and specifying attributes on an item.
+表 B-6 显示了在调用或定义宏以及在项上指定属性的上下文中出现的符号。
 
-<span class="caption">Table B-6: Macros and Attributes</span>
+<span class="caption">表 B-6：宏和属性</span>
 
 | Symbol                                      | Explanation        |
 | ------------------------------------------- | ------------------ |
@@ -157,9 +146,9 @@ macros and specifying attributes on an item.
 | `$(...)...`                                 | Macro repetition   |
 | `ident!(...)`, `ident!{...}`, `ident![...]` | Macro invocation   |
 
-Table B-7 shows symbols that create comments.
+表 B-7 显示了创建注释的符号。
 
-<span class="caption">Table B-7: Comments</span>
+<span class="caption">表 B-7：注释</span>
 
 | Symbol     | Explanation             |
 | ---------- | ----------------------- |
@@ -170,9 +159,9 @@ Table B-7 shows symbols that create comments.
 | `/*!...*/` | Inner block doc comment |
 | `/**...*/` | Outer block doc comment |
 
-Table B-8 shows the contexts in which parentheses are used.
+表 B-8 显示了使用括号的上下文。
 
-<span class="caption">Table B-8: Parentheses</span>
+<span class="caption">表 B-8：括号</span>
 
 | Symbol                   | Explanation                                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------------- |
@@ -184,18 +173,18 @@ Table B-8 shows the contexts in which parentheses are used.
 | `(type, ...)`            | Tuple type                                                                                  |
 | `expr(expr, ...)`        | Function call expression; also used to initialize tuple `struct`s and tuple `enum` variants |
 
-Table B-9 shows the contexts in which curly brackets are used.
+表 B-9 显示了使用花括号的上下文。
 
-<span class="caption">Table B-9: Curly Brackets</span>
+<span class="caption">表 B-9：花括号</span>
 
 | Context      | Explanation      |
 | ------------ | ---------------- |
 | `{...}`      | Block expression |
 | `Type {...}` | Struct literal   |
 
-Table B-10 shows the contexts in which square brackets are used.
+表 B-10 显示了使用方括号的上下文。
 
-<span class="caption">Table B-10: Square Brackets</span>
+<span class="caption">表 B-10：方括号</span>
 
 | Context                                            | Explanation                                                                                                                   |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -203,4 +192,4 @@ Table B-10 shows the contexts in which square brackets are used.
 | `[expr; len]`                                      | Array literal containing `len` copies of `expr`                                                                               |
 | `[type; len]`                                      | Array type containing `len` instances of `type`                                                                               |
 | `expr[expr]`                                       | Collection indexing; overloadable (`Index`, `IndexMut`)                                                                       |
-| `expr[..]`, `expr[a..]`, `expr[..b]`, `expr[a..b]` | Collection indexing pretending to be collection slicing, using `Range`, `RangeFrom`, `RangeTo`, or `RangeFull` as the “index” |
+| `expr[..]`, `expr[a..]`, `expr[..b]`, `expr[a..b]` | Collection indexing pretending to be collection slicing, using `Range`, `RangeFrom`, `RangeTo`, or `RangeFull` as the "index" |
