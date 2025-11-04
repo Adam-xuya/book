@@ -1,31 +1,19 @@
 ## Hello, World!
 
-Now that you’ve installed Rust, it’s time to write your first Rust program.
-It’s traditional when learning a new language to write a little program that
-prints the text `Hello, world!` to the screen, so we’ll do the same here!
+现在您已经安装了 Rust，是时候编写您的第一个 Rust 程序了。学习新语言时，传统做法是编写一个向屏幕打印文本 `Hello, world!` 的小程序，所以我们在这里也这样做！
 
-> Note: This book assumes basic familiarity with the command line. Rust makes
-> no specific demands about your editing or tooling or where your code lives, so
-> if you prefer to use an IDE instead of the command line, feel free to use your
-> favorite IDE. Many IDEs now have some degree of Rust support; check the IDE’s
-> documentation for details. The Rust team has been focusing on enabling great
-> IDE support via `rust-analyzer`. See [Appendix D][devtools]<!-- ignore -->
-> for more details.
+> 注意：本书假定您对命令行有基本了解。Rust 对您的编辑或工具或代码所在的位置没有特定要求，因此如果您更喜欢使用 IDE 而不是命令行，请随时使用您喜欢的 IDE。许多 IDE 现在都有一定程度的 Rust 支持；请查看 IDE 的文档以获取详细信息。Rust 团队一直专注于通过 `rust-analyzer` 启用出色的 IDE 支持。有关更多详细信息，请参见[附录 D][devtools]<!-- ignore -->。
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="creating-a-project-directory"></a>
 
-### Project Directory Setup
+### 项目目录设置
 
-You’ll start by making a directory to store your Rust code. It doesn’t matter
-to Rust where your code lives, but for the exercises and projects in this book,
-we suggest making a _projects_ directory in your home directory and keeping all
-your projects there.
+您将首先创建一个目录来存储您的 Rust 代码。Rust 不关心您的代码在哪里，但对于本书中的练习和项目，我们建议在您的主目录中创建一个 _projects_ 目录，并将所有项目保存在那里。
 
-Open a terminal and enter the following commands to make a _projects_ directory
-and a directory for the “Hello, world!” project within the _projects_ directory.
+打开终端并输入以下命令以创建 _projects_ 目录，并在 _projects_ 目录中为 "Hello, world!" 项目创建一个目录。
 
-For Linux, macOS, and PowerShell on Windows, enter this:
+对于 Linux、macOS 和 Windows 上的 PowerShell，请输入：
 
 ```console
 $ mkdir ~/projects
@@ -34,7 +22,7 @@ $ mkdir hello_world
 $ cd hello_world
 ```
 
-For Windows CMD, enter this:
+对于 Windows CMD，请输入：
 
 ```cmd
 > mkdir "%USERPROFILE%\projects"
@@ -46,16 +34,13 @@ For Windows CMD, enter this:
 <!-- Old headings. Do not remove or links may break. -->
 <a id="writing-and-running-a-rust-program"></a>
 
-### Rust Program Basics
+### Rust 程序基础
 
-Next, make a new source file and call it _main.rs_. Rust files always end with
-the _.rs_ extension. If you’re using more than one word in your filename, the
-convention is to use an underscore to separate them. For example, use
-_hello_world.rs_ rather than _helloworld.rs_.
+接下来，创建一个新的源文件并将其命名为 _main.rs_。Rust 文件总是以 _.rs_ 扩展名结尾。如果您的文件名使用多个单词，约定是使用下划线分隔它们。例如，使用 _hello_world.rs_ 而不是 _helloworld.rs_。
 
-Now open the _main.rs_ file you just created and enter the code in Listing 1-1.
+现在打开您刚刚创建的 _main.rs_ 文件，并输入清单 1-1 中的代码。
 
-<Listing number="1-1" file-name="main.rs" caption="A program that prints `Hello, world!`">
+<Listing number="1-1" file-name="main.rs" caption="一个打印 `Hello, world!` 的程序">
 
 ```rust
 fn main() {
@@ -65,9 +50,7 @@ fn main() {
 
 </Listing>
 
-Save the file and go back to your terminal window in the
-_~/projects/hello_world_ directory. On Linux or macOS, enter the following
-commands to compile and run the file:
+保存文件并返回到终端窗口中的 _~/projects/hello_world_ 目录。在 Linux 或 macOS 上，输入以下命令来编译和运行文件：
 
 ```console
 $ rustc main.rs
@@ -75,7 +58,7 @@ $ ./main
 Hello, world!
 ```
 
-On Windows, enter the command `.\main` instead of `./main`:
+在 Windows 上，请输入 `.\main` 而不是 `./main`：
 
 ```powershell
 > rustc main.rs
@@ -83,22 +66,17 @@ On Windows, enter the command `.\main` instead of `./main`:
 Hello, world!
 ```
 
-Regardless of your operating system, the string `Hello, world!` should print to
-the terminal. If you don’t see this output, refer back to the
-[“Troubleshooting”][troubleshooting]<!-- ignore --> part of the Installation
-section for ways to get help.
+无论您的操作系统是什么，字符串 `Hello, world!` 都应该打印到终端。如果您没有看到此输出，请返回安装部分的["故障排除"][troubleshooting]<!-- ignore -->部分以获取帮助。
 
-If `Hello, world!` did print, congratulations! You’ve officially written a Rust
-program. That makes you a Rust programmer—welcome!
+如果 `Hello, world!` 确实打印了，恭喜！您已经正式编写了一个 Rust 程序。这使您成为 Rust 程序员——欢迎！
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="anatomy-of-a-rust-program"></a>
 
-### The Anatomy of a Rust Program
+### Rust 程序的剖析
 
-Let’s review this “Hello, world!” program in detail. Here’s the first piece of
-the puzzle:
+让我们详细审查这个 "Hello, world!" 程序。这是拼图的第一块：
 
 ```rust
 fn main() {
@@ -106,75 +84,50 @@ fn main() {
 }
 ```
 
-These lines define a function named `main`. The `main` function is special: It
-is always the first code that runs in every executable Rust program. Here, the
-first line declares a function named `main` that has no parameters and returns
-nothing. If there were parameters, they would go inside the parentheses (`()`).
+这些行定义了一个名为 `main` 的函数。`main` 函数很特殊：它始终是每个可执行 Rust 程序中首先运行的代码。在这里，第一行声明了一个名为 `main` 的函数，它没有参数且不返回任何内容。如果有参数，它们将放在括号 (`()`) 内。
 
-The function body is wrapped in `{}`. Rust requires curly brackets around all
-function bodies. It’s good style to place the opening curly bracket on the same
-line as the function declaration, adding one space in between.
+函数体用 `{}` 包裹。Rust 要求所有函数体周围都有花括号。将左花括号放在函数声明的同一行上，并在它们之间添加一个空格，这是良好的风格。
 
-> Note: If you want to stick to a standard style across Rust projects, you can
-> use an automatic formatter tool called `rustfmt` to format your code in a
-> particular style (more on `rustfmt` in
-> [Appendix D][devtools]<!-- ignore -->). The Rust team has included this tool
-> with the standard Rust distribution, as `rustc` is, so it should already be
-> installed on your computer!
+> 注意：如果您想在整个 Rust 项目中坚持标准风格，可以使用名为 `rustfmt` 的自动格式化工具来格式化您的代码（有关 `rustfmt` 的更多信息，请参见
+> [附录 D][devtools]<!-- ignore -->）。Rust 团队已将此工具包含在标准 Rust 发行版中，就像 `rustc` 一样，因此它应该已经安装在您的计算机上！
 
-The body of the `main` function holds the following code:
+`main` 函数的主体包含以下代码：
 
 ```rust
 println!("Hello, world!");
 ```
 
-This line does all the work in this little program: It prints text to the
-screen. There are three important details to notice here.
+这一行完成了这个小程序中的所有工作：它将文本打印到屏幕。这里有三个重要的细节需要注意。
 
-First, `println!` calls a Rust macro. If it had called a function instead, it
-would be entered as `println` (without the `!`). Rust macros are a way to write
-code that generates code to extend Rust syntax, and we’ll discuss them in more
-detail in [Chapter 20][ch20-macros]<!-- ignore -->. For now, you just need to
-know that using a `!` means that you’re calling a macro instead of a normal
-function and that macros don’t always follow the same rules as functions.
+首先，`println!` 调用 Rust 宏。如果它调用的是函数，则会输入为 `println`（不带 `!`）。Rust 宏是一种编写生成代码以扩展 Rust 语法的方法，我们将在[第 20 章][ch20-macros]<!-- ignore -->中更详细地讨论它们。现在，您只需要知道使用 `!` 意味着您正在调用宏而不是普通函数，并且宏并不总是遵循与函数相同的规则。
 
-Second, you see the `"Hello, world!"` string. We pass this string as an argument
-to `println!`, and the string is printed to the screen.
+其次，您看到 `"Hello, world!"` 字符串。我们将此字符串作为参数传递给 `println!`，字符串被打印到屏幕。
 
-Third, we end the line with a semicolon (`;`), which indicates that this
-expression is over, and the next one is ready to begin. Most lines of Rust code
-end with a semicolon.
+第三，我们以分号 (`;`) 结束该行，这表明此表达式已结束，下一个表达式已准备好开始。Rust 代码的大多数行都以分号结尾。
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="compiling-and-running-are-separate-steps"></a>
 
-### Compilation and Execution
+### 编译和执行
 
-You’ve just run a newly created program, so let’s examine each step in the
-process.
+您刚刚运行了一个新创建的程序，让我们检查过程中的每个步骤。
 
-Before running a Rust program, you must compile it using the Rust compiler by
-entering the `rustc` command and passing it the name of your source file, like
-this:
+在运行 Rust 程序之前，您必须使用 Rust 编译器编译它，方法是输入 `rustc` 命令并将源文件的名称传递给它，如下所示：
 
 ```console
 $ rustc main.rs
 ```
 
-If you have a C or C++ background, you’ll notice that this is similar to `gcc`
-or `clang`. After compiling successfully, Rust outputs a binary executable.
+如果您有 C 或 C++ 背景，您会注意到这类似于 `gcc` 或 `clang`。编译成功后，Rust 会输出一个二进制可执行文件。
 
-On Linux, macOS, and PowerShell on Windows, you can see the executable by
-entering the `ls` command in your shell:
+在 Linux、macOS 和 Windows 上的 PowerShell 中，您可以通过在 shell 中输入 `ls` 命令来查看可执行文件：
 
 ```console
 $ ls
 main  main.rs
 ```
 
-On Linux and macOS, you’ll see two files. With PowerShell on Windows, you’ll
-see the same three files that you would see using CMD. With CMD on Windows, you
-would enter the following:
+在 Linux 和 macOS 上，您会看到两个文件。在 Windows 上的 PowerShell 中，您会看到与使用 CMD 相同的三个文件。在 Windows 上的 CMD 中，您将输入以下内容：
 
 ```cmd
 > dir /B %= the /B option says to only show the file names =%
@@ -183,31 +136,18 @@ main.pdb
 main.rs
 ```
 
-This shows the source code file with the _.rs_ extension, the executable file
-(_main.exe_ on Windows, but _main_ on all other platforms), and, when using
-Windows, a file containing debugging information with the _.pdb_ extension.
-From here, you run the _main_ or _main.exe_ file, like this:
+这显示了带有 _.rs_ 扩展名的源代码文件、可执行文件（在 Windows 上是 _main.exe_，但在所有其他平台上都是 _main_），以及在使用 Windows 时，一个包含调试信息的文件，扩展名为 _.pdb_。从这里开始，您运行 _main_ 或 _main.exe_ 文件，如下所示：
 
 ```console
 $ ./main # or .\main on Windows
 ```
 
-If your _main.rs_ is your “Hello, world!” program, this line prints `Hello,
-world!` to your terminal.
+如果您的 _main.rs_ 是您的 "Hello, world!" 程序，这行会将 `Hello,
+world!` 打印到您的终端。
 
-If you’re more familiar with a dynamic language, such as Ruby, Python, or
-JavaScript, you might not be used to compiling and running a program as
-separate steps. Rust is an _ahead-of-time compiled_ language, meaning you can
-compile a program and give the executable to someone else, and they can run it
-even without having Rust installed. If you give someone a _.rb_, _.py_, or
-_.js_ file, they need to have a Ruby, Python, or JavaScript implementation
-installed (respectively). But in those languages, you only need one command to
-compile and run your program. Everything is a trade-off in language design.
+如果您更熟悉动态语言（如 Ruby、Python 或 JavaScript），您可能不习惯将编译和运行程序作为单独的步骤。Rust 是一种_提前编译_的语言，这意味着您可以编译程序并将可执行文件提供给其他人，他们可以在没有安装 Rust 的情况下运行它。如果您给某人一个 _.rb_、_.py_ 或 _.js_ 文件，他们需要安装 Ruby、Python 或 JavaScript 实现（分别）。但在这些语言中，您只需要一个命令来编译和运行程序。语言设计中的一切都是权衡。
 
-Just compiling with `rustc` is fine for simple programs, but as your project
-grows, you’ll want to manage all the options and make it easy to share your
-code. Next, we’ll introduce you to the Cargo tool, which will help you write
-real-world Rust programs.
+仅使用 `rustc` 编译对于简单程序来说是可以的，但随着项目的增长，您将希望管理所有选项并使其易于共享代码。接下来，我们将向您介绍 Cargo 工具，它将帮助您编写真实的 Rust 程序。
 
 [troubleshooting]: ch01-01-installation.html#troubleshooting
 [devtools]: appendix-04-useful-development-tools.html
