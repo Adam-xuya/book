@@ -1,49 +1,16 @@
-# Fearless Concurrency
+# 无畏并发
 
-Handling concurrent programming safely and efficiently is another of Rust’s
-major goals. _Concurrent programming_, in which different parts of a program
-execute independently, and _parallel programming_, in which different parts of
-a program execute at the same time, are becoming increasingly important as more
-computers take advantage of their multiple processors. Historically,
-programming in these contexts has been difficult and error-prone. Rust hopes to
-change that.
+安全高效地处理并发编程是 Rust 的另一个主要目标。_并发编程_，其中程序的不同部分独立执行，以及 _并行编程_，其中程序的不同部分同时执行，随着更多计算机利用其多个处理器，正变得越来越重要。历史上，在这些上下文中进行编程一直很困难且容易出错。Rust 希望改变这一点。
 
-Initially, the Rust team thought that ensuring memory safety and preventing
-concurrency problems were two separate challenges to be solved with different
-methods. Over time, the team discovered that the ownership and type systems are
-a powerful set of tools to help manage memory safety _and_ concurrency
-problems! By leveraging ownership and type checking, many concurrency errors
-are compile-time errors in Rust rather than runtime errors. Therefore, rather
-than making you spend lots of time trying to reproduce the exact circumstances
-under which a runtime concurrency bug occurs, incorrect code will refuse to
-compile and present an error explaining the problem. As a result, you can fix
-your code while you’re working on it rather than potentially after it has been
-shipped to production. We’ve nicknamed this aspect of Rust _fearless
-concurrency_. Fearless concurrency allows you to write code that is free of
-subtle bugs and is easy to refactor without introducing new bugs.
+最初，Rust 团队认为确保内存安全和防止并发问题是两个需要用不同方法解决的独立挑战。随着时间的推移，团队发现所有权和类型系统是一套强大的工具，可以帮助管理内存安全 _和_ 并发问题！通过利用所有权和类型检查，许多并发错误在 Rust 中是编译时错误而不是运行时错误。因此，与其让你花费大量时间尝试重现运行时并发错误发生的确切情况，不正确的代码将拒绝编译并显示解释问题的错误。因此，你可以在处理代码时修复它，而不是可能在它被运送到生产环境之后。我们将 Rust 的这一方面称为 _无畏并发_。无畏并发允许你编写没有细微错误的代码，并且易于重构而不会引入新错误。
 
-> Note: For simplicity’s sake, we’ll refer to many of the problems as
-> _concurrent_ rather than being more precise by saying _concurrent and/or
-> parallel_. For this chapter, please mentally substitute _concurrent and/or
-> parallel_ whenever we use _concurrent_. In the next chapter, where the
-> distinction matters more, we’ll be more specific.
+> 注意：为简单起见，我们将许多问题称为 _并发_ 而不是更精确地说 _并发和/或并行_。对于本章，请在我们使用 _并发_ 时在心理上替换 _并发和/或并行_。在下一章中，区别更重要，我们将更加具体。
 
-Many languages are dogmatic about the solutions they offer for handling
-concurrent problems. For example, Erlang has elegant functionality for
-message-passing concurrency but has only obscure ways to share state between
-threads. Supporting only a subset of possible solutions is a reasonable
-strategy for higher-level languages because a higher-level language promises
-benefits from giving up some control to gain abstractions. However, lower-level
-languages are expected to provide the solution with the best performance in any
-given situation and have fewer abstractions over the hardware. Therefore, Rust
-offers a variety of tools for modeling problems in whatever way is appropriate
-for your situation and requirements.
+许多语言对它们提供的处理并发问题的解决方案持教条态度。例如，Erlang 具有优雅的消息传递并发功能，但只有模糊的方式在线程之间共享状态。仅支持可能的解决方案的子集对于高级语言来说是合理的策略，因为高级语言承诺通过放弃一些控制来获得抽象的好处。但是，低级语言期望在任何给定情况下提供最佳性能的解决方案，并且对硬件的抽象较少。因此，Rust 提供了各种工具，以适合你的情况和要求的任何方式建模问题。
 
-Here are the topics we’ll cover in this chapter:
+以下是我们在本章中要涵盖的主题：
 
-- How to create threads to run multiple pieces of code at the same time
-- _Message-passing_ concurrency, where channels send messages between threads
-- _Shared-state_ concurrency, where multiple threads have access to some piece
-  of data
-- The `Sync` and `Send` traits, which extend Rust’s concurrency guarantees to
-  user-defined types as well as types provided by the standard library
+- 如何创建线程以同时运行多个代码片段
+- _消息传递_ 并发，其中通道在线程之间发送消息
+- _共享状态_ 并发，其中多个线程可以访问某些数据片段
+- `Sync` 和 `Send` trait，它们将 Rust 的并发保证扩展到用户定义的类型以及标准库提供的类型

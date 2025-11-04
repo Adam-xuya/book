@@ -1,46 +1,22 @@
-## Using Threads to Run Code Simultaneously
+## 使用线程同时运行代码
 
-In most current operating systems, an executed program’s code is run in a
-_process_, and the operating system will manage multiple processes at once.
-Within a program, you can also have independent parts that run simultaneously.
-The features that run these independent parts are called _threads_. For
-example, a web server could have multiple threads so that it can respond to
-more than one request at the same time.
+在大多数当前操作系统中，已执行程序的代码在 _进程_ 中运行，操作系统将同时管理多个进程。在程序中，你也可以有同时运行的独立部分。运行这些独立部分的功能称为 _线程_。例如，Web 服务器可以有多个线程，以便它可以同时响应多个请求。
 
-Splitting the computation in your program into multiple threads to run multiple
-tasks at the same time can improve performance, but it also adds complexity.
-Because threads can run simultaneously, there’s no inherent guarantee about the
-order in which parts of your code on different threads will run. This can lead
-to problems, such as:
+将程序中的计算拆分为多个线程以同时运行多个任务可以提高性能，但它也增加了复杂性。因为线程可以同时运行，所以没有关于在不同线程上运行的代码部分的执行顺序的固有保证。这可能导致问题，例如：
 
-- Race conditions, in which threads are accessing data or resources in an
-  inconsistent order
-- Deadlocks, in which two threads are waiting for each other, preventing both
-  threads from continuing
-- Bugs that only happen in certain situations and are hard to reproduce and fix
-  reliably
+- 竞争条件，其中线程以不一致的顺序访问数据或资源
+- 死锁，其中两个线程相互等待，阻止两个线程继续
+- 仅在特定情况下发生的错误，难以可靠地重现和修复
 
-Rust attempts to mitigate the negative effects of using threads, but
-programming in a multithreaded context still takes careful thought and requires
-a code structure that is different from that in programs running in a single
-thread.
+Rust 试图减轻使用线程的负面影响，但在多线程上下文中编程仍然需要仔细思考，并且需要与在单线程中运行的程序不同的代码结构。
 
-Programming languages implement threads in a few different ways, and many
-operating systems provide an API the programming language can call for creating
-new threads. The Rust standard library uses a _1:1_ model of thread
-implementation, whereby a program uses one operating system thread per one
-language thread. There are crates that implement other models of threading that
-make different trade-offs to the 1:1 model. (Rust’s async system, which we will
-see in the next chapter, provides another approach to concurrency as well.)
+编程语言以几种不同的方式实现线程，许多操作系统提供编程语言可以调用以创建新线程的 API。Rust 标准库使用线程实现的 _1:1_ 模型，其中程序为每个语言线程使用一个操作系统线程。有一些 crate 实现了其他线程模型，对 1:1 模型做出了不同的权衡。（Rust 的异步系统，我们将在下一章看到，也提供了另一种并发方法。）
 
-### Creating a New Thread with `spawn`
+### 使用 `spawn` 创建新线程
 
-To create a new thread, we call the `thread::spawn` function and pass it a
-closure (we talked about closures in Chapter 13) containing the code we want to
-run in the new thread. The example in Listing 16-1 prints some text from a main
-thread and other text from a new thread.
+要创建新线程，我们调用 `thread::spawn` 函数并向其传递一个闭包（我们在第 13 章讨论过闭包），其中包含我们想在新线程中运行的代码。代码清单 16-1 中的示例从主线程打印一些文本，从新线程打印其他文本。
 
-<Listing number="16-1" file-name="src/main.rs" caption="Creating a new thread to print one thing while the main thread prints something else">
+<Listing number="16-1" file-name="src/main.rs" caption="创建新线程以打印一件事，而主线程打印其他内容">
 
 ```rust
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-01/src/main.rs}}
@@ -48,10 +24,7 @@ thread and other text from a new thread.
 
 </Listing>
 
-Note that when the main thread of a Rust program completes, all spawned threads
-are shut down, whether or not they have finished running. The output from this
-program might be a little different every time, but it will look similar to the
-following:
+注意，当 Rust 程序的主线程完成时，所有生成的线程都会关闭，无论它们是否完成运行。此程序的输出可能每次都有点不同，但它看起来类似于以下内容：
 
 <!-- Not extracting output because changes to this output aren't significant;
 the changes are likely to be due to the threads running differently rather than
@@ -69,38 +42,21 @@ hi number 4 from the spawned thread!
 hi number 5 from the spawned thread!
 ```
 
-The calls to `thread::sleep` force a thread to stop its execution for a short
-duration, allowing a different thread to run. The threads will probably take
-turns, but that isn’t guaranteed: It depends on how your operating system
-schedules the threads. In this run, the main thread printed first, even though
-the print statement from the spawned thread appears first in the code. And even
-though we told the spawned thread to print until `i` is `9`, it only got to `5`
-before the main thread shut down.
+对 `thread::sleep` 的调用强制线程停止执行一小段时间，允许不同的线程运行。线程可能会轮流执行，但不能保证：这取决于你的操作系统如何调度线程。在这次运行中，主线程首先打印，尽管生成线程的打印语句在代码中首先出现。即使我们告诉生成线程打印直到 `i` 是 `9`，它只在主线程关闭之前到达 `5`。
 
-If you run this code and only see output from the main thread, or don’t see any
-overlap, try increasing the numbers in the ranges to create more opportunities
-for the operating system to switch between the threads.
+如果你运行此代码并只看到主线程的输出，或没有看到任何重叠，尝试增加范围中的数字，为操作系统在线程之间切换创造更多机会。
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="waiting-for-all-threads-to-finish-using-join-handles"></a>
 
-### Waiting for All Threads to Finish
+### 等待所有线程完成
 
-The code in Listing 16-1 not only stops the spawned thread prematurely most of
-the time due to the main thread ending, but because there is no guarantee on
-the order in which threads run, we also can’t guarantee that the spawned thread
-will get to run at all!
+代码清单 16-1 中的代码不仅由于主线程结束而在大多数情况下过早停止生成线程，而且因为无法保证线程运行的顺序，我们也无法保证生成线程会运行！
 
-We can fix the problem of the spawned thread not running or of it ending
-prematurely by saving the return value of `thread::spawn` in a variable. The
-return type of `thread::spawn` is `JoinHandle<T>`. A `JoinHandle<T>` is an
-owned value that, when we call the `join` method on it, will wait for its
-thread to finish. Listing 16-2 shows how to use the `JoinHandle<T>` of the
-thread we created in Listing 16-1 and how to call `join` to make sure the
-spawned thread finishes before `main` exits.
+我们可以通过将 `thread::spawn` 的返回值保存在变量中来修复生成线程不运行或过早结束的问题。`thread::spawn` 的返回类型是 `JoinHandle<T>`。`JoinHandle<T>` 是一个拥有的值，当我们在其上调用 `join` 方法时，它将等待其线程完成。代码清单 16-2 显示了如何使用我们在代码清单 16-1 中创建的线程的 `JoinHandle<T>`，以及如何调用 `join` 以确保生成线程在 `main` 退出之前完成。
 
-<Listing number="16-2" file-name="src/main.rs" caption="Saving a `JoinHandle<T>` from `thread::spawn` to guarantee the thread is run to completion">
+<Listing number="16-2" file-name="src/main.rs" caption="保存来自 `thread::spawn` 的 `JoinHandle<T>` 以保证线程运行到完成">
 
 ```rust
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-02/src/main.rs}}
@@ -108,11 +64,7 @@ spawned thread finishes before `main` exits.
 
 </Listing>
 
-Calling `join` on the handle blocks the thread currently running until the
-thread represented by the handle terminates. _Blocking_ a thread means that
-thread is prevented from performing work or exiting. Because we’ve put the call
-to `join` after the main thread’s `for` loop, running Listing 16-2 should
-produce output similar to this:
+在句柄上调用 `join` 会阻塞当前运行的线程，直到句柄表示的线程终止。_阻塞_ 线程意味着该线程被阻止执行工作或退出。因为我们将 `join` 的调用放在主线程的 `for` 循环之后，运行代码清单 16-2 应该产生与此类似的输出：
 
 <!-- Not extracting output because changes to this output aren't significant;
 the changes are likely to be due to the threads running differently rather than
@@ -134,11 +86,9 @@ hi number 8 from the spawned thread!
 hi number 9 from the spawned thread!
 ```
 
-The two threads continue alternating, but the main thread waits because of the
-call to `handle.join()` and does not end until the spawned thread is finished.
+两个线程继续交替，但主线程由于对 `handle.join()` 的调用而等待，并且在生成线程完成之前不会结束。
 
-But let’s see what happens when we instead move `handle.join()` before the
-`for` loop in `main`, like this:
+但是让我们看看当我们改为将 `handle.join()` 移动到 `main` 中的 `for` 循环之前时会发生什么，如下所示：
 
 <Listing file-name="src/main.rs">
 
@@ -148,8 +98,7 @@ But let’s see what happens when we instead move `handle.join()` before the
 
 </Listing>
 
-The main thread will wait for the spawned thread to finish and then run its
-`for` loop, so the output won’t be interleaved anymore, as shown here:
+主线程将等待生成线程完成，然后运行其 `for` 循环，所以输出不再交错，如下所示：
 
 <!-- Not extracting output because changes to this output aren't significant;
 the changes are likely to be due to the threads running differently rather than
@@ -171,26 +120,15 @@ hi number 3 from the main thread!
 hi number 4 from the main thread!
 ```
 
-Small details, such as where `join` is called, can affect whether or not your
-threads run at the same time.
+小细节，例如 `join` 的调用位置，可以影响你的线程是否同时运行。
 
-### Using `move` Closures with Threads
+### 在线程中使用 `move` 闭包
 
-We’ll often use the `move` keyword with closures passed to `thread::spawn`
-because the closure will then take ownership of the values it uses from the
-environment, thus transferring ownership of those values from one thread to
-another. In [“Capturing References or Moving Ownership”][capture]<!-- ignore
---> in Chapter 13, we discussed `move` in the context of closures. Now we’ll
-concentrate more on the interaction between `move` and `thread::spawn`.
+我们经常将 `move` 关键字与传递给 `thread::spawn` 的闭包一起使用，因为闭包然后将从环境中使用的值获取所有权，从而将这些值的所有权从一个线程转移到另一个线程。在第 13 章的["捕获引用或移动所有权"][capture]<!-- ignore -->中，我们在闭包的上下文中讨论了 `move`。现在我们将更多地关注 `move` 和 `thread::spawn` 之间的交互。
 
-Notice in Listing 16-1 that the closure we pass to `thread::spawn` takes no
-arguments: We’re not using any data from the main thread in the spawned
-thread’s code. To use data from the main thread in the spawned thread, the
-spawned thread’s closure must capture the values it needs. Listing 16-3 shows
-an attempt to create a vector in the main thread and use it in the spawned
-thread. However, this won’t work yet, as you’ll see in a moment.
+注意代码清单 16-1 中我们传递给 `thread::spawn` 的闭包不接受参数：我们在生成线程的代码中不使用主线程的任何数据。要在生成线程中使用主线程的数据，生成线程的闭包必须捕获它需要的值。代码清单 16-3 显示尝试在主线程中创建向量并在生成线程中使用它。但是，这还不起作用，正如你稍后会看到的。
 
-<Listing number="16-3" file-name="src/main.rs" caption="Attempting to use a vector created by the main thread in another thread">
+<Listing number="16-3" file-name="src/main.rs" caption="尝试在另一个线程中使用主线程创建的向量">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-03/src/main.rs}}
@@ -198,24 +136,17 @@ thread. However, this won’t work yet, as you’ll see in a moment.
 
 </Listing>
 
-The closure uses `v`, so it will capture `v` and make it part of the closure’s
-environment. Because `thread::spawn` runs this closure in a new thread, we
-should be able to access `v` inside that new thread. But when we compile this
-example, we get the following error:
+闭包使用 `v`，所以它将捕获 `v` 并使其成为闭包环境的一部分。因为 `thread::spawn` 在新线程中运行此闭包，我们应该能够在该新线程内访问 `v`。但是当我们编译此示例时，我们得到以下错误：
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/listing-16-03/output.txt}}
 ```
 
-Rust _infers_ how to capture `v`, and because `println!` only needs a reference
-to `v`, the closure tries to borrow `v`. However, there’s a problem: Rust can’t
-tell how long the spawned thread will run, so it doesn’t know whether the
-reference to `v` will always be valid.
+Rust _推断_ 如何捕获 `v`，因为 `println!` 只需要对 `v` 的引用，闭包尝试借用 `v`。但是，有一个问题：Rust 无法判断生成线程将运行多长时间，所以它不知道对 `v` 的引用是否始终有效。
 
-Listing 16-4 provides a scenario that’s more likely to have a reference to `v`
-that won’t be valid.
+代码清单 16-4 提供了一个更可能具有对 `v` 的无效引用的场景。
 
-<Listing number="16-4" file-name="src/main.rs" caption="A thread with a closure that attempts to capture a reference to `v` from a main thread that drops `v`">
+<Listing number="16-4" file-name="src/main.rs" caption="一个线程，其闭包尝试从丢弃 `v` 的主线程捕获对 `v` 的引用">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-04/src/main.rs}}
@@ -223,15 +154,9 @@ that won’t be valid.
 
 </Listing>
 
-If Rust allowed us to run this code, there’s a possibility that the spawned
-thread would be immediately put in the background without running at all. The
-spawned thread has a reference to `v` inside, but the main thread immediately
-drops `v`, using the `drop` function we discussed in Chapter 15. Then, when the
-spawned thread starts to execute, `v` is no longer valid, so a reference to it
-is also invalid. Oh no!
+如果 Rust 允许我们运行此代码，生成线程可能会立即被放到后台而不运行。生成线程内部有一个对 `v` 的引用，但主线程立即使用我们在第 15 章讨论的 `drop` 函数丢弃 `v`。然后，当生成线程开始执行时，`v` 不再有效，所以对它的引用也无效。哦不！
 
-To fix the compiler error in Listing 16-3, we can use the error message’s
-advice:
+为了修复代码清单 16-3 中的编译器错误，我们可以使用错误消息的建议：
 
 <!-- manual-regeneration
 after automatic regeneration, look at listings/ch16-fearless-concurrency/listing-16-03/output.txt and copy the relevant part
@@ -244,12 +169,9 @@ help: to force the closure to take ownership of `v` (and any other referenced va
   |                                ++++
 ```
 
-By adding the `move` keyword before the closure, we force the closure to take
-ownership of the values it’s using rather than allowing Rust to infer that it
-should borrow the values. The modification to Listing 16-3 shown in Listing
-16-5 will compile and run as we intend.
+通过在闭包之前添加 `move` 关键字，我们强制闭包获取它使用的值的所有权，而不是允许 Rust 推断它应该借用值。对代码清单 16-3 的修改如代码清单 16-5 所示，将按我们的意图编译和运行。
 
-<Listing number="16-5" file-name="src/main.rs" caption="Using the `move` keyword to force a closure to take ownership of the values it uses">
+<Listing number="16-5" file-name="src/main.rs" caption="使用 `move` 关键字强制闭包获取它使用的值的所有权">
 
 ```rust
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-05/src/main.rs}}
@@ -257,28 +179,14 @@ should borrow the values. The modification to Listing 16-3 shown in Listing
 
 </Listing>
 
-We might be tempted to try the same thing to fix the code in Listing 16-4 where
-the main thread called `drop` by using a `move` closure. However, this fix will
-not work because what Listing 16-4 is trying to do is disallowed for a
-different reason. If we added `move` to the closure, we would move `v` into the
-closure’s environment, and we could no longer call `drop` on it in the main
-thread. We would get this compiler error instead:
+我们可能想尝试同样的事情来修复代码清单 16-4 中的代码，其中主线程通过使用 `move` 闭包调用 `drop`。但是，此修复不会起作用，因为代码清单 16-4 尝试做的事情因不同的原因而被禁止。如果我们将 `move` 添加到闭包，我们会将 `v` 移动到闭包的环境中，我们不能再在主线程中对其调用 `drop`。相反，我们会得到此编译器错误：
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/output-only-01-move-drop/output.txt}}
 ```
 
-Rust’s ownership rules have saved us again! We got an error from the code in
-Listing 16-3 because Rust was being conservative and only borrowing `v` for the
-thread, which meant the main thread could theoretically invalidate the spawned
-thread’s reference. By telling Rust to move ownership of `v` to the spawned
-thread, we’re guaranteeing to Rust that the main thread won’t use `v` anymore.
-If we change Listing 16-4 in the same way, we’re then violating the ownership
-rules when we try to use `v` in the main thread. The `move` keyword overrides
-Rust’s conservative default of borrowing; it doesn’t let us violate the
-ownership rules.
+Rust 的所有权规则再次拯救了我们！我们从代码清单 16-3 的代码中得到错误，因为 Rust 是保守的，只为线程借用 `v`，这意味着主线程理论上可能使生成线程的引用无效。通过告诉 Rust 将 `v` 的所有权移动到生成线程，我们向 Rust 保证主线程不会再使用 `v`。如果我们以相同方式更改代码清单 16-4，当我们尝试在主线程中使用 `v` 时，我们会违反所有权规则。`move` 关键字覆盖 Rust 借用的保守默认值；它不允许我们违反所有权规则。
 
-Now that we’ve covered what threads are and the methods supplied by the thread
-API, let’s look at some situations in which we can use threads.
+现在我们已经了解了线程是什么以及线程 API 提供的方法，让我们看看一些可以使用线程的情况。
 
 [capture]: ch13-01-closures.html#capturing-references-or-moving-ownership
