@@ -1,45 +1,37 @@
-## Comments
+## 注释
 
-All programmers strive to make their code easy to understand, but sometimes
-extra explanation is warranted. In these cases, programmers leave _comments_ in
-their source code that the compiler will ignore but that people reading the
-source code may find useful.
+所有程序员都努力使他们的代码易于理解，但有时需要额外的解释。在这些情况下，程序员在其源代码中留下_注释_，编译器将忽略这些注释，但阅读源代码的人可能会发现它们有用。
 
-Here’s a simple comment:
+这是一个简单的注释：
 
 ```rust
 // hello, world
 ```
 
-In Rust, the idiomatic comment style starts a comment with two slashes, and the
-comment continues until the end of the line. For comments that extend beyond a
-single line, you’ll need to include `//` on each line, like this:
+在 Rust 中，惯用的注释样式以两个斜杠开始注释，注释一直持续到行尾。对于扩展到单行之外的注释，您需要在每一行包含 `//`，如下所示：
 
 ```rust
-// So we're doing something complicated here, long enough that we need
-// multiple lines of comments to do it! Whew! Hopefully, this comment will
-// explain what's going on.
+// 所以我们在这里做一些复杂的事情，足够长以至于我们需要
+// 多行注释来完成它！哇！希望这个注释会
+// 解释发生了什么。
 ```
 
-Comments can also be placed at the end of lines containing code:
+注释也可以放在包含代码的行末尾：
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">文件名：src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch03-common-programming-concepts/no-listing-24-comments-end-of-line/src/main.rs}}
 ```
 
-But you’ll more often see them used in this format, with the comment on a
-separate line above the code it’s annotating:
+但是您会更经常看到它们以这种格式使用，注释在它注释的代码上方的单独行上：
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">文件名：src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch03-common-programming-concepts/no-listing-25-comments-above-line/src/main.rs}}
 ```
 
-Rust also has another kind of comment, documentation comments, which we’ll
-discuss in the [“Publishing a Crate to Crates.io”][publishing]<!-- ignore -->
-section of Chapter 14.
+Rust 还有另一种注释，文档注释，我们将在第 14 章的["发布 Crate 到 Crates.io"][publishing]<!-- ignore -->部分中讨论。
 
 [publishing]: ch14-02-publishing-to-crates-io.html

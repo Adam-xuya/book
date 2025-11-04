@@ -1,23 +1,11 @@
-# Common Programming Concepts
+# 常见编程概念
 
-This chapter covers concepts that appear in almost every programming language
-and how they work in Rust. Many programming languages have much in common at
-their core. None of the concepts presented in this chapter are unique to Rust,
-but we’ll discuss them in the context of Rust and explain the conventions
-around using them.
+本章涵盖了几乎每种编程语言中都出现的概念以及它们在 Rust 中的工作方式。许多编程语言在其核心上有很多共同点。本章中介绍的概念都不是 Rust 独有的，但我们将在 Rust 的上下文中讨论它们，并解释使用它们的约定。
 
-Specifically, you’ll learn about variables, basic types, functions, comments,
-and control flow. These foundations will be in every Rust program, and learning
-them early will give you a strong core to start from.
+具体来说，您将学习变量、基本类型、函数、注释和控制流。这些基础将出现在每个 Rust 程序中，尽早学习它们将为您提供一个强大的核心起点。
 
-> #### Keywords
+> #### 关键字
 >
-> The Rust language has a set of _keywords_ that are reserved for use by the
-> language only, much as in other languages. Keep in mind that you cannot use
-> these words as names of variables or functions. Most of the keywords have
-> special meanings, and you’ll be using them to do various tasks in your Rust
-> programs; a few have no current functionality associated with them but have
-> been reserved for functionality that might be added to Rust in the future. You
-> can find the list of the keywords in [Appendix A][appendix_a]<!-- ignore -->.
+> Rust 语言有一组_关键字_，这些关键字仅保留供语言使用，就像在其他语言中一样。请记住，您不能将这些词用作变量或函数的名称。大多数关键字都有特殊含义，您将在 Rust 程序中使用它们来执行各种任务；一些关键字目前没有关联的功能，但已被保留用于可能在未来添加到 Rust 的功能。您可以在[附录 A][appendix_a]<!-- ignore -->中找到关键字列表。
 
 [appendix_a]: appendix-01-keywords.md
