@@ -1,50 +1,22 @@
-## Characteristics of Object-Oriented Languages
+## 面向对象语言的特征
 
-There is no consensus in the programming community about what features a
-language must have to be considered object oriented. Rust is influenced by many
-programming paradigms, including OOP; for example, we explored the features
-that came from functional programming in Chapter 13. Arguably, OOP languages
-share certain common characteristics—namely, objects, encapsulation, and
-inheritance. Let’s look at what each of those characteristics means and whether
-Rust supports it.
+编程社区对于语言必须具有哪些特征才能被认为是面向对象的没有达成共识。Rust 受到许多编程范式的影响，包括 OOP；例如，我们在第13章中探讨了来自函数式编程的特性。可以说，OOP 语言共享某些共同特征——即对象、封装和继承。让我们看看这些特征中的每一个意味着什么，以及 Rust 是否支持它。
 
-### Objects Contain Data and Behavior
+### 对象包含数据和行为
 
-The book _Design Patterns: Elements of Reusable Object-Oriented Software_ by
-Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides (Addison-Wesley,
-1994), colloquially referred to as _The Gang of Four_ book, is a catalog of
-object-oriented design patterns. It defines OOP in this way:
+Erich Gamma、Richard Helm、Ralph Johnson 和 John Vlissides（Addison-Wesley，1994）的《设计模式：可复用面向对象软件的元素》一书，俗称_四人帮_书，是面向对象设计模式的目录。它这样定义 OOP：
 
-> Object-oriented programs are made up of objects. An **object** packages both
-> data and the procedures that operate on that data. The procedures are
-> typically called **methods** or **operations**.
+> 面向对象程序由对象组成。**对象**既打包数据，也打包对该数据进行操作的过程。这些过程通常称为**方法**或**操作**。
 
-Using this definition, Rust is object oriented: Structs and enums have data,
-and `impl` blocks provide methods on structs and enums. Even though structs and
-enums with methods aren’t _called_ objects, they provide the same
-functionality, according to the Gang of Four’s definition of objects.
+使用这个定义，Rust 是面向对象的：结构体和枚举有数据，`impl` 块为结构体和枚举提供方法。即使带有方法的结构体和枚举不_称为_对象，根据四人帮的对象定义，它们提供相同的功能。
 
-### Encapsulation That Hides Implementation Details
+### 隐藏实现细节的封装
 
-Another aspect commonly associated with OOP is the idea of _encapsulation_,
-which means that the implementation details of an object aren’t accessible to
-code using that object. Therefore, the only way to interact with an object is
-through its public API; code using the object shouldn’t be able to reach into
-the object’s internals and change data or behavior directly. This enables the
-programmer to change and refactor an object’s internals without needing to
-change the code that uses the object.
+通常与 OOP 相关的另一个方面是_封装_的概念，这意味着对象的实现细节对使用该对象的代码不可访问。因此，与对象交互的唯一方式是通过其公共 API；使用对象的代码不应该能够深入对象的内部并直接更改数据或行为。这使程序员能够更改和重构对象的内部，而无需更改使用对象的代码。
 
-We discussed how to control encapsulation in Chapter 7: We can use the `pub`
-keyword to decide which modules, types, functions, and methods in our code
-should be public, and by default everything else is private. For example, we
-can define a struct `AveragedCollection` that has a field containing a vector
-of `i32` values. The struct can also have a field that contains the average of
-the values in the vector, meaning the average doesn’t have to be computed on
-demand whenever anyone needs it. In other words, `AveragedCollection` will
-cache the calculated average for us. Listing 18-1 has the definition of the
-`AveragedCollection` struct.
+我们在第7章中讨论了如何控制封装：我们可以使用 `pub` 关键字来决定代码中的哪些模块、类型、函数和方法应该是公共的，默认情况下其他所有内容都是私有的。例如，我们可以定义一个 `AveragedCollection` 结构体，它有一个包含 `i32` 值向量的字段。该结构体还可以有一个字段，包含向量中值的平均值，这意味着平均值不必在任何人需要时按需计算。换句话说，`AveragedCollection` 将为我们缓存计算的平均值。代码清单18-1显示了 `AveragedCollection` 结构体的定义。
 
-<Listing number="18-1" file-name="src/lib.rs" caption="An `AveragedCollection` struct that maintains a list of integers and the average of the items in the collection">
+<Listing number="18-1" file-name="src/lib.rs" caption="一个 `AveragedCollection` 结构体，维护一个整数列表和集合中项目的平均值">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch18-oop/listing-18-01/src/lib.rs}}
@@ -52,13 +24,9 @@ cache the calculated average for us. Listing 18-1 has the definition of the
 
 </Listing>
 
-The struct is marked `pub` so that other code can use it, but the fields within
-the struct remain private. This is important in this case because we want to
-ensure that whenever a value is added or removed from the list, the average is
-also updated. We do this by implementing `add`, `remove`, and `average` methods
-on the struct, as shown in Listing 18-2.
+该结构体被标记为 `pub`，以便其他代码可以使用它，但结构体内的字段保持私有。在这种情况下这很重要，因为我们希望确保每当从列表中添加或删除值时，平均值也会更新。我们通过在结构体上实现 `add`、`remove` 和 `average` 方法来实现这一点，如代码清单18-2所示。
 
-<Listing number="18-2" file-name="src/lib.rs" caption="Implementations of the public methods `add`, `remove`, and `average` on `AveragedCollection`">
+<Listing number="18-2" file-name="src/lib.rs" caption="在 `AveragedCollection` 上实现公共方法 `add`、`remove` 和 `average`">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch18-oop/listing-18-02/src/lib.rs:here}}
@@ -66,84 +34,32 @@ on the struct, as shown in Listing 18-2.
 
 </Listing>
 
-The public methods `add`, `remove`, and `average` are the only ways to access
-or modify data in an instance of `AveragedCollection`. When an item is added to
-`list` using the `add` method or removed using the `remove` method, the
-implementations of each call the private `update_average` method that handles
-updating the `average` field as well.
+公共方法 `add`、`remove` 和 `average` 是访问或修改 `AveragedCollection` 实例中数据的唯一方式。当使用 `add` 方法将项目添加到 `list` 或使用 `remove` 方法删除时，每个实现的内部都会调用私有 `update_average` 方法，该方法也处理更新 `average` 字段。
 
-We leave the `list` and `average` fields private so that there is no way for
-external code to add or remove items to or from the `list` field directly;
-otherwise, the `average` field might become out of sync when the `list`
-changes. The `average` method returns the value in the `average` field,
-allowing external code to read the `average` but not modify it.
+我们将 `list` 和 `average` 字段保留为私有，以便外部代码无法直接向 `list` 字段添加或删除项目；否则，当 `list` 更改时，`average` 字段可能变得不同步。`average` 方法返回 `average` 字段中的值，允许外部代码读取 `average` 但不能修改它。
 
-Because we’ve encapsulated the implementation details of the struct
-`AveragedCollection`, we can easily change aspects, such as the data structure,
-in the future. For instance, we could use a `HashSet<i32>` instead of a
-`Vec<i32>` for the `list` field. As long as the signatures of the `add`,
-`remove`, and `average` public methods stayed the same, code using
-`AveragedCollection` wouldn’t need to change. If we made `list` public instead,
-this wouldn’t necessarily be the case: `HashSet<i32>` and `Vec<i32>` have
-different methods for adding and removing items, so the external code would
-likely have to change if it were modifying `list` directly.
+因为我们已经封装了结构体 `AveragedCollection` 的实现细节，我们可以轻松地更改方面，例如数据结构，在未来。例如，我们可以使用 `HashSet<i32>` 而不是 `Vec<i32>` 作为 `list` 字段。只要 `add`、`remove` 和 `average` 公共方法的签名保持不变，使用 `AveragedCollection` 的代码就不需要更改。如果我们改为使 `list` 公开，情况就不一定如此：`HashSet<i32>` 和 `Vec<i32>` 有不同的添加和删除项目的方法，所以如果外部代码直接修改 `list`，它可能需要更改。
 
-If encapsulation is a required aspect for a language to be considered object
-oriented, then Rust meets that requirement. The option to use `pub` or not for
-different parts of code enables encapsulation of implementation details.
+如果封装是语言被认为是面向对象的必需方面，那么 Rust 满足该要求。选择是否对不同部分的代码使用 `pub` 能够封装实现细节。
 
-### Inheritance as a Type System and as Code Sharing
+### 作为类型系统和代码共享的继承
 
-_Inheritance_ is a mechanism whereby an object can inherit elements from
-another object’s definition, thus gaining the parent object’s data and behavior
-without you having to define them again.
+_继承_是一种机制，通过它对象可以从另一个对象的定义继承元素，从而获得父对象的数据和行为，而无需再次定义它们。
 
-If a language must have inheritance to be object oriented, then Rust is not
-such a language. There is no way to define a struct that inherits the parent
-struct’s fields and method implementations without using a macro.
+如果语言必须具有继承才能是面向对象的，那么 Rust 不是这样的语言。没有办法定义一个继承父结构体的字段和方法实现的结构体，而不使用宏。
 
-However, if you’re used to having inheritance in your programming toolbox, you
-can use other solutions in Rust, depending on your reason for reaching for
-inheritance in the first place.
+但是，如果你习惯于在编程工具箱中使用继承，你可以根据你首先使用继承的原因在 Rust 中使用其他解决方案。
 
-You would choose inheritance for two main reasons. One is for reuse of code:
-You can implement particular behavior for one type, and inheritance enables you
-to reuse that implementation for a different type. You can do this in a limited
-way in Rust code using default trait method implementations, which you saw in
-Listing 10-14 when we added a default implementation of the `summarize` method
-on the `Summary` trait. Any type implementing the `Summary` trait would have
-the `summarize` method available on it without any further code. This is
-similar to a parent class having an implementation of a method and an
-inheriting child class also having the implementation of the method. We can
-also override the default implementation of the `summarize` method when we
-implement the `Summary` trait, which is similar to a child class overriding the
-implementation of a method inherited from a parent class.
+你会选择继承有两个主要原因。一个是为了代码的重用：你可以为一个类型实现特定行为，继承使你能够为不同类型重用该实现。你可以在 Rust 代码中使用默认 trait 方法实现以有限的方式做到这一点，你在代码清单10-14中看到了这一点，当时我们在 `Summary` trait 上添加了 `summarize` 方法的默认实现。任何实现 `Summary` trait 的类型都会在其上拥有 `summarize` 方法，无需任何进一步的代码。这类似于父类具有方法的实现，而继承的子类也具有该方法的实现。当我们实现 `Summary` trait 时，我们还可以覆盖 `summarize` 方法的默认实现，这类似于子类覆盖从父类继承的方法的实现。
 
-The other reason to use inheritance relates to the type system: to enable a
-child type to be used in the same places as the parent type. This is also
-called _polymorphism_, which means that you can substitute multiple objects for
-each other at runtime if they share certain characteristics.
+使用继承的另一个原因与类型系统有关：使子类型能够在与父类型相同的地方使用。这也称为_多态性_，这意味着如果多个对象共享某些特征，你可以在运行时将它们相互替换。
 
-> ### Polymorphism
+> ### 多态性
 >
-> To many people, polymorphism is synonymous with inheritance. But it’s
-> actually a more general concept that refers to code that can work with data of
-> multiple types. For inheritance, those types are generally subclasses.
+> 对许多人来说，多态性与继承同义。但它实际上是一个更通用的概念，指的是可以处理多种类型数据的代码。对于继承，这些类型通常是子类。
 >
-> Rust instead uses generics to abstract over different possible types and
-> trait bounds to impose constraints on what those types must provide. This is
-> sometimes called _bounded parametric polymorphism_.
+> Rust 改为使用泛型来抽象不同的可能类型，并使用 trait 约束来对这些类型必须提供的内容施加约束。这有时称为_有界参数多态性_。
 
-Rust has chosen a different set of trade-offs by not offering inheritance.
-Inheritance is often at risk of sharing more code than necessary. Subclasses
-shouldn’t always share all characteristics of their parent class but will do so
-with inheritance. This can make a program’s design less flexible. It also
-introduces the possibility of calling methods on subclasses that don’t make
-sense or that cause errors because the methods don’t apply to the subclass. In
-addition, some languages will only allow _single inheritance_ (meaning a
-subclass can only inherit from one class), further restricting the flexibility
-of a program’s design.
+Rust 通过不提供继承选择了一组不同的权衡。继承经常面临共享比必要更多代码的风险。子类不应该总是共享其父类的所有特征，但通过继承会这样做。这可能会使程序的设计不太灵活。它还引入了在子类上调用没有意义或导致错误的方法的可能性，因为这些方法不适用于子类。此外，一些语言只允许_单继承_（意味着子类只能从一个类继承），进一步限制了程序设计的灵活性。
 
-For these reasons, Rust takes the different approach of using trait objects
-instead of inheritance to achieve polymorphism at runtime. Let’s look at how
-trait objects work.
+出于这些原因，Rust 采用了不同的方法，使用 trait 对象而不是继承来实现运行时多态性。让我们看看 trait 对象是如何工作的。
