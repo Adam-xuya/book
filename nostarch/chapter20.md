@@ -440,7 +440,7 @@ external functions from another language we want to call. The `"C"` part
 defines which *application binary interface (ABI)* the external function uses:
 The ABI defines how to call the function at the assembly level. The `"C"` ABI
 is the most common and follows the C programming language’s ABI. Information
-about all the ABIs Rust supports is available in the Rust Reference at *../reference/items/external-blocks.html#abi*.
+about all the ABIs Rust supports is available in the Rust Reference at *https://doc.rust-lang.org/reference/items/external-blocks.html#abi*.
 
 Every item declared within an `unsafe extern` block is implicitly unsafe.
 However, some FFI functions *are* safe to call. For example, the `abs` function
@@ -633,7 +633,7 @@ A *union* is similar to a `struct`, but only one declared field is used in a
 particular instance at one time. Unions are primarily used to interface with
 unions in C code. Accessing union fields is unsafe because Rust can’t guarantee
 the type of the data currently being stored in the union instance. You can
-learn more about unions in the Rust Reference at *../reference/items/unions.html*.
+learn more about unions in the Rust Reference at *https://doc.rust-lang.org/reference/items/unions.html*.
 
 ### Using Miri to Check Unsafe Code
 
@@ -2117,7 +2117,7 @@ Valid pattern syntax in macro definitions is different from the pattern syntax
 covered in Chapter 19 because macro patterns are matched against Rust code
 structure rather than values. Let’s walk through what the pattern pieces in
 Listing 20-29 mean; for the full macro pattern syntax, see the Rust
-Reference at *../reference/macros-by-example.html*.
+Reference at *https://doc.rust-lang.org/reference/macros-by-example.html*.
 
 First, we use a set of parentheses to encompass the whole pattern. We use a
 dollar sign (`$`) to declare a variable in the macro system that will contain

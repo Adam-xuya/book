@@ -170,7 +170,7 @@ underscores between words. The compiler is able to evaluate a limited set of
 operations at compile time, which lets us choose to write out this value in a
 way that’s easier to understand and verify, rather than setting this constant
 to the value 10,800. See the Rust Reference’s section on constant
-evaluation at *../reference/const_eval.html* for more information on what operations can be used
+evaluation at *https://doc.rust-lang.org/reference/const_eval.html* for more information on what operations can be used
 when declaring constants.
 
 Constants are valid for the entire time a program runs, within the scope in

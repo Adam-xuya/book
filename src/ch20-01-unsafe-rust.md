@@ -295,11 +295,11 @@ Miri 不会捕获你在编写不安全代码时可能出错的所有内容。Mir
 要更深入地探索如何有效地使用不安全 Rust，请阅读 Rust 的 `unsafe` 官方指南，[The Rustonomicon][nomicon]。
 
 [dangling-references]: ch04-02-references-and-borrowing.html#dangling-references
-[ABI]: ../reference/items/external-blocks.html#abi
+[ABI]: https://doc.rust-lang.org/reference/items/external-blocks.html#abi
 [constants]: ch03-01-variables-and-mutability.html#declaring-constants
 [send-and-sync]: ch16-04-extensible-concurrency-sync-and-send.html
 [the-slice-type]: ch04-03-slices.html#the-slice-type
-[unions]: ../reference/items/unions.html
+[unions]: https://doc.rust-lang.org/reference/items/unions.html
 [miri]: https://github.com/rust-lang/miri
 [editions]: appendix-05-editions.html
 [nightly]: appendix-07-nightly-rust.html

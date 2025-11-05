@@ -732,7 +732,7 @@ to use with the `derive` attribute that can add useful behavior to our custom
 types. Those traits and their behaviors are listed in Appendix C. We’ll cover how to implement these traits with custom behavior as
 well as how to create your own traits in Chapter 10. There are also many
 attributes other than `derive`; for more information, see the “Attributes”
-section of the Rust Reference at *../reference/attributes.html*.
+section of the Rust Reference at *https://doc.rust-lang.org/reference/attributes.html*.
 
 Our `area` function is very specific: It only computes the area of rectangles.
 It would be helpful to tie this behavior more closely to our `Rectangle` struct

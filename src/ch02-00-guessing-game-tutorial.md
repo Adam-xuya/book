@@ -611,15 +611,15 @@ You win!
 
 这个项目是通过实践方式向您介绍许多新的 Rust 概念：`let`、`match`、函数、外部 crate 的使用等等。在接下来的几章中，您将更详细地了解这些概念。第 3 章涵盖大多数编程语言都有的概念，例如变量、数据类型和函数，并展示如何在 Rust 中使用它们。第 4 章探讨所有权，这是使 Rust 不同于其他语言的功能。第 5 章讨论结构体和方法语法，第 6 章解释枚举的工作原理。
 
-[prelude]: ../std/prelude/index.html
+[prelude]: https://doc.rust-lang.org/std/prelude/index.html
 [variables-and-mutability]: ch03-01-variables-and-mutability.html#variables-and-mutability
 [comments]: ch03-04-comments.html
-[string]: ../std/string/struct.String.html
-[iostdin]: ../std/io/struct.Stdin.html
-[read_line]: ../std/io/struct.Stdin.html#method.read_line
-[result]: ../std/result/enum.Result.html
+[string]: https://doc.rust-lang.org/std/string/struct.String.html
+[iostdin]: https://doc.rust-lang.org/std/io/struct.Stdin.html
+[read_line]: https://doc.rust-lang.org/std/io/struct.Stdin.html#method.read_line
+[result]: https://doc.rust-lang.org/std/result/enum.Result.html
 [enums]: ch06-00-enums.html
-[expect]: ../std/result/enum.Result.html#method.expect
+[expect]: https://doc.rust-lang.org/std/result/enum.Result.html#method.expect
 [recover]: ch09-02-recoverable-errors-with-result.html
 [randcrate]: https://crates.io/crates/rand
 [semver]: http://semver.org
@@ -628,5 +628,5 @@ You win!
 [doccratesio]: https://doc.rust-lang.org/cargo/reference/publishing.html
 [match]: ch06-02-match.html
 [shadowing]: ch03-01-variables-and-mutability.html#shadowing
-[parse]: ../std/primitive.str.html#method.parse
+[parse]: https://doc.rust-lang.org/std/primitive.str.html#method.parse
 [integers]: ch03-02-data-types.html#integer-types

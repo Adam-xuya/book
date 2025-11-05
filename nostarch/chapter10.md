@@ -1965,5 +1965,5 @@ Believe it or not, there is much more to learn on the topics we discussed in
 this chapter: Chapter 18 discusses trait objects, which are another way to use
 traits. There are also more complex scenarios involving lifetime annotations
 that you will only need in very advanced scenarios; for those, you should read
-the Rust Reference at *../reference/trait-bounds.html*. But next, you’ll learn how to write tests in
+the Rust Reference at *https://doc.rust-lang.org/reference/trait-bounds.html*. But next, you’ll learn how to write tests in
 Rust so that you can make sure your code is working the way it should.

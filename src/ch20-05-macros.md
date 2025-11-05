@@ -287,7 +287,7 @@ pub fn sql(input: TokenStream) -> TokenStream {
 
 接下来，我们将把我们在整本书中讨论的所有内容付诸实践，并再做一個项目！
 
-[ref]: ../reference/macros-by-example.html
+[ref]: https://doc.rust-lang.org/reference/macros-by-example.html
 [tlborm]: https://veykril.github.io/tlborm/
 [syn]: https://crates.io/crates/syn
 [quote]: https://crates.io/crates/quote

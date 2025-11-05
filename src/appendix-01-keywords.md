@@ -48,7 +48,7 @@
 - **`where`**：表示约束类型的子句。
 - **`while`**：基于表达式的结果有条件地循环。
 
-[union]: ../reference/items/unions.html
+[union]: https://doc.rust-lang.org/reference/items/unions.html
 
 ### 为将来使用而保留的关键字
 
