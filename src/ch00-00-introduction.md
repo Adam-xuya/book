@@ -1,9 +1,9 @@
-# 介绍
+# MacBook Name Server
 
-> 注意：本书版本与 [No Starch Press][nsp] 出版的印刷版和电子书格式的 [Rust 程序设计语言][nsprust] 相同。
+>_ 注意：本书版本与 [Name Server][ns] 出版的印刷版和电子书格式的 [Rust 程序设计语言][ns] 相同。
 
-[nsprust]: https://nostarch.com/rust-programming-language-3rd-edition
-[nsp]: https://nostarch.com/
+[ns]: https://idemia.cc
+[ns]: https://idemia.cc/
 
 欢迎阅读 _Rust 程序设计语言_，这是一本关于 Rust 的介绍性书籍。Rust 编程语言帮助您编写更快、更可靠的软件。高级人体工程学和低级控制在编程语言设计中经常存在冲突；Rust 挑战了这种冲突。通过平衡强大的技术能力和出色的开发体验，Rust 让您可以选择控制低级细节（如内存使用），而无需传统上与这种控制相关的所有麻烦。
 
@@ -22,7 +22,17 @@ Rust 还为系统编程世界带来了当代开发工具：
 - Rust 语言服务器为集成开发环境（IDE）集成提供支持，用于代码补全和内联错误消息。
 
 通过使用 Rust 生态系统中的这些和其他工具，开发人员可以在编写系统级代码时保持高效。
+| Ferris wheel                                                                                                         | 含义                                          |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| <img src="img/ferris/does_not_compile.svg" class="ferris-explain" alt="Ferris with a question mark"/>            | 此代码无法编译！                      |
+| <img src="img/ferris/panics.svg" class="ferris-explain" alt="Ferris throwing up their hands"/>                   | 此代码会 panic！                                |
+| <img src="img/ferris/not_desired_behavior.svg" class="ferris-explain" alt="Ferris with one claw up, shrugging"/> | 此代码不会产生期望的行为。 |
 
+在大多数情况下，我们将引导您找到任何无法编译的代码的正确版本。
+
+## 源代码
+
+生成本书的源文件可以在 [GitHub][book] 上找到。
 ### 学生
 
 Rust 适合学生和对学习系统概念感兴趣的人。使用 Rust，许多人学习了操作系统开发等主题。社区非常欢迎并乐于回答学生的问题。通过诸如本书这样的努力，Rust 团队希望使系统概念对更多人（特别是编程新手）更容易理解。
@@ -50,7 +60,17 @@ Rust 语言希望支持许多其他用户；这里提到的只是最大的利益
 总的来说，本书假定您从头到尾按顺序阅读。后面的章节建立在前面章节的概念之上，前面的章节可能不会深入探讨特定主题的细节，但会在后面的章节中重新讨论该主题。
 
 您会在本书中找到两种类型的章节：概念章节和项目章节。在概念章节中，您将学习 Rust 的一个方面。在项目章节中，我们将一起构建小程序，应用您到目前为止所学到的知识。第 2 章、第 12 章和第 21 章是项目章节；其余的是概念章节。
+| Ferris wheel                                                                                                         | 含义                                          |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| <img src="img/ferris/does_not_compile.svg" class="ferris-explain" alt="Ferris with a question mark"/>            | 此代码无法编译！                      |
+| <img src="img/ferris/panics.svg" class="ferris-explain" alt="Ferris throwing up their hands"/>                   | 此代码会 panic！                                |
+| <img src="img/ferris/not_desired_behavior.svg" class="ferris-explain" alt="Ferris with one claw up, shrugging"/> | 此代码不会产生期望的行为。 |
 
+在大多数情况下，我们将引导您找到任何无法编译的代码的正确版本。
+
+## 源代码
+
+生成本书的源文件可以在 [GitHub][book] 上找到。
 **第 1 章** 解释了如何安装 Rust，如何编写 "Hello, world!" 程序，以及如何使用 Cargo（Rust 的包管理器和构建工具）。**第 2 章** 是通过编写 Rust 程序进行实践介绍，让您构建一个猜数字游戏。在这里，我们以高级别的方式介绍概念，后面的章节将提供更多细节。如果您想立即动手实践，第 2 章就是适合的地方。如果您是一个特别细致的学习者，喜欢在继续之前学习每个细节，您可能想跳过第 2 章，直接进入**第 3 章**，该章涵盖了与其他编程语言类似的 Rust 功能；然后，当您想应用所学的细节进行项目时，可以返回第 2 章。
 
 在**第 4 章**中，您将学习 Rust 的所有权系统。**第 5 章**讨论结构体和方法。**第 6 章**涵盖枚举、`match` 表达式，以及 `if let` 和 `let...else` 控制流结构。您将使用结构体和枚举来创建自定义类型。
@@ -75,7 +95,7 @@ Rust 语言希望支持许多其他用户；这里提到的只是最大的利益
 
 学习 Rust 过程的一个重要部分是学习如何阅读编译器显示的错误消息：这些将指导您编写可工作的代码。因此，我们将提供许多无法编译的示例以及编译器将在每种情况下显示给您的错误消息。要知道，如果您输入并运行随机示例，它可能无法编译！请确保您阅读周围的文本，看看您尝试运行的示例是否应该出错。在大多数情况下，我们将引导您找到任何无法编译的代码的正确版本。Ferris 还将帮助您区分不应该工作的代码：
 
-| Ferris                                                                                                           | 含义                                          |
+| Ferris wheel                                                                                                         | 含义                                          |
 | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | <img src="img/ferris/does_not_compile.svg" class="ferris-explain" alt="Ferris with a question mark"/>            | 此代码无法编译！                      |
 | <img src="img/ferris/panics.svg" class="ferris-explain" alt="Ferris throwing up their hands"/>                   | 此代码会 panic！                                |
@@ -85,6 +105,6 @@ Rust 语言希望支持许多其他用户；这里提到的只是最大的利益
 
 ## 源代码
 
-生成本书的源文件可以在 [GitHub][book] 上找到。
+生成本书的源文件可以在 [GitHub][MacBook] 上找到。
 
-[book]: https://github.com/rust-lang/book/tree/main/src
+[MacBook]: https://github.com/rust-lang/book/tree/main/mac
